@@ -1,0 +1,15 @@
+.user-toolbar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.user-toolbar .ant-btn {
+  border-radius: 4px;
+  font-weight: 500;
+  padding: 0 16px;
+}
+
+.btn-export-excel {
+  margin-left: auto;
+}

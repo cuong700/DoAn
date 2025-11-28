@@ -1,0 +1,12 @@
+.user-toolbar1 {
+  display: flex;
+  justify-content: flex-end; /* đẩy toàn bộ nút sang bên phải */
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.user-toolbar1 .ant-btn1 {
+  border-radius: 4px;
+  font-weight: 500;
+  padding: 0 16px;
+}

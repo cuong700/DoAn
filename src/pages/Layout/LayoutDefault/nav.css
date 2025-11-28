@@ -1,0 +1,187 @@
+
+
+  .custom-sider {
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      z-index: 1000;
+      /* Đảm bảo sider luôn hiển thị trên cùng */
+      overflow-y: auto;
+      /* Cho phép cuộn khi nội dung vượt ra ngoài */
+  }
+
+
+
+  .custom-header .hop .innerwrap {
+
+      background-color: rgb(230, 230, 230);
+      padding: 7px 100px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+
+  }
+
+  .custom-header .hop .innerwrap .item {
+
+      margin-right: 10px;
+      font-size: 14px;
+  }
+
+  .custom-header .hop .innerwrap .item a {
+
+      text-decoration: none;
+      color: black;
+  }
+
+
+
+
+  .custom-header .box1 .logo img {
+      max-width: 20px;
+      height: auto;
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+  .custom-header .section1 {
+      position: sticky;
+      width: 100%;
+  }
+
+
+
+  .custom-header .section1 .hop .innerwrap .box1 img {
+      max-width: 65px;
+      height: auto;
+  }
+
+  .custom-header .section1 .hop .innerwrap {
+      background-color: rgb(255, 255, 255);
+      padding: 31px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 47px;
+
+  }
+
+
+  .custom-header .section1 .hop .innerwrap .box2 {
+      text-decoration: none;
+      color: black;
+      display: flex;
+      margin-left: 125px;
+  }
+
+  .custom-header.section1 .hop .innerwrap .box2 .item {
+
+      margin-right: 20px;
+
+  }
+
+  .custom-header .section1 .hop .innerwrap .box2 a {
+      text-decoration: none;
+      color: black;
+      font-size: 16px;
+
+
+  }
+
+
+  #search-box {
+      max-width: 179px;
+      height: 40px;
+      margin: 20px auto;
+      background: #eaeaea;
+      border-radius: 30px;
+      display: flex;
+  }
+
+  #search-box #search-text {
+      border: none;
+      outline: none;
+      width: 80%;
+      border-radius: 30px 0 0 30px;
+      /* Góc cong bên trái */
+      padding-left: 15px;
+      font-size: 20px;
+      background-color: rgb(230, 230, 230);
+
+
+  }
+
+  #search-box #search-btn {
+      width: 20%;
+      background-color: rgb(230, 230, 230);
+      color: #535353;
+      border: none;
+      cursor: pointer;
+      border-radius: 0 30px 30px 0;
+      /* Góc cong bên phải */
+  }
+
+  #search-box #search-btn .fa-search {
+      font-size: 17px;
+  }
+
+
+
+
+
+
+
+  .custom-header .section1 .hop .innerwrap .box3 a {
+
+      text-decoration: none;
+      color: black;
+      margin-left: 20px;
+  }
+
+
+  .custom-header .section1 .hop .innerwrap .box3 {
+
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-right: 12px;
+
+  }
+
+
+
+
+  /* nav.css */
+
+  .custom-header .tieude {
+      display: flex;
+      /* Các thuộc tính khác ở đây */
+  }
+
+  /* Ẩn phần tử khi màn hình nhỏ hơn 600px */
+  @media (max-width: 700px) {
+      .custom-header .tieude .bienmat {
+          display: none;
+      }
+
+      .custom-header .hop .innerwrap {
+
+          padding: 7px 30px;
+
+
+      }
+  }
