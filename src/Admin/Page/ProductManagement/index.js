@@ -75,6 +75,11 @@ function ProductManagement() {
       dataIndex: "title",
       key: "title",
     },
+     {
+      title: "Danh mục sản phẩm",
+      dataIndex: "",
+      key: "",
+    },
     {
       title: "Giá tiền",
       dataIndex: "price",

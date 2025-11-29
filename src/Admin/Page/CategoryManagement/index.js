@@ -50,7 +50,7 @@ function CategoryManagement() {
       title: "STT",
       render: (_, __, index) => {
         const page = pagination.current; // trang hiện tại
-        const pageSize = pagination.pageSize; //số dong mỗi trang
+        const pageSize = pagination.pageSize; //số dòng mỗi trang
         return (page - 1) * pageSize + index + 1;
       },
     },

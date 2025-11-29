@@ -2,17 +2,18 @@ import { DeleteOutlined } from "@ant-design/icons";
 import { Button, message, notification, Popconfirm } from "antd";
 import { useState } from "react";
 
-function DeleteCategory(props) {
+function DeleteComment(props) {
   const { record, onReload } = props;
+
   const [loading, setLoading] = useState(false);
 
   const [notiApi, contextHolder] = notification.useNotification();
-  
+
   const handleDelete = async () => {
     try {
       setLoading(true);
 
-      const res = await fetch(`http://localhost:8090/category/${record.id}`, {
+      const res = await fetch(`https://dummyjson.com/comment/${record.id}`, {
         method: "DELETE",
       });
 
@@ -20,16 +21,17 @@ function DeleteCategory(props) {
 
       notiApi.success({
         message: "Xoá thành công",
-        description: `Đã xoá danh mục: ${record.fullname}`,
+        description: `Đã xoá bình luận: ${record.fullname}`,
       });
       onReload();
     } catch (error) {
       console.error(error);
       message.error("Xoá thất bại!");
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
   };
+
   return (
     <>
       {contextHolder}
@@ -46,4 +48,4 @@ function DeleteCategory(props) {
   );
 }
 
-export default DeleteCategory;
+export default DeleteComment;

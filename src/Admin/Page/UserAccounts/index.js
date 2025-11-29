@@ -6,6 +6,7 @@ import { FileExcelOutlined } from "@ant-design/icons";
 import "./UserAccounts.css";
 import ViewUser from "./ViewUser";
 import EditUser from "./EditUser";
+import { render } from "@testing-library/react";
 
 function UserAccounts() {
   const [dataSource, setDataSource] = useState([]);
@@ -28,6 +29,7 @@ function UserAccounts() {
 
       const mapped = data.users.map((item, _) => ({
         ...item,
+        Address: item.address.city || "",
       }));
       setDataSource(mapped);
     } catch (error) {
@@ -74,6 +76,9 @@ function UserAccounts() {
       title: "Địa chỉ",
       dataIndex: "address",
       key: "address",
+      render:(_,record) => 
+        record.Address
+      
     },
      {
       title: "Trạng thái",
