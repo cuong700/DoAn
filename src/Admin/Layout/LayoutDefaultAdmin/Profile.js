@@ -108,10 +108,6 @@ function Profile() {
     <>
       <h2>Thông tin quản trị viên</h2>
 
-      <h3>Hello</h3>
-
-      <h4>hoc bai</h4>
-
       {contextHolder}
 
       <Spin spinning={spinning} tip="Đang cập nhật...">
