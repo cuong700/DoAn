@@ -16,6 +16,8 @@ import ProductDetail from "../pages/Product/ProductDetail";
 import ProductManagement from "../Admin/Page/ProductManagement";
 import Profile from "../Admin/Layout/LayoutDefaultAdmin/Profile";
 import CommentManagement from "../Admin/Page/CommentManagement";
+import Analytics from "../Admin/Page/Analytics";
+import CouponManagement from "../Admin/Page/CouponManagement";
 
 export const routes = [
   {
@@ -67,6 +69,10 @@ export const routes = [
     children: [
       {
         index: true,
+        element: <Analytics />,
+      },
+      {
+        path: "user-accounts",
         element: <UserAccounts />,
       },
       {
@@ -80,6 +86,10 @@ export const routes = [
       {
         path: "comment-management",
         element: <CommentManagement />,
+      },
+      {
+        path: "coupon-management",
+        element: <CouponManagement />,
       },
       {
         path: "profile",

@@ -1,5 +1,5 @@
-import { FileExcelOutlined } from "@ant-design/icons";
-import { Button, message, Space, Table } from "antd";
+
+import {  message, Space, Table } from "antd";
 import { useEffect, useState } from "react";
 import "./CategoryManagement.css";
 import CreateCategory from "./CreateCategory";
@@ -85,15 +85,7 @@ function CategoryManagement() {
     <>
       <div className="user-toolbar1">
         <CreateCategory onReload={handleReload} />
-
-        <Button
-          type="primary"
-          icon={<FileExcelOutlined />}
-          className="btn-export-excel1 "
-          // onClick={handleExportExcel} // TODO: export Excel
-        >
-          Xuất Excel
-        </Button>
+        
       </div>
       <Table
         dataSource={dataSource}

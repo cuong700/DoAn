@@ -5,6 +5,7 @@ import DeleteProduct from "./DeleteProduct";
 import CreateProduct from "./CreateProduct";
 import { FileExcelOutlined } from "@ant-design/icons";
 import ViewProduct from "./ViewProduct";
+import ExcelProduct from "./ExcelProduct";
 
 function ProductManagement() {
   const [pagination, setPagination] = useState({
@@ -75,10 +76,10 @@ function ProductManagement() {
       dataIndex: "title",
       key: "title",
     },
-     {
+    {
       title: "Danh mục sản phẩm",
-      dataIndex: "",
-      key: "",
+      dataIndex: "category",
+      key: "category",
     },
     {
       title: "Giá tiền",
@@ -125,15 +126,11 @@ function ProductManagement() {
       <div className="user-toolbar1">
         <CreateProduct onReload={handleReload} />
 
-        <Button
-          type="primary"
-          icon={<FileExcelOutlined />}
-          className="btn-export-excel1 "
-          // onClick={handleExportExcel} // TODO: export Excel
-        >
-          Xuất Excel
-        </Button>
+        <div className="btn-export-excel1 ">
+          <ExcelProduct loading={loading}/>
+        </div>
       </div>
+
       <Table
         columns={columns}
         dataSource={dataSource}

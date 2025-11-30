@@ -1,12 +1,10 @@
-import { Button, message, Space, Table, Tag } from "antd";
+import {  message, Space, Table, Tag, Tooltip } from "antd";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import DeleteUser from "./DeleteUser";
-import { FileExcelOutlined } from "@ant-design/icons";
-import "./UserAccounts.css";
 import ViewUser from "./ViewUser";
 import EditUser from "./EditUser";
-import { render } from "@testing-library/react";
+
 
 function UserAccounts() {
   const [dataSource, setDataSource] = useState([]);
@@ -88,11 +86,23 @@ function UserAccounts() {
           <>
             {record.is_active === "1" ? (
               <> 
-                <Tag color="green">Hoạt động</Tag>
+                <Tooltip  
+                  placement="top"
+                  title="Tài khoản vẫn hoạt động"
+                  color="green"
+                >
+                  <Tag color="green">Hoạt động</Tag>
+                </Tooltip>
               </>
             ) : (
               <>
-                <Tag color="red"> Ngừng hoạt động</Tag>
+                <Tooltip  
+                  placement="top"
+                  title="Tài khoản bị khoá"
+                  color="red"
+                >
+                  <Tag color="red">Ngừng hoạt động</Tag>
+                </Tooltip>
               </>
             )}
           </>
@@ -120,18 +130,6 @@ function UserAccounts() {
 
   return (
     <>
-
-      <div className="user-toolbar">
-      <Button
-        type="primary"
-        icon={<FileExcelOutlined />}
-        className="btn-export-excel"
-        // onClick={handleExportExcel} // TODO: export Excel
-      >
-        Xuất Excel
-      </Button>
-      
-    </div>
 
       <Table
         dataSource={dataSource}

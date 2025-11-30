@@ -1,0 +1,48 @@
+.analytics-page {
+  padding: 16px;
+}
+
+.analytics-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+
+.analytics-title {
+  margin-bottom: 24px;
+}
+
+.analytics-summary-row {
+  margin-bottom: 24px;
+}
+
+.analytics-stat .ant-statistic-title {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.analytics-stat .ant-statistic-content-value {
+  font-weight: 600;
+  font-size: 32px;
+  line-height: 1.2;
+}
+
+.analytics-card {
+  margin-bottom: 24px;
+}
+
+/* cell hiển thị ảnh + tên sản phẩm */
+.analytics-product-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.analytics-product-image {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 8px;
+}
