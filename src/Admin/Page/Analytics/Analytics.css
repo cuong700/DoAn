@@ -40,9 +40,22 @@
   gap: 12px;
 }
 
-.analytics-product-image {
-  width: 64px;
-  height: 64px;
-  object-fit: cover;
-  border-radius: 8px;
+.analytics-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #1f1f1f;
+}
+
+
+
+.analytics-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+.analytics_right {
+  display: flex;
+  gap: 8px;
 }

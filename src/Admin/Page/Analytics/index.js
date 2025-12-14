@@ -8,7 +8,9 @@ import ExcelAnalytics from "./ExcelAnalytics";
 function Analytics() {
   const [summary, setSummary] = useState({
     totalRevenue: 0,
-    totalSold: 0,
+    totalQuantitySold: 0,
+    totalCost: 0,
+    totalProfit: 0,
   });
 
   const [dataSource, setDataSource] = useState([]);
@@ -27,7 +29,7 @@ function Analytics() {
         };
 
         const [resNumber, resChart] = await Promise.all([
-          fetch("http://localhost:8090/api/v1/statistics/dashboard", {
+          fetch("http://localhost:8090/api/v1/orders/revenue/products", {
             method: "GET",
             headers,
           }),
@@ -45,29 +47,31 @@ function Analytics() {
         const dataChart = await resChart.json();
 
         setSummary({
-          totalRevenue: Number(dataNumber.totalRevenue || 0),
-          totalSold: Number(dataChart.totalSold || 0),
+          totalRevenue: Number(dataNumber.grand_total_revenue || 0),
+          totalQuantitySold: Number(dataChart.grand_total_quantity || 0),
+          totalCost: Number(dataNumber.grand_total_cost || 0),
+          totalProfit: Number(dataNumber.grand_total_profit || 0),
         });
 
-        const productData = (dataNumber.products || []).map((item, index) => ({
-          key: item.id || index,
-          name: item.name,
-          revenue: Number(item.revenue || 0),
-          quantity: Number(item.quantity || 0),
-          image: item.imageUrl,
-        }));
+        const productData = (dataNumber.products?.content || []).map(
+          (item, index) => ({
+            key: item.productId,
+            productId: item.productId,
+            productName: item.productName,
+            thumbnail: item.thumbnail,
+            totalRevenue: Number(item.totalRevenue || 0),
+            totalQuantitySold: Number(item.totalQuantitySold || 0),
+            totalCost: Number(item.totalCost || 0),
+            totalProfit: Number(item.totalProfit || 0),
+          })
+        );
         setDataSource(productData);
 
-        //Xem xét lại
-        const rawChartData = Array.isArray(dataChart.data)
-          ? dataChart.data
-          : Array.isArray(dataChart)
-          ? dataChart
-          : [];
-
-        const revenueData = rawChartData.map((item) => ({
-          month: String(item.month),
-          revenue: Number(item.revenue || item.totalRevenue || 0),
+        // Xử lý chart data
+        const chartData = Array.isArray(dataChart) ? dataChart : [];
+        const revenueData = chartData.map((item) => ({
+          month: `Tháng ${item.month}`,
+          profit: Number(item.profit || 0),
         }));
         setMonthlyRevenue(revenueData);
       } catch (error) {
@@ -83,7 +87,7 @@ function Analytics() {
   const config = {
     data: monthlyRevenue,
     xField: "month",
-    yField: "revenue",
+    yField: "profit",
     smooth: true,
     height: 260,
     point: {
@@ -92,100 +96,197 @@ function Analytics() {
     },
     meta: {
       month: { alias: "Tháng" },
-      revenue: { alias: "Doanh thu (VND)" },
+      revenue: { alias: "Lợi nhuận (VND)" },
     },
 
     yAxis: {
       label: {
-        formatter: (v) => `${Number(v) / 1_000_000} tr`,
+        formatter: (v) => {
+          const num = Number(v);
+          if (num >= 1_000_000) {
+            return `${(num / 1_000_000).toFixed(1)} tr`;
+          }
+          return `${(num / 1_000).toFixed(0)} k`;
+        },
       },
     },
     tooltip: {
       formatter: (datum) => ({
-        name: "Doanh thu",
-        value: datum.revenue.toLocaleString("vi-VN") + " đ",
+        name: "Lợi nhuận",
+        value: Number(datum.profit).toLocaleString("vi-VN") + " đ",
       }),
     },
   };
 
   const columns = [
     {
-      title: "Tên giày",
-      dataIndex: "name",
-      key: "name",
+      title: "Sản phẩm",
+      dataIndex: "productName",
+      key: "productName",
+      align: "center",
+      width: 300,
       render: (_, record) => (
         <div className="analytics-product-cell">
-          {record.image && (
+          {record.thumbnail && (
             <img
-              src={record.image}
-              alt={record.name}
+              src={record.thumbnail}
+              alt={record.productName}
               className="analytics-product-image"
+              style={{
+                width: 50,
+                height: 50,
+                objectFit: "cover",
+                borderRadius: 4,
+                marginRight: 12,
+              }}
             />
           )}
-          <span>{record.name}</span>
+          <span>{record.productName}</span>
         </div>
       ),
     },
     {
-      title: "Doanh thu",
-      dataIndex: "revenue",
-      key: "revenue",
-      align: "right",
-      render: (value) =>
-        typeof value === "number"
-          ? value.toLocaleString("vi-VN") + " đ" //định dạng tiền tệ theo từng vùng
-          : "0 đ",
+      title: "Số lượng bán",
+      dataIndex: "totalQuantitySold",
+      key: "totalQuantitySold",
+      width: 150,
+      render: (value) => <b>{value}</b>,
     },
     {
-      title: "Số lượng đã bán",
-      dataIndex: "quantity",
-      key: "quantity",
+      title: "Doanh thu",
+      dataIndex: "totalRevenue",
+      key: "totalRevenue",
+      render: (value) => (
+        <span style={{ color: "#1890ff" }}>
+          {Number(value).toLocaleString("vi-VN") + " đ"}
+        </span>
+      ),
+    },
+    {
+      title: "Chi phí",
+      dataIndex: "totalCost",
+      key: "totalCost",
+      width: 180,
+      render: (value) => (
+        <span style={{ color: "#ff4d4f" }}>
+          {Number(value).toLocaleString("vi-VN") + " đ"}
+        </span>
+      ),
+    },
+    {
+      title: "Lợi nhuận",
+      dataIndex: "totalProfit",
+      key: "totalProfit",
       align: "right",
+      width: 180,
+      render: (value) => (
+        <b style={{ color: "#52c41a" }}>
+          {Number(value).toLocaleString("vi-VN") + " đ"}
+        </b>
+      ),
     },
   ];
   return (
     <>
-      <div className="analytics-page">
-        <div className="analytics-header">
-          <h2 className="analytics-title">Doanh thu</h2>
+      <h2 className="analytics-title">Thống kê doanh thu</h2>
+      <div className="analytics-header">
+        <div className="analytics__right">
           <ExcelAnalytics />
         </div>
-
-        <Spin spinning={loading}>
-          <Row gutter={[20, 20]} className="analytics-summary-row">
-            <Col xxl={12} xl={12} lg={12} md={12} sm={24} xs={24}>
-              <Card>
-                <Statistic
-                  className="analytics-stat"
-                  title="Tổng doanh thu"
-                  value={summary.totalRevenue}
-                  formatter={(value) =>
-                    Number(value).toLocaleString("vi-VN") + " đ"
-                  }
-                />
-              </Card>
-            </Col>
-            <Col xxl={12} xl={12} lg={12} md={12} sm={24} xs={24}>
-              <Card>
-                <Statistic
-                  className="analytics-stat"
-                  title="Tổng số lượng bán"
-                  value={summary.totalSold}
-                  precision={2}
-                />
-              </Card>
-            </Col>
-          </Row>
-
-          <Card title="Doanh thu theo tháng" className="analytics-card">
-            <Line {...config} />
-          </Card>
-
-          <Card title="Top sản phẩm" className="analytics-card">
-            <Table dataSource={dataSource} columns={columns} />
-          </Card>
-        </Spin>
       </div>
+
+      <Spin spinning={loading}>
+        <Row gutter={[16, 16]} className="analytics-summary-row">
+          <Col xxl={6} xl={6} lg={12} md={12} sm={12} xs={24}>
+            <Card>
+              <Statistic
+                className="analytics-stat"
+                title="Tổng số lượng bán"
+                value={summary.totalQuantitySold}
+                valueStyle={{ color: "#090909ff" }}
+              />
+            </Card>
+          </Col>
+
+          <Col xxl={6} xl={6} lg={12} md={12} sm={12} xs={24}>
+            <Card>
+              <Statistic
+                className="analytics-stat"
+                title="Tổng doanh thu"
+                value={summary.totalRevenue}
+                valueStyle={{ color: "#1890ff" }}
+                formatter={(value) =>
+                  Number(value).toLocaleString("vi-VN") + " đ"
+                }
+              />
+            </Card>
+          </Col>
+
+          <Col xxl={6} xl={6} lg={12} md={12} sm={12} xs={24}>
+            <Card>
+              <Statistic
+                className="analytics-stat"
+                title="Tổng chi phí"
+                value={summary.totalCost}
+                valueStyle={{ color: "#ff4d4f" }}
+                formatter={(value) =>
+                  Number(value).toLocaleString("vi-VN") + " đ"
+                }
+              />
+            </Card>
+          </Col>
+
+          <Col xxl={6} xl={6} lg={12} md={12} sm={12} xs={24}>
+            <Card>
+              <Statistic
+                className="analytics-stat"
+                title="Tổng lợi nhuận"
+                value={summary.totalProfit}
+                valueStyle={{ color: "#52c41a" }}
+                formatter={(value) =>
+                  Number(value).toLocaleString("vi-VN") + " đ"
+                }
+              />
+            </Card>
+          </Col>
+        </Row>
+
+        <Card
+          title="Lợi nhuận theo tháng"
+          className="analytics-card"
+          style={{ marginTop: 16 }}
+        >
+          {monthlyRevenue.length > 0 ? (
+            <Line {...config} />
+          ) : (
+            <div
+              style={{
+                textAlign: "center",
+                padding: "40px 0",
+                color: "#999",
+              }}
+            >
+              Chưa có dữ liệu biểu đồ
+            </div>
+          )}
+        </Card>
+
+        <Card
+          title="Chi tiết sản phẩm"
+          className="analytics-card"
+          style={{ marginTop: 16 }}
+        >
+          <Table
+            dataSource={dataSource}
+            columns={columns}
+            pagination={{
+              pageSize: 10,
+              showTotal: (total) => `Tổng ${total} sản phẩm`,
+            }}
+            scroll={{ x: 900 }}
+          />
+        </Card>
+      </Spin>
     </>
   );
 }

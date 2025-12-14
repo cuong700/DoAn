@@ -1,6 +1,7 @@
 import { PlusOutlined } from "@ant-design/icons";
 import { Button, Form, Input, Modal, notification, Spin } from "antd";
 import { useState } from "react";
+import { getCookie } from "../../../helpers/cookie";
 
 function CreateCategory(props) {
   const { onReload } = props;
@@ -24,13 +25,18 @@ function CreateCategory(props) {
     try {
       setSpinning(true);
 
+      const token = getCookie("token");
+
       const payload = {
         ...value,
       };
 
-      const res = await fetch("http://localhost:8090/category", {
+      const res = await fetch("http://localhost:8090/api/v1/categories/admin", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify(payload),
       });
 
@@ -40,8 +46,6 @@ function CreateCategory(props) {
         message: "Thêm mới thành công",
         description: "Thông tin danh mục đã được thêm mới.",
       });
-
-     
 
       setShowModal(false);
       onReload();
@@ -55,7 +59,6 @@ function CreateCategory(props) {
       setSpinning(false);
     }
   };
-
 
   const rules = [
     {
@@ -76,14 +79,13 @@ function CreateCategory(props) {
       </Button>
 
       <Modal
-        title="Thêm người dùng mới"
+        title="Thêm danh mục mới"
         open={showModal}
         onCancel={handleCancel}
         footer={null}
       >
         <Spin spinning={spinning} tip="Đang thêm...">
           <Form layout="vertical" form={form} onFinish={handleSubmit}>
-
             <Form.Item label="Tên danh mục" name="name" rules={rules}>
               <Input />
             </Form.Item>

@@ -10,36 +10,45 @@ function Profile() {
 
   const [notiApi, contextHolder] = notification.useNotification();
 
+  const mapUser = (u) => ({
+    fullname: u.fullname ?? "",
+    phone_number: u.phone_number ?? "",
+    address: u.address ?? "",
+    created_at: u.created_at ?? "",
+    updated_at: u.updated_at ?? "",
+    date_of_birth: u.date_of_birth
+      ? dayjs(u.date_of_birth, "YYYY-MM-DD")
+      : null,
+  });
+
   const fetchApi = async () => {
     try {
       const userId = getCookie("userid");
       const token = getCookie("token");
 
-      if (!userId || !token) return;
-
-      const res = await fetch(`http://localhost:8090/api/v1/users/${userId}`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const res = await fetch(
+        "http://localhost:8090/api/v1/users/admin/get-all-user",
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (!res.ok) throw new Error("Không lấy được thông tin user");
 
-      const data = await res.json();
+      const json = await res.json();
+      const list = json.data;
 
-      form.setFieldsValue({
-        firstName: data.full_name || "",
-        phone: data.phone_number || "",
-        address: data.address || "",
-        birthDate: data.date ? dayjs(data.date, "DD/MM/YYYY") : null,
-        created_at: data.created_at
-          ? dayjs(data.created_at).format("DD/MM/YYYY HH:mm")
-          : "",
-        updated_at: data.updated_at
-          ? dayjs(data.updated_at).format("DD/MM/YYYY HH:mm")
-          : "",
-      });
+      const found = list.find((u) => String(u.id) === String(userId)); // Tìm user ứng với id
+
+      if (!found) {
+        console.warn("Không tìm thấy user theo ID:", userId);
+        return;
+      }
+      form.setFieldsValue(mapUser(found));
+
     } catch (error) {
       console.error(error);
     }
@@ -47,46 +56,47 @@ function Profile() {
 
   useEffect(() => {
     fetchApi();
-  }, [form]);
+  }, []);
 
   const handleSubmit = async (value) => {
     try {
       setSpinning(true);
-      const userId = getCookie("userid");
+      const id = getCookie("userid");
       const token = getCookie("token");
 
       const payload = {
-        full_name: value.firstName,
-        phone_number: value.phone,
+        fullname: value.fullname,
+        phone_number: value.phone_number,
         address: value.address,
-        date: value.birthDate ? value.birthDate.format("DD/MM/YYYY") : null,
+        date_of_birth: value.date_of_birth
+          ? value.date_of_birth.format("YYYY-MM-DD")
+          : null,
       };
 
-      const res = await fetch(`http://localhost:8090/api/v1/users/${userId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: token ? `Bearer ${token}` : undefined,
-        },
-        body: JSON.stringify(payload),
-      });
+      const res = await fetch(
+        `http://localhost:8090/api/v1/users/user/details/${id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token ? `Bearer ${token}` : undefined,
+          },
+          body: JSON.stringify(payload), 
+        }
+      );
+
+      console.log(payload);
 
       if (!res.ok) throw new Error("Update thất bại");
+
 
       notiApi.success({
         message: "Cập nhật thành công",
         description: "Thông tin quản trị viên đã được cập nhật.",
       });
-
-      setCookie("name", value.firstName, 1);
-      setCookie("phone", value.phone, 1);
-      setCookie("address", value.address, 1);
-      if (value.birthDate) {
-        setCookie("date", value.birthDate.format("DD/MM/YYYY"), 1);
-      }
-
-      await fetchApi(); //Gọi lại GET để cập nhập updated_at mới
-
+      
+      setCookie("name", value.fullname, 1);// cập nhật cookie giao diện
+      fetchApi(); // load lại dữ liệu mới
     } catch (error) {
       console.error(error);
       notiApi.error({
@@ -112,15 +122,15 @@ function Profile() {
 
       <Spin spinning={spinning} tip="Đang cập nhật...">
         <Form layout="vertical" onFinish={handleSubmit} form={form}>
-          <Form.Item label="Họ và tên" name="firstName" rules={rules}>
+          <Form.Item label="Họ và tên" name="fullname" rules={rules}>
             <Input />
           </Form.Item>
 
-          <Form.Item label="Ngày sinh" name="birthDate" rules={rules}>
+          <Form.Item label="Ngày sinh" name="date_of_birth" rules={rules}>
             <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
           </Form.Item>
 
-          <Form.Item label="Số điện thoại" name="phone" rules={rules}>
+          <Form.Item label="Số điện thoại" name="phone_number" rules={rules}>
             <Input />
           </Form.Item>
 

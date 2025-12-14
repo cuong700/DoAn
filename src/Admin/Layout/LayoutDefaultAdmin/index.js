@@ -4,7 +4,7 @@ import {
   RightOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Avatar, Dropdown, Layout, message, Space } from "antd";
+import { Avatar, Dropdown, Input, Layout, message, Space } from "antd";
 import { Content } from "antd/es/layout/layout";
 import Sider from "antd/es/layout/Sider";
 import MenuSider from "../MenuSider";
@@ -12,10 +12,9 @@ import "./LayoutDefaultAdmin.css";
 import logo from "../../images/logo.png";
 import logoFold from "../../images/logo-fold.png";
 import { useEffect, useState } from "react";
-import {  Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { deleteCookie, getCookie } from "../../../helpers/cookie";
 import withAuth from "../../ComponentsAdmin/HOC";
-
 
 function LayoutDefault() {
   const [collapsed, setCollapsed] = useState(false);
@@ -46,7 +45,7 @@ function LayoutDefault() {
         deleteCookie("isLogin");
 
         message.success("Đăng xuất thành công");
-        navigate("/login"); 
+        navigate("/login");
         break;
       default:
         break;
@@ -113,12 +112,15 @@ function LayoutDefault() {
           </div>
 
           <div className="header__nav">
-            <div
-              className="header__collapse"
-              onClick={() => setCollapsed(!collapsed)}
-            >
-              <MenuFoldOutlined />
-            </div>
+            
+              <div
+                className="header__collapse"
+                onClick={() => setCollapsed(!collapsed)}
+              >
+                <MenuFoldOutlined />
+              </div>
+
+             
             <div className="header__right">
               <Dropdown
                 menu={{ items: menuItems, onClick: handleMenuClick }}

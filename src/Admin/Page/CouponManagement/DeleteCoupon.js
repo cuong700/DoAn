@@ -1,6 +1,7 @@
 import { DeleteOutlined } from "@ant-design/icons";
 import { Button, message, notification, Popconfirm } from "antd";
 import { useState } from "react";
+import { getCookie } from "../../../helpers/cookie";
 
 function DeleteCoupon(props) {
   const { record, onReload } = props;
@@ -13,17 +14,28 @@ function DeleteCoupon(props) {
     try {
       setLoading(true);
 
-      const res = await fetch(`https://dummyjson.com/comment/${record.id}`, {
-        method: "DELETE",
-      });
+      const token = getCookie("token");
+      const res = await fetch(
+        `http://localhost:8090/api/v1/coupons/admin/delete/${record.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!res.ok) throw new Error("Delete thất bại");
 
       notiApi.success({
         message: "Xoá thành công",
-        description: `Đã xoá mã giảm giá: ${record.fullname}`,
+        description: `Đã xoá mã giảm giá: ${record.code}`,
       });
-      onReload();
+
+      setTimeout(() => {
+        onReload();
+      }, 500);
     } catch (error) {
       console.error(error);
       message.error("Xoá thất bại!");
@@ -35,7 +47,12 @@ function DeleteCoupon(props) {
   return (
     <>
       {contextHolder}
-      <Popconfirm title="Sure to delete?" onConfirm={handleDelete}>
+      <Popconfirm
+        title="Bạn chắc chắn muốn xoá?"
+        onConfirm={handleDelete}
+        okText="Xoá"
+        cancelText="Huỷ"
+      >
         <Button
           size="small"
           type="text"

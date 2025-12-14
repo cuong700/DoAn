@@ -10,32 +10,31 @@ const withAuth = (Component) => {
 
     useEffect(() => {
       const token = getCookie("token");
-
       if (!token) {
         setIsLoading(false);
         setIsAdmin(false);
         return;
       }
 
-      const fetchData = async () => {
+      console.log(getCookie("token"));
 
+      const fetchData = async () => {
         try {
           const res = await fetch(
-            "http://localhost:8090/api/v1/users/details",
+            "http://localhost:8090/api/v1/users/user/detail-self",
             {
-              method: "POST",
+              method: "GET",
               headers: {
                 Authorization: `Bearer ${token}`,
               },
             }
           );
 
-          if (!res.ok) {
-            throw new Error("Không lấy được thông tin user");
-          }
+          if (!res.ok) throw new Error("Không lấy được thông tin user");
 
           const data = await res.json();
 
+          // JSON bạn gửi ở trên -> đọc role.name
           const roleName = data?.role?.name;
 
           if (roleName === "ADMIN") {
@@ -43,8 +42,8 @@ const withAuth = (Component) => {
           } else {
             setIsAdmin(false);
           }
-        } catch (error) {
-          console.error("Error fetching data:", error);
+        } catch (err) {
+          console.error(err);
           setIsAdmin(false);
         } finally {
           setIsLoading(false);
@@ -56,19 +55,14 @@ const withAuth = (Component) => {
 
     useEffect(() => {
       if (!isLoading && !isAdmin) {
-        navigate("/login");
+        navigate("/");
       }
     }, [isLoading, isAdmin, navigate]);
 
-    if (isLoading) {
-      return <div>Loading...</div>;
-    }
+    if (isLoading) return <div>Loading...</div>;
+    if (!isAdmin) return null;
 
-    if (!isAdmin) {
-      return null;
-    }
-
-    return <Component />;
+    return <Component {...props} />;
   };
 };
 

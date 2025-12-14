@@ -15,8 +15,8 @@ function ViewUser(props) {
 
     form.setFieldsValue({
       ...record,
-      birthDate: record.birthDate
-        ? dayjs(record.birthDate) // DatePicker cần dayjs object
+      date_of_birth: record.date_of_birth
+        ? dayjs(record.date_of_birth) 
         : null,
     });
   };
@@ -51,20 +51,16 @@ function ViewUser(props) {
             destroyOnClose
             disabled
           >
-            <Form.Item label="Họ và tên" name="firstName">
+            <Form.Item label="Họ và tên" name="fullname" >
               <Input />
             </Form.Item>
 
-            <Form.Item label="Ngày sinh" name="birthDate">
+            <Form.Item label="Ngày sinh" name="date_of_birth" >
               <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
             </Form.Item>
 
-            <Form.Item label="Số điện thoại" name="phone" >
+            <Form.Item label="Số điện thoại" name="phone_number" >
               <Input />
-            </Form.Item>
-
-            <Form.Item label="Mật khẩu" name="password" >
-              <Input.Password />
             </Form.Item>
 
             <Form.Item label="Địa chỉ" name="address" >

@@ -18,6 +18,7 @@ import Profile from "../Admin/Layout/LayoutDefaultAdmin/Profile";
 import CommentManagement from "../Admin/Page/CommentManagement";
 import Analytics from "../Admin/Page/Analytics";
 import CouponManagement from "../Admin/Page/CouponManagement";
+import InvoiceManagement from "../Admin/Page/InvoiceManagement";
 
 export const routes = [
   {
@@ -56,6 +57,10 @@ export const routes = [
         path: "product/:id",
         element: <ProductDetail />,
       },
+       {
+        path: "search",
+        element: <ProductDetail />,
+      },
       {
         path: "*",
         element: <Error404 />,
@@ -90,6 +95,10 @@ export const routes = [
       {
         path: "coupon-management",
         element: <CouponManagement />,
+      },
+       {
+        path: "invoice-management",
+        element: <InvoiceManagement />,
       },
       {
         path: "profile",

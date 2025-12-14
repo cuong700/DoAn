@@ -53,7 +53,7 @@ function CommentManagement() {
       },
     },
     {
-      title: "Tên người dùng",
+      title: "Tên khách hàng",
       dataIndex: "user",
       key: "user",
       render: (_, record) =>

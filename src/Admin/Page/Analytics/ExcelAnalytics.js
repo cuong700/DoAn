@@ -6,14 +6,18 @@ import { getCookie } from "../../../helpers/cookie";
 function ExcelAnalytics() {
   const [exporting, setExporting] = useState(false);
 
-  const handleExportExcel = async () => {
+  const handleExportExcel = async (start, end) => {
     try {
       setExporting(true);
 
       const token = getCookie("token");
 
+      const query = new URLSearchParams();
+      if (start) query.append("start", start);
+      if (end) query.append("end", end);
+
       const res = await fetch(
-        "http://localhost:8090/api/v1/orders/revenue/products/export",
+        `http://localhost:8090/api/v1/orders/revenue/products/export?${query.toString()}`,
         {
           method: "GET",
           headers: {
@@ -22,12 +26,11 @@ function ExcelAnalytics() {
         }
       );
 
-      if(!res.ok) throw new Error("Xuất excel thất bại");
+      if (!res.ok) throw new Error("Xuất excel thất bại");
 
       // nhận file nhị phân từ BE
       const blob = await res.blob();
 
-      
       // tạo link download tạm thời
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -36,8 +39,7 @@ function ExcelAnalytics() {
       document.body.appendChild(link);
       link.click();
       link.remove();
-      window.URL.revokeObjectURL(url);//Giải phóng URL tạm để tránh tốn bộ nhớ.
-
+      window.URL.revokeObjectURL(url); //Giải phóng URL tạm để tránh tốn bộ nhớ.
 
       message.success("Xuất Excel thành công");
     } catch (error) {

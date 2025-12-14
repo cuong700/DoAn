@@ -1,6 +1,7 @@
 import { EditOutlined } from "@ant-design/icons";
 import { Button, Form, Input, Modal, notification, Spin } from "antd";
 import { useState } from "react";
+import { getCookie } from "../../../helpers/cookie";
 
 function EditCategory(props) {
   const { record, onReload } = props;
@@ -17,7 +18,7 @@ function EditCategory(props) {
     setShowModal(true);
 
     form.setFieldsValue({
-      ...record,
+      name: record?.name || "",
     });
   };
 
@@ -29,13 +30,19 @@ function EditCategory(props) {
   const handleSubmit = async (value) => {
     try {
       setSpinning(true);
+
+      const token = getCookie("token");
+
       const payload = {
         ...value,
       };
 
-      const res = await fetch(`http://localhost:8090/category/${record.id}`, {
+      const res = await fetch(`http://localhost:8090/api/v1/categories/admin/${record.id}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+       headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, 
+          },
         body: JSON.stringify(payload),
       });
 

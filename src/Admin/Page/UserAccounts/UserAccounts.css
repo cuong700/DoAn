@@ -1,15 +1,19 @@
-.user-toolbar {
+.user-accounts__title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #1f1f1f;
+}
+
+
+
+.user-accounts__header {
   display: flex;
-  gap: 8px;
+  justify-content: flex-end;
   margin-bottom: 16px;
 }
 
-.user-toolbar .ant-btn {
-  border-radius: 4px;
-  font-weight: 500;
-  padding: 0 16px;
-}
-
-.btn-export-excel {
-  margin-left: auto;
+.user-accounts__right {
+  display: flex;
+  gap: 8px;
 }

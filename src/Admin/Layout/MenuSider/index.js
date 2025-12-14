@@ -2,6 +2,7 @@ import {
   BarChartOutlined,
   BarsOutlined,
   CommentOutlined,
+  FileTextOutlined,
   GiftOutlined,
   ProductOutlined,
   UserOutlined,
@@ -17,8 +18,8 @@ function MenuSider() {
       icon: <BarChartOutlined />,
     },
     {
-      key: "Quản lí người dùng",
-      label: <Link to="user-accounts">Quản lí người dùng</Link>,
+      key: "Quản lí khách hàng",
+      label: <Link to="user-accounts">Quản lí khách hàng</Link>,
       icon: <UserOutlined />,
     },
     {
@@ -40,6 +41,11 @@ function MenuSider() {
       key: "Quản lí mã giảm giá",
       label: <Link to="coupon-management">Quản lí mã giảm giá</Link>,
       icon: <GiftOutlined />,
+    },
+    {
+      key: "Quản lí hoá đơn",
+      label: <Link to="invoice-management">Quản lí hoá đơn</Link>,
+      icon: <FileTextOutlined />,
     },
   ];
   return (

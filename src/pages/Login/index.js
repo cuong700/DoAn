@@ -51,8 +51,8 @@ function Login() {
         setCookie("address", data.address, 1);
         setCookie("date", data.date, 1);
         setCookie("isLogin", "true", 1);
-        
-        setIsLoading(false); // Set loading to false after timeout
+
+        setIsLoading(false); // Set loading to false after navigation
         alert("Đăng nhập thành công", data.token, 1);
       }, 2000);
     } catch (error) {
