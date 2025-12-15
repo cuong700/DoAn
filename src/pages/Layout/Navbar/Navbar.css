@@ -129,7 +129,7 @@
 
 .navbar__icons-user {
   font-size: 18px;
-  color: #555;
+  color: #555 !important;
   cursor: pointer;
 }
 

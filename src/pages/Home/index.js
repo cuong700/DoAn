@@ -16,7 +16,7 @@ function Home() {
     <div>
       <div className="section2">
         <div className="hop">
-          <div className="inner-wrap">
+          <div className="content-wrap">
             <div className="header">
               <div className="text1">
                 Move, Shop, Customise & Celebrate With Us.

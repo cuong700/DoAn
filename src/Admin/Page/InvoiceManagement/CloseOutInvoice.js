@@ -18,8 +18,10 @@ function CloseOutInvoice(props) {
 
       const payload = {
         status: newStatus,
-        cancellation_reason: cancellation_reason,
+        reason: cancellation_reason,
       };
+
+      console.log("PAYLOAD SEND:", payload);
 
       const res = await fetch(
         `http://localhost:8090/api/v1/orders/admin/order/${order.id}/status`,
@@ -77,7 +79,7 @@ function CloseOutInvoice(props) {
       );
 
       const promises = selectedOrders.map((order) =>
-        updateOrderStatus(order.id, "CANCELLED", values.reason)
+        updateOrderStatus(order, "CANCELLED", values.cancellation_reason)
       );
 
       await Promise.all(promises);
@@ -129,14 +131,19 @@ function CloseOutInvoice(props) {
       <Modal
         title="Từ chối đơn hàng"
         open={showModal}
-        onOk={handleSubmit}
+        onOk={() => form.submit()}
         onCancel={handleCancel}
         okText="Từ chối"
         cancelText="Hủy"
         okButtonProps={{ danger: true, loading }}
         width={600}
       >
-        <Form form={form} layout="vertical" style={{ marginTop: 20 }}>
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleSubmit}
+          style={{ marginTop: 20 }}
+        >
           <Form.Item
             label={
               <span>
@@ -144,7 +151,7 @@ function CloseOutInvoice(props) {
                 Mô tả lý do từ chối
               </span>
             }
-            name="description"
+            name="cancellation_reason"
             rules={[
               {
                 required: true,

@@ -7,6 +7,9 @@ import AboutUs from "../pages/About us";
 import Contact from "../pages/Contact";
 import Error404 from "../pages/Error404";
 import Logout from "../pages/Logout";
+import User from "../pages/Layout/User";
+import Cart from "../pages/Layout/Cart";
+import Searchpage from "../pages/Layout/Navbar/Searchpage";
 
 import LayoutDefaultAdmin from "../Admin/Layout/LayoutDefaultAdmin";
 import UserAccounts from "../Admin/Page/UserAccounts";
@@ -20,52 +23,61 @@ import Analytics from "../Admin/Page/Analytics";
 import CouponManagement from "../Admin/Page/CouponManagement";
 import InvoiceManagement from "../Admin/Page/InvoiceManagement";
 
+
 export const routes = [
   {
     path: "/",
     element: <LayoutDefault />,
     children: [
-      {
-        path: "/",
-        element: <Home />,
-      },
-      {
-        path: "about-us",
-        element: <AboutUs />,
-      },
-      {
-        path: "contact",
-        element: <Contact />,
-      },
-      {
-        path: "login",
-        element: <Login />,
-      },
-      {
-        path: "register",
-        element: <Register />,
-      },
-      {
-        path: "logout",
-        element: <Logout />,
-      },
-      {
-        path: "category/:productId",
-        element: <ProductList />,
-      },
-      {
-        path: "product/:id",
-        element: <ProductDetail />,
-      },
-       {
-        path: "search",
-        element: <ProductDetail />,
-      },
-      {
-        path: "*",
-        element: <Error404 />,
-      },
-    ],
+          {
+            path: "/",
+            element: <Home />,
+          },
+          {
+            path: "about-us",
+            element: <AboutUs />,
+          },
+          {
+            path: "contact",
+            element: <Contact />,
+          },
+          {
+            path: "login",
+            element: <Login />,
+          },
+          {
+            path: "register",
+            element: <Register />,
+          },
+          {
+            path: "logout",
+            element: <Logout />,
+          },
+          {
+            path: "category/:categoryId",
+            element: <ProductList />,
+          },
+          {
+            path: "search",
+            element: <Searchpage />,
+          },
+          {
+            path: "user",
+            element: <User />,
+          },
+          {
+            path: "product/:productId",
+            element: <ProductDetail />,
+          },
+          {
+            path: "cart",
+            element: <Cart />,
+          },
+          {
+            path: "*",
+            element: <Error404 />,
+          },
+        ],
   },
 
   {

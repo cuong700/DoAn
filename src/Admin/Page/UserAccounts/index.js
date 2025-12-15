@@ -76,7 +76,7 @@ function UserAccounts() {
       setDataSource(users);
 
       // Cập nhật lại thông tin phân trang từ backend
-      const total = json?.data?.total_elements;
+      const total = json?.data?.total_elements ;
 
       setPagination((prev) => ({
         ...prev,
@@ -122,15 +122,16 @@ function UserAccounts() {
     try {
       const token = getCookie("token");
 
+      const statusValue = checked ? 1 : 0; 
+
       const res = await fetch(
-        `http://localhost:8090/api/v1/users/admin/block/${record.id}/0`,
+        `http://localhost:8090/api/v1/users/admin/block/${record.id}/${statusValue}`,
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ isActive: checked }),
         }
       );
 

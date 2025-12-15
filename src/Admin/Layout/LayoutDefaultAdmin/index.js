@@ -153,4 +153,4 @@ function LayoutDefault() {
   );
 }
 
-export default LayoutDefault;
+export default withAuth(LayoutDefault);

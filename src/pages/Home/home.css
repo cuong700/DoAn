@@ -183,14 +183,14 @@
 
 }
 
-.section2 .hop .inner-wrap .header {
+.section2 .hop .content-wrap .header {
     display: flex;
     align-items: center;
     justify-content: center;
     flex-direction: column;
 }
 
-.section2 .hop .inner-wrap .header .text1 {
+.section2 .hop .content-wrap .header .text1 {
 
     font-size: 16px;
 
@@ -198,13 +198,13 @@
 
 
 
-.section2 .hop .inner-wrap .header .text2 {
+.section2 .hop .content-wrap .header .text2 {
 
     font-size: 12px;
     margin-bottom: 4px;
 }
 
-.section2 .hop .inner-wrap .header .text3 a {
+.section2 .hop .content-wrap.header .text3 a {
 
     font-size: 12px;
     color: black;
