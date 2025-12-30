@@ -1,3 +1,23 @@
+/* Sửa lỗi autocomplete nền đen */
+.category-management input:-webkit-autofill,
+.category-management input:-webkit-autofill:hover,
+.category-management input:-webkit-autofill:focus,
+.category-management input:-webkit-autofill:active,
+.category-management textarea:-webkit-autofill,
+.category-management textarea:-webkit-autofill:hover,
+.category-management textarea:-webkit-autofill:focus,
+.category-management textarea:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px white inset !important; 
+  -webkit-text-fill-color: #000 !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Cho Select và Input Number */
+.category-management .ant-input-number-input:-webkit-autofill,
+.category-management .ant-select-selection-search-input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 30px white inset !important;
+  -webkit-text-fill-color: #000 !important;
+}
 
 .category-management__title {
   font-size: 24px;

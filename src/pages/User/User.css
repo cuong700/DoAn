@@ -110,6 +110,7 @@
   color: #e5e5e5;
 }
 
+/* Style cho input text */
 .user-form input[type="text"] {
   padding: 10px 14px;
   background-color: #2a2a2a;
@@ -126,6 +127,37 @@
   background-color: #333;
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
 }
+
+/* Style cho input date - giống input text */
+.user-form input[type="date"] {
+  padding: 10px 14px;
+  background-color: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 6px;
+  font-size: 15px;
+  color: #fff;
+  outline: none;
+  transition: all 0.2s ease;
+  color-scheme: dark; /* Làm cho calendar icon màu sáng */
+}
+
+.user-form input[type="date"]:focus {
+  border-color: #666;
+  background-color: #333;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+}
+
+/* Style cho calendar icon của input date */
+.user-form input[type="date"]::-webkit-calendar-picker-indicator {
+ cursor: pointer;
+  background-size: 16px;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 24px;
+  height: 24px;
+  opacity: 0.8;
+}
+
 
 .form-actions {
   display: flex;
@@ -165,111 +197,148 @@
   border-color: #666;
 }
 
-/* ===== PASSWORD CHECK FORM ===== */
-.pass-check {
-  margin-top: 20px;
-  padding: 20px;
-  background-color: #1a1a1a;
+
+
+/* Nền modal */
+.dark-modal .ant-modal-content {
+  background-color: #1e1e1e;
+  color: #ffffff;
+}
+
+/* Header */
+.dark-modal .ant-modal-header {
+  background-color: #1e1e1e;
+  border-bottom: 1px solid #333;
+}
+
+.dark-modal .ant-modal-title {
+  color: #ffffff;
+}
+
+/* Nút X đóng modal */
+.dark-modal .ant-modal-close {
+  color: #ffffff;
+}
+
+.dark-modal .ant-modal-close:hover {
+  color: #aaa;
+}
+
+/* Body */
+.dark-modal .ant-modal-body {
+  background-color: #1e1e1e;
+}
+
+/* Input thông thường trong modal */
+.dark-modal input {
+  background-color: #2a2a2a;
+  color: #fff;
   border: 1px solid #444;
-  border-radius: 6px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
 }
 
-.pass-check > div {
-  font-size: 14px;
-  font-weight: 500;
-  color: #e5e5e5;
+.dark-modal input::placeholder {
+  color: #888;
 }
 
-.pass-check input[type="password"] {
-  padding: 10px 14px;
+.dark-modal input:hover {
+  border-color: #666;
+}
+
+.dark-modal input:focus {
+  border-color: #666;
+  background-color: #333;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+}
+
+/* Ant Design Input.Password trong modal */
+.dark-modal .ant-input-password {
   background-color: #2a2a2a;
   border: 1px solid #444;
   border-radius: 6px;
-  font-size: 15px;
+}
+
+.dark-modal .ant-input-password input {
+  background-color: transparent;
   color: #fff;
-  outline: none;
-  transition: all 0.2s ease;
 }
 
-.pass-check input[type="password"]:focus {
-  border-color: #2563eb;
-  background-color: #333;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+.dark-modal .ant-input-password input::placeholder {
+  color: #888;
 }
 
-.pass-check button {
+.dark-modal .ant-input-password .ant-input-password-icon {
+  color: #aaa;
+}
+
+.dark-modal .ant-input-password .ant-input-password-icon:hover {
+  color: #fff;
+}
+
+.dark-modal .ant-input-affix-wrapper {
+  background-color: #2a2a2a;
+  border: 1px solid #444;
+}
+
+.dark-modal .ant-input-affix-wrapper:hover {
+  border-color: #666;
+  background-color: #2a2a2a;
+}
+
+.dark-modal .ant-input-affix-wrapper-focused {
+  border-color: #666 !important;
+  background-color: #333 !important;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+}
+
+/* Buttons trong modal footer */
+.dark-modal .btn-cancel {
   padding: 10px 20px;
-  background-color: #1e40af;
+  background-color: #333;
   color: #fff;
-  border: 1px solid #2563eb;
+  border: 1px solid #555;
   border-radius: 6px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  align-self: flex-start;
+  margin-right: 12px;
 }
 
-.pass-check button:hover {
-  background-color: #2563eb;
-  border-color: #3b82f6;
+.dark-modal .btn-cancel:hover {
+  background-color: #444;
+  border-color: #666;
 }
 
-/* ===== NEW PASSWORD FORM ===== */
-.pass-new {
-  margin-top: 20px;
-  padding: 20px;
-  background-color: #1a2e1a;
-  border: 1px solid #166534;
-  border-radius: 6px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.pass-new > div {
-  font-size: 14px;
-  font-weight: 500;
-  color: #86efac;
-}
-
-.pass-new input[type="password"] {
-  padding: 10px 14px;
-  background-color: #2a2a2a;
-  border: 1px solid #16a34a;
-  border-radius: 6px;
-  font-size: 15px;
-  color: #fff;
-  outline: none;
-  transition: all 0.2s ease;
-}
-
-.pass-new input[type="password"]:focus {
-  border-color: #22c55e;
-  background-color: #333;
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
-}
-
-.pass-new button {
+.dark-modal .btn-submit {
   padding: 10px 20px;
-  background-color: #15803d;
+  background-color: #059669;
   color: #fff;
-  border: 1px solid #16a34a;
+  border: 1px solid #10b981;
   border-radius: 6px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  align-self: flex-start;
 }
 
-.pass-new button:hover {
-  background-color: #16a34a;
-  border-color: #22c55e;
+.dark-modal .btn-submit:hover {
+  background-color: #10b981;
+  border-color: #34d399;
 }
+
+.dark-modal .btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #059669;
+  border-color: #10b981;
+}
+
+.dark-modal .btn-submit:disabled:hover {
+  background-color: #059669;
+  border-color: #10b981;
+}
+
+
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {

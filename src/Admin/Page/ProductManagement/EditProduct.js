@@ -1,13 +1,16 @@
 import { EditOutlined, PlusOutlined } from "@ant-design/icons";
 import {
   Button,
+  Col,
   Form,
   Input,
   InputNumber,
   Modal,
   notification,
+  Row,
   Select,
   Spin,
+  Switch,
   Upload,
 } from "antd";
 import { useEffect, useState } from "react";
@@ -37,7 +40,7 @@ function EditProduct(props) {
 
         const token = getCookie("token");
         const res = await fetch(
-          "http://localhost:8090/api/v1/categories/public/search",
+          "http://localhost:8090/api/v1/categories/public/search?active=true",
           {
             method: "GET",
             headers: { Authorization: `Bearer ${token}` },
@@ -48,11 +51,12 @@ function EditProduct(props) {
 
         const json = await res.json();
 
-         const mapped = json.data.content.filter((item) => item.active === true) // lọc các phần tử thỏa mãn điều kiện và trả về một mảng mới.
-        .map((item) => ({
-          value: item.id,
-          label: item.name,
-        }));
+        const mapped = json.data.content
+          .filter((item) => item.active === true) // lọc các phần tử thỏa mãn điều kiện và trả về một mảng mới.
+          .map((item) => ({
+            value: item.id,
+            label: item.name,
+          }));
         setCategories(mapped);
       } catch (error) {
         console.error(error);
@@ -74,7 +78,7 @@ function EditProduct(props) {
     const currentSizes =
       Array.isArray(record.sizes) && record.sizes.length > 0
         ? record.sizes.map((s) => ({
-            name: s.name  || "",
+            name: s.name || "",
             total: s.total || 0,
           }))
         : [];
@@ -85,10 +89,13 @@ function EditProduct(props) {
       description: record.description,
       cost: typeof record.cost === "number" ? record.cost : null,
       price: typeof record.price === "number" ? record.price : null,
+      display_price:
+        typeof record.display_price === "number" ? record.display_price : null,
       weight: typeof record.weight === "number" ? record.weight : null,
       total_stock:
         typeof record.total_stock === "number" ? record.total_stock : undefined,
       sizes: currentSizes,
+      active: record?.active !== undefined ? record.active : true,
     });
   };
 
@@ -115,11 +122,17 @@ function EditProduct(props) {
         parseInt(value.cost.toString().replace(/\D/g, ""))
       );
       formData.append(
+        "originalPrice",
+        parseInt(value.display_price.toString().replace(/\D/g, ""))
+      );
+      formData.append(
         "weight",
         parseInt(value.weight.toString().replace(/\D/g, ""))
       );
       formData.append("categoryId", value.category_id);
       formData.append("description", value.description || "");
+
+       formData.append("active", value.active !== undefined ? value.active : true);
 
       if (thumbnailFile.length > 0) {
         const thumbnail = thumbnailFile[0].originFileObj; //Nó chứa file gốc để mang đi upload.
@@ -136,12 +149,12 @@ function EditProduct(props) {
         });
       }
 
-       if (value.sizes && Array.isArray(value.sizes) && value.sizes.length > 0) {
-      value.sizes.forEach((item, index) => {
-        formData.append(`sizeQuantities[${index}].sizeName`, item.name);
-        formData.append(`sizeQuantities[${index}].quantity`, item.total);
-      });
-    }
+      if (value.sizes && Array.isArray(value.sizes) && value.sizes.length > 0) {
+        value.sizes.forEach((item, index) => {
+          formData.append(`sizeQuantities[${index}].sizeName`, item.name);
+          formData.append(`sizeQuantities[${index}].quantity`, item.total);
+        });
+      }
 
       const token = getCookie("token");
       const res = await fetch(
@@ -167,7 +180,6 @@ function EditProduct(props) {
       setThumbnailFile([]);
       setImagesFile([]);
 
-
       setTimeout(() => {
         onReload();
       }, 1000);
@@ -181,8 +193,6 @@ function EditProduct(props) {
       setSpinning(false);
     }
   };
-
- 
 
   const rules = [
     {
@@ -302,34 +312,63 @@ function EditProduct(props) {
               <Input.TextArea rows={3} />
             </Form.Item>
 
-            <Form.Item label="Giá nhập" name="cost" rules={rules}>
-              <InputNumber
-                min={0}
-                style={{ width: "100%" }}
-                formatter={(value) =>
-                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " đ"
-                }
-                parser={(value) => value.replace(/[^\d]/g, "")}
-              />
-            </Form.Item>
+            <Row gutter={16}>
+              <Col span={12}>
+                <Form.Item label="Giá nhập" name="cost" rules={rules}>
+                  <InputNumber
+                    min={0}
+                    style={{ width: "100%" }}
+                    controls={false}
+                    formatter={(value) =>
+                      `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " đ"
+                    }
+                    parser={(value) => value.replace(/[^\d]/g, "")}
+                  />
+                </Form.Item>
+              </Col>
 
-            <Form.Item label="Giá bán" name="price" rules={rules}>
-              <InputNumber
-                min={0}
-                style={{ width: "100%" }}
-                formatter={(value) =>
-                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " đ"
-                }
-                parser={(value) => value.replace(/[^\d]/g, "")}
-              />
-            </Form.Item>
+              <Col span={12}>
+                <Form.Item label="Giá bán" name="price" rules={rules}>
+                  <InputNumber
+                    min={0}
+                    style={{ width: "100%" }}
+                    controls={false}
+                    formatter={(value) =>
+                      `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " đ"
+                    }
+                    parser={(value) => value.replace(/[^\d]/g, "")}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
 
-            <Form.Item label="Trọng lượng" name="weight">
-              <InputNumber
-                formatter={(v) => (v ? `${v} g` : "")}
-                parser={(v) => v.replace(/[^\d]/g, "")}
-              />
-            </Form.Item>
+            <Row gutter={16}>
+              <Col span={12}>
+                <Form.Item label="Giá sale" name="display_price" rules={rules}>
+                  <InputNumber
+                    min={0}
+                    controls={false}
+                    style={{ width: "100%" }}
+                    formatter={(value) =>
+                      `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " đ"
+                    }
+                    parser={(value) => value.replace(/[^\d]/g, "")}
+                  />
+                </Form.Item>
+              </Col>
+
+              <Col span={12}>
+                <Form.Item label="Trọng lượng" name="weight" >
+                  <InputNumber
+                  min={0}
+                   style={{ width: "100%" }}  
+                   controls={false}
+                    formatter={(v) => (v ? `${v} g` : "")}
+                    parser={(v) => v.replace(/[^\d]/g, "")}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
 
             <Form.Item label="Bảng size">
               <div className="size-table">
@@ -342,7 +381,15 @@ function EditProduct(props) {
                 <Form.List name="sizes">
                   {(fields, { add, remove }) => (
                     <>
-                      <div>
+                      <div
+                        style={{
+                          maxHeight: "200px",
+                          overflowY: "auto",
+                          border: "1px solid #d9d9d9",
+                          borderRadius: "4px",
+                          padding: "8px",
+                        }}
+                      >
                         {fields.map((field) => (
                           <div key={field.key} className="size-table__row">
                             <Form.Item
@@ -364,7 +411,6 @@ function EditProduct(props) {
                                 min={0}
                                 placeholder="Số lượng"
                                 style={{ width: "100%" }}
-                                
                               />
                             </Form.Item>
 
@@ -392,6 +438,20 @@ function EditProduct(props) {
                 </Form.List>
               </div>
             </Form.Item>
+
+             {!record.active && (
+              <Form.Item
+                label="Trạng thái"
+                name="active"
+                valuePropName="checked" // prop bắt buộc cho Switch 
+              >
+                <Switch
+                  checkedChildren="Hoạt động"
+                  unCheckedChildren="Ngừng hoạt động"
+                />
+              </Form.Item>
+            )}
+
 
             <Form.Item>
               <Button type="primary" htmlType="submit">

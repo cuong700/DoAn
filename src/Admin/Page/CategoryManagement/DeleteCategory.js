@@ -4,7 +4,7 @@ import { useState } from "react";
 import { getCookie } from "../../../helpers/cookie";
 
 function DeleteCategory(props) {
-  const { record, onReload } = props;
+  const { record, onReload, activeFilter } = props;
   const [loading, setLoading] = useState(false);
 
   const [notiApi, contextHolder] = notification.useNotification();
@@ -16,7 +16,7 @@ function DeleteCategory(props) {
       const token = getCookie("token");
 
       const res = await fetch(
-        `http://localhost:8090/api/v1/categories/admin/${record.id}`,
+        `http://localhost:8090/api/v1/categories/admin/delete/${record.id}`,
         {
           method: "DELETE",
           headers: {
@@ -28,10 +28,17 @@ function DeleteCategory(props) {
 
       if (!res.ok) throw new Error("Delete thất bại");
 
-      notiApi.success({
-        message: "Xoá thành công",
-        description: `Đã xoá danh mục: ${record.name}`,
-      });
+      if (activeFilter === "NGUNG_HOAT_DONG") {
+        notiApi.info({
+          message: "Thông báo",
+          description: `Danh mục "${record.name}" đã được xoá trước đó `,
+        });
+      } else {
+        notiApi.success({
+          message: "Xoá thành công",
+          description: `Đã xoá danh mục: ${record.name}`,
+        });
+      }
 
       setTimeout(() => {
         onReload();
@@ -43,14 +50,25 @@ function DeleteCategory(props) {
       setLoading(false);
     }
   };
+
+  const confirmTitle =
+    activeFilter === "NGUNG_HOAT_DONG"
+      ? "Danh mục này đã bị xoá."
+      : "Bạn chắc chắn muốn xoá?";
+
+  const showOkButton = activeFilter !== "NGUNG_HOAT_DONG";
   return (
     <>
       {contextHolder}
       <Popconfirm
-        title="Bạn chắc chắn muốn xoá?"
-        onConfirm={handleDelete}
+        title={confirmTitle}
+        onConfirm={showOkButton ? handleDelete : undefined}
         okText="Xoá"
-        cancelText="Huỷ"
+        cancelText={showOkButton ? "Huỷ" : "Đóng"}
+        showCancel={true}
+        okButtonProps={{
+          style: { display: showOkButton ? "inline-block" : "none" },
+        }}
       >
         <Button
           size="small"

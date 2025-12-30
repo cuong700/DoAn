@@ -16,7 +16,7 @@
 //     fetch("http://localhost:8090/api/v1/categories/public/search")
 //       .then((res) => res.json())
 //       .then((res) => {
-        
+
 //         const categories = res?.data?.content || [];
 
 //         const items = categories
@@ -35,7 +35,6 @@
 //       .catch((err) => console.error("Fetch category error:", err));
 //   }, [navigate]);
 
-  
 //   const [keyword, setKeyword] = useState("");
 //    const handleSubmit = (e) => {
 //     e.preventDefault();
@@ -96,7 +95,6 @@
 
 // export default Navbar;
 
-
 import { NavLink, useNavigate } from "react-router-dom";
 import "./Navbar.css";
 import {
@@ -104,19 +102,19 @@ import {
   ShoppingCartOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Dropdown, Space } from "antd";
+import { Avatar, Badge, Dropdown, Space } from "antd";
 import { useEffect, useState } from "react";
 
 function Navbar() {
   const [category, setCategory] = useState([]);
   const [keyword, setKeyword] = useState("");
+  const [cartCount, setCartCount] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
     fetch("http://localhost:8090/api/v1/categories/public/search")
       .then((res) => res.json())
       .then((res) => {
-        
         const categories = res?.data?.content || [];
 
         const items = categories
@@ -147,6 +145,24 @@ function Navbar() {
       navigate(`/search?keyword=${keyword}`);
     }
   };
+
+  //load cart
+  const loadCartCount = () => {
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+    const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
+    setCartCount(totalQty);
+  };
+
+  useEffect(() => {
+    loadCartCount();
+
+    // lắng nghe khi cart thay đổi
+    window.addEventListener("cartUpdated", loadCartCount);
+
+    return () => {
+      window.removeEventListener("cartUpdated", loadCartCount);
+    };
+  }, []);
 
   return (
     <>
@@ -183,13 +199,18 @@ function Navbar() {
           </form>
           <div className="navbar__icons-cart">
             <NavLink to="/cart" className="navbar__cart">
-              <ShoppingCartOutlined className="navbar_icon" />
+               <Badge count={cartCount} size="small">
+                <ShoppingCartOutlined style={{ fontSize: 25 }} className="navbar_icon" />
+                 </Badge>
             </NavLink>
           </div>
           <div className="navbar__icons-user">
-            <NavLink to="/User" className="navbar__user">
-              <UserOutlined className="navbar_icon" />
-              User
+            <NavLink to="/user" className="navbar__user">
+              <Avatar
+                size={32}
+                style={{ backgroundColor: "gray" }}
+                icon={<UserOutlined />}
+              />
             </NavLink>
           </div>
         </div>

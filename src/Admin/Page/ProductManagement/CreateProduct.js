@@ -1,11 +1,13 @@
 import { PlusOutlined } from "@ant-design/icons";
 import {
   Button,
+  Col,
   Form,
   Input,
   InputNumber,
   Modal,
   notification,
+  Row,
   Select,
   Spin,
   Upload,
@@ -91,6 +93,7 @@ function CreateProduct(props) {
       formData.append("name", value.name);
       formData.append("price", value.price);
       formData.append("cost", value.cost);
+      formData.append("originalPrice", value.display_price);
       formData.append("weight", value.weight);
       formData.append("categoryId", value.category_id);
       formData.append("description", value.description || "");
@@ -219,17 +222,37 @@ function CreateProduct(props) {
               <Input.TextArea rows={3} />
             </Form.Item>
 
-            <Form.Item label="Giá nhập" name="cost" rules={rules}>
-              <InputNumber min={0} style={{ width: "100%" }} />
-            </Form.Item>
+            <Row gutter={16}>
+              <Col span={12}>
+                <Form.Item label="Giá nhập" name="cost" rules={rules}>
+                  <InputNumber min={0} style={{ width: "100%" }} />
+                </Form.Item>
+              </Col>
 
-            <Form.Item label="Giá bán" name="price" rules={rules}>
-              <InputNumber min={0} style={{ width: "100%" }} />
-            </Form.Item>
+              <Col span={12}>
+                <Form.Item label="Giá bán" name="price" rules={rules}>
+                  <InputNumber min={0} style={{ width: "100%" }} />
+                </Form.Item>
+              </Col>
+            </Row>
 
-            <Form.Item label="Trọng lượng" name="weight">
-              <InputNumber min={0} style={{ width: "100%" }} />
-            </Form.Item>
+            <Row gutter={16}>
+              <Col span={12}>
+                <Form.Item
+                  label="Giá sale (nếu có)"
+                  name="display_price"
+                  rules={rules}
+                >
+                  <InputNumber min={0} style={{ width: "100%" }} />
+                </Form.Item>
+              </Col>
+
+              <Col span={12}>
+                <Form.Item label="Trọng lượng" name="weight">
+                  <InputNumber min={0} style={{ width: "100%" }} />
+                </Form.Item>
+              </Col>
+            </Row>
 
             <Form.Item label="Bảng size">
               <div className="size-table">
@@ -242,7 +265,15 @@ function CreateProduct(props) {
                 <Form.List name="sizes">
                   {(fields, { add, remove }) => (
                     <>
-                      <div>
+                      <div
+                        style={{
+                          maxHeight: "200px",
+                          overflowY: "auto",
+                          border: "1px solid #d9d9d9",
+                          borderRadius: "4px",
+                          padding: "8px",
+                        }}
+                      >
                         {fields.map((field) => (
                           <div key={field.key} className="size-table__row">
                             <Form.Item

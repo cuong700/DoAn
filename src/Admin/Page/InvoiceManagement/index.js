@@ -24,7 +24,7 @@ const { Search } = Input;
 function OrderManagement() {
   const [pagination, setPagination] = useState({
     current: 1,
-    pageSize: 10,
+    pageSize: 8,
     total: 0,
   });
   const [spinning, setSpinning] = useState(false);
@@ -38,7 +38,7 @@ function OrderManagement() {
   const fetchApi = async (
     searchText = "",
     current = 1,
-    pageSize = 10,
+    pageSize = 8,
     status = "ALL"
   ) => {
     try {

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { getCookie } from "../../../helpers/cookie";
 
 function DeleteProduct(props) {
-  const { record, onReload } = props;
+  const { record, onReload, statusFilter } = props;
   const [loading, setLoading] = useState(false);
   const [notiApi, contextHolder] = notification.useNotification();
 
@@ -42,14 +42,26 @@ function DeleteProduct(props) {
       setLoading(false);
     }
   };
+
+  const confirmTitle =
+    statusFilter === "NGUNG_HOAT_DONG"
+      ? "Sản phẩm này đã bị xoá."
+      : "Bạn chắc chắn muốn xoá?";
+
+  const showOkButton = statusFilter !== "NGUNG_HOAT_DONG";
+
   return (
     <>
       {contextHolder}
       <Popconfirm
-        title="Bạn chắc chắn muốn xoá?"
-        onConfirm={handleDelete}
-        okText="Xoá"
-        cancelText="Huỷ"
+        title={confirmTitle}
+        onConfirm={showOkButton ? handleDelete : undefined}
+        okText="Xoá" 
+        cancelText={showOkButton ? "Huỷ" : "Đóng"}
+        showCancel={true}
+        okButtonProps={{
+          style: { display: showOkButton ? "inline-block" : "none" },
+        }}
       >
         <Button
           size="small"

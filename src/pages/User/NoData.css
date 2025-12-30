@@ -1,0 +1,12 @@
+.no-data-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  padding: 50px 0;
+}
+
+.no-data-text {
+  font-size: 18px;
+  color: #595959;
+}

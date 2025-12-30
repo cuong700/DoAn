@@ -58,7 +58,7 @@ function CloseOutInvoice(props) {
     );
 
     const invalidOrders = selectedOrders.filter(
-      (order) => !["PENDING", "PROCESSING"].includes(order.status) //kiểm tra phần tử có tồn tại
+      (order) => !["PENDING", "PROCESSING", "SHIPPED"].includes(order.status) //kiểm tra phần tử có tồn tại
     );
 
     if (invalidOrders.length > 0) {

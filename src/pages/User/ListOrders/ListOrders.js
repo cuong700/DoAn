@@ -1,0 +1,285 @@
+import React, { useEffect, useState, useMemo } from "react";
+import axios from "axios";
+import {
+  Col,
+  ConfigProvider,
+  Tag,
+  Button,
+  Space,
+  Modal,
+  Descriptions,
+  Image,
+  Divider,
+} from "antd";
+import { EyeOutlined, CloseCircleOutlined } from "@ant-design/icons";
+import { getCookie } from "../../../helpers/cookie";
+import "./ListOrders.css";
+import NoData from "../NoData";
+import dayjs from "dayjs";
+import OrderDetail from "./OrderDetail";
+
+export function ListOrders() {
+  const [orders, setOrders] = useState([]);
+  const [current, setCurrent] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = getCookie("token");
+        const idUser = getCookie("userid");
+        const response = await axios.get(
+          `http://localhost:8090/api/v1/orders/user/${idUser}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        setOrders(response.data.data || []);
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const statuses = [
+    { key: "pending", title: "ĐANG CHỜ XỬ LÝ" },
+    { key: "processing", title: "ĐÃ LÊN ĐƠN" },
+    { key: "shipped", title: "ĐANG GIAO HÀNG" },
+    { key: "completed", title: "ĐÃ HOÀN THÀNH" },
+    { key: "cancelled", title: "ĐÃ HỦY" },
+  ];
+
+  const statusToIndex = (status) => {
+    if (!status) return 0;
+    const s = String(status).toUpperCase();
+
+    if (s === "CANCELLED") return 4;
+    if (s === "COMPLETED") return 3;
+    if (s === "SHIPPED") return 2;
+    if (s === "PROCESSING") return 1;
+    if (s === "PENDING") return 0;
+
+    return 0;
+  };
+
+  const counts = useMemo(() => {
+    const c = new Array(statuses.length).fill(0);
+    for (const o of orders) {
+      const idx = statusToIndex(o.status);
+      if (typeof idx === "number" && idx >= 0 && idx < statuses.length)
+        c[idx] += 1;
+    }
+    return c;
+  }, [orders]);
+
+  const filteredOrders = orders.filter(
+    (order) => statusToIndex(order.status) === current
+  );
+
+  const renderStatusTag = (status) => {
+    const idx = statusToIndex(status);
+    const colorMap = ["orange", "blue", "gold", "green", "red"];
+    return (
+      <Tag color={colorMap[idx] || "default"}>
+        {statuses[idx]?.title || status}
+      </Tag>
+    );
+  };
+
+  // Fetch chi tiết đơn hàng
+  const fetchOrderDetail = async (orderId) => {
+    setDetailLoading(true);
+    try {
+      const token = getCookie("token");
+      const response = await axios.get(
+        `http://localhost:8090/api/v1/orders/user/detail/${orderId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setSelectedOrder(response.data.data);
+      setModalVisible(true);
+    } catch (error) {
+      console.error("Error fetching order detail:", error);
+      Modal.error({
+        title: "Lỗi",
+        content: "Không thể tải chi tiết đơn hàng. Vui lòng thử lại!",
+      });
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setModalVisible(false);
+    setSelectedOrder(null);
+  };
+
+  return (
+    <>
+      <div className="order-container">
+        <h1 style={{ padding: "5px" }}>Thông tin đơn hàng</h1>
+      </div>
+
+      <ConfigProvider
+        theme={{
+          token: {
+            colorPrimary: "black",
+            colorPrimaryBorder: "black",
+          },
+        }}
+      >
+        <div className="status-buttons" style={{ marginBottom: 16 }}>
+          <Space wrap>
+            {statuses.map((s, i) => (
+              <Button
+                key={s.key}
+                type={current === i ? "primary" : "default"}
+                onClick={() => setCurrent(i)}
+              >
+                {s.title} ({counts[i] || 0})
+              </Button>
+            ))}
+          </Space>
+        </div>
+
+        {loading ? (
+          <div className="loading">Loading...</div>
+        ) : filteredOrders.length === 0 ? (
+          <NoData />
+        ) : (
+          filteredOrders.map((order) => (
+            <div key={order.id} className="order-wrapper">
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <h4 style={{ margin: "10px" }}>Order ID: #{order.id}</h4>
+                <Space>
+                  {renderStatusTag(order.status)}
+                  <Button
+                    type="primary"
+                    icon={<EyeOutlined />}
+                    onClick={() => fetchOrderDetail(order.id)}
+                    loading={detailLoading}
+                  >
+                    Xem chi tiết
+                  </Button>
+                </Space>
+              </div>
+
+              {order.cancellation_reason && (
+                <div
+                  style={{
+                    margin: "10px",
+                    padding: "10px",
+                    background: "#fff1f0",
+                    borderRadius: "4px",
+                  }}
+                >
+                  <strong>Lý do hủy:</strong> {order.cancellation_reason}
+                </div>
+              )}
+
+              <div className="order-card">
+                <div className="order-details">
+                  {order.order_details.map((item) => (
+                    <Col md={24} lg={24} key={item.id} className="order-item">
+                      <div className="detail-item">
+                        <div className="image">
+                          <div className="anhdemo">
+                            <Image
+                              className="customimage"
+                              src={`http://localhost:8090${item.product_thumbnail}`}
+                              alt="product"
+                              crossOrigin="anonymous"
+                              preview={false}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="info">
+                          <h2 className="name">{item.product_name}</h2>
+
+                          <div className="sizequantity">
+                            <h6 className="size">Size: {item.size_name}</h6>
+                            <h6 className="quantity">
+                              Quantity: {item.number_of_products}
+                            </h6>
+                          </div>
+
+                          {item.coupon_code && (
+                            <div style={{ marginTop: "5px" }}>
+                              <Tag color="green">
+                                Coupon: {item.coupon_code} (-
+                                {item.coupon_discount?.toLocaleString("vi-VN")}
+                                đ)
+                              </Tag>
+                            </div>
+                          )}
+                        </div>
+
+                        <h6 className="price">
+                          {item.total_money?.toLocaleString("vi-VN")}đ
+                        </h6>
+                      </div>
+                    </Col>
+                  ))}
+                  <div className="order-info">
+                    <h5>
+                      <span>Total Money:</span>
+                      <strong>
+                        {order.total_money?.toLocaleString("vi-VN") ?? "N/A"}đ
+                      </strong>
+                    </h5>
+
+                    <h5>
+                      <span>Payment Method:</span>
+                      <strong>{order.payment_method}</strong>
+                    </h5>
+
+                    <h5>
+                      <span>Shipping Address:</span>
+                      <strong>{order.shipping_address}</strong>
+                    </h5>
+
+                    {order.note && (
+                      <h5>
+                        <span>Note:</span>
+                        <strong>{order.note}</strong>
+                      </h5>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </ConfigProvider>
+
+      {/* Modal Chi tiết đơn hàng */}
+       <OrderDetail
+        visible={modalVisible}
+        order={selectedOrder}
+        onClose={handleCloseModal}
+        renderStatusTag={renderStatusTag}
+      />
+    </>
+  );
+}

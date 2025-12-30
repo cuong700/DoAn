@@ -1,4 +1,4 @@
-import React from "react";
+
 import LayoutDefault from "../pages/Layout/LayoutDefault";
 import Home from "../pages/Home";
 import Login from "../pages/Login";
@@ -7,9 +7,11 @@ import AboutUs from "../pages/About us";
 import Contact from "../pages/Contact";
 import Error404 from "../pages/Error404";
 import Logout from "../pages/Logout";
-import User from "../pages/Layout/User";
-import Cart from "../pages/Layout/Cart";
-import Searchpage from "../pages/Layout/Navbar/Searchpage";
+import User from "../pages/User";
+import Cart from "../pages/Cart";
+
+
+
 
 import LayoutDefaultAdmin from "../Admin/Layout/LayoutDefaultAdmin";
 import UserAccounts from "../Admin/Page/UserAccounts";
@@ -22,6 +24,8 @@ import CommentManagement from "../Admin/Page/CommentManagement";
 import Analytics from "../Admin/Page/Analytics";
 import CouponManagement from "../Admin/Page/CouponManagement";
 import InvoiceManagement from "../Admin/Page/InvoiceManagement";
+import Checkout from "../pages/Checkout";
+import SearchPage from "../pages/SearchPage";
 
 
 export const routes = [
@@ -29,55 +33,59 @@ export const routes = [
     path: "/",
     element: <LayoutDefault />,
     children: [
-          {
-            path: "/",
-            element: <Home />,
-          },
-          {
-            path: "about-us",
-            element: <AboutUs />,
-          },
-          {
-            path: "contact",
-            element: <Contact />,
-          },
-          {
-            path: "login",
-            element: <Login />,
-          },
-          {
-            path: "register",
-            element: <Register />,
-          },
-          {
-            path: "logout",
-            element: <Logout />,
-          },
-          {
-            path: "category/:categoryId",
-            element: <ProductList />,
-          },
-          {
-            path: "search",
-            element: <Searchpage />,
-          },
-          {
-            path: "user",
-            element: <User />,
-          },
-          {
-            path: "product/:productId",
-            element: <ProductDetail />,
-          },
-          {
-            path: "cart",
-            element: <Cart />,
-          },
-          {
-            path: "*",
-            element: <Error404 />,
-          },
-        ],
+      {
+        path: "/",
+        element: <Home />,
+      },
+      {
+        path: "about-us",
+        element: <AboutUs />,
+      },
+      {
+        path: "contact",
+        element: <Contact />,
+      },
+      {
+        path: "login",
+        element: <Login />,
+      },
+      {
+        path: "register",
+        element: <Register />,
+      },
+      {
+        path: "logout",
+        element: <Logout />,
+      },
+      {
+        path: "category/:categoryId",
+        element: <ProductList />,
+      },
+      {
+        path: "search",
+        element: <SearchPage />,
+      },
+      {
+        path: "user",
+        element: <User />,
+      },
+      {
+        path: "product/:id",
+        element: <ProductDetail />,
+      },
+      {
+        path: "cart",
+        element: <Cart />,
+      },
+      {
+        path: "checkout",
+        element: <Checkout />,
+      },
+      {
+        path: "*",
+        element: <Error404 />,
+      },
+    ],
   },
 
   {
@@ -108,7 +116,7 @@ export const routes = [
         path: "coupon-management",
         element: <CouponManagement />,
       },
-       {
+      {
         path: "invoice-management",
         element: <InvoiceManagement />,
       },
