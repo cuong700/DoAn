@@ -1,0 +1,152 @@
+ /* Tổng thể navbar */
+.navbar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 15px 40px;
+  background: #fff;
+  border-bottom: 1px solid #ccc;
+  font-family: Arial, sans-serif;
+}
+
+
+/* Menu ngang chính */
+.navbar__menu {
+  list-style: none;
+  display: flex;
+  gap: 40px;
+  /* khoảng cách giữa các mục */
+  margin: 0;
+  padding: 0;
+  margin-right: 50px;
+
+}
+
+
+
+.navbar__menu li a {
+  text-decoration: none;
+  color: #111;
+  font-weight: 500;
+  letter-spacing: 1px;
+  /* các chữ cách đều nhau */
+  margin-left: 7px;
+}
+
+.navbar__menu li a:hover {
+  color: rgb(44, 44, 191);
+  border-bottom: 2px solid #000;
+}
+
+/* Dropdown (menu con) */
+.dropdown {
+  position: relative;
+}
+
+.dropdown__menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #fff;
+  list-style: none;
+  border: 1px solid #ccc;
+  padding: 5px 0;
+}
+
+.dropdown__menu li {
+  padding: 5px 15px;
+}
+
+.dropdown__menu li a {
+  color: #111;
+}
+
+.dropdown:hover .dropdown__menu {
+  display: block;
+}
+
+
+
+
+/* Phần bên phải: ô tìm kiếm + icon */
+.navbar__right {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+}
+
+
+/* Khối chứa ô tìm kiếm */
+.navbar__search {
+  display: flex;
+  align-items: center;
+}
+
+/* Ô nhập */
+.navbar__search input {
+  border: 1px solid #ccc;
+  border-radius: 999px;
+  /* Bo tròn hoàn toàn */
+  padding: 10px 20px;
+  outline: none;
+  width: 200px;
+  font-size: 14px;
+  color: #333;
+}
+
+/* Placeholder mờ hơn một chút */
+.navbar__search input::placeholder {
+  color: #aaa;
+}
+
+/* Nút Search */
+.navbar__search button {
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  /* Bo tròn hoàn toàn */
+  padding: 10px 25px;
+  margin-left: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.3s;
+}
+
+/* Hiệu ứng hover */
+.navbar__search button:hover {
+  background: #333;
+}
+
+
+/* Icon và chữ "User" */
+.navbar__icons-cart {
+  color: #555;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.navbar__icons-user {
+  font-size: 18px;
+  color: #555 !important;
+  cursor: pointer;
+}
+
+.navbar__user {
+  font-size: 15px;
+}
+ .navbar__cart {
+   position: relative;
+ }
+
+ .cart-badge {
+   position: absolute;
+   top: -6px;
+   right: -10px;
+   background: red;
+   color: white;
+   font-size: 12px;
+   padding: 2px 6px;
+   border-radius: 50%;
+ }

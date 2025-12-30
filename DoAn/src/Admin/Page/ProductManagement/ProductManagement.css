@@ -1,0 +1,64 @@
+
+.page-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #262626; 
+  margin-bottom: 20px;
+  margin-top: 0;
+}
+
+
+.action-bar {
+  display: flex;
+  justify-content: space-between; 
+  align-items: center; 
+  margin-bottom: 16px; 
+  flex-wrap: wrap; 
+  gap: 16px;
+}
+
+
+.action-bar__left {
+  display: flex;
+  gap: 10px; 
+}
+
+
+.action-bar__right {
+  display: flex;
+  gap: 10px; 
+}
+
+
+/* Container của bảng size */
+.size-table {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 8px 12px;
+}
+
+/* Header bảng: Size | Số lượng |  */
+.size-table__header {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  column-gap: 8px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+/* Mỗi dòng size */
+.size-table__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  column-gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+
+
+
+
+
+
+
