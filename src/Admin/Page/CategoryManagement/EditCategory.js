@@ -1,5 +1,5 @@
 import { EditOutlined } from "@ant-design/icons";
-import { Button, Form, Input, Modal, notification, Spin } from "antd";
+import { Button, Form, Input, Modal, notification, Spin, Switch } from "antd";
 import { useState } from "react";
 import { getCookie } from "../../../helpers/cookie";
 
@@ -19,6 +19,7 @@ function EditCategory(props) {
 
     form.setFieldsValue({
       name: record?.name || "",
+      active: record?.active !== undefined ? record.active : true, // Set giá trị active
     });
   };
 
@@ -37,7 +38,7 @@ function EditCategory(props) {
         ...value,
       };
 
-      const res = await fetch(`http://localhost:8090/api/v1/categories/admin/${record.id}`, {
+      const res = await fetch(`http://localhost:8090/api/v1/categories/admin/update/${record.id}`, {
         method: "PATCH",
        headers: {
             "Content-Type": "application/json",
@@ -100,6 +101,19 @@ function EditCategory(props) {
             <Form.Item label="Tên danh mục" name="name" rules={rules}>
               <Input />
             </Form.Item>
+
+             {!record.active && (
+              <Form.Item
+                label="Trạng thái"
+                name="active"
+                valuePropName="checked" // prop bắt buộc cho Switch 
+              >
+                <Switch
+                  checkedChildren="Hoạt động"
+                  unCheckedChildren="Ngừng hoạt động"
+                />
+              </Form.Item>
+            )}
 
             <Form.Item>
               <Button type="primary" htmlType="submit">

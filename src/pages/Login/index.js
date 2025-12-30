@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux"; // Import both useDispatch and useSel
 import { useNavigate } from "react-router-dom";
 import { setCookie } from "../../helpers/cookie"; // Corrected import path
 import { checkLogin } from "../../actions/login"; // Corrected import path
-import styles from "./styles.module.css";
+import "./Login.css";
 import axios from "axios";
 
 function Login() {
@@ -52,6 +52,7 @@ function Login() {
         setCookie("date", data.date, 1);
         setCookie("isLogin", "true", 1);
 
+          
         setIsLoading(false); // Set loading to false after navigation
         alert("Đăng nhập thành công", data.token, 1);
       }, 2000);
@@ -64,11 +65,11 @@ function Login() {
 
   return (
     <>
-      <div className={styles.login}>
-        <div className={styles.loginbox}>
+      <div className="login">
+        <div className="loginbox">
           <h2>Login</h2>
           <form onSubmit={handleSubmit}>
-            <div className={styles.userbox}>
+            <div className="userbox">
               <label>Phone Number</label>
               <input
                 type="tel"
@@ -78,7 +79,7 @@ function Login() {
                 onChange={handlePhoneNumberChange}
               />
             </div>
-            <div className={styles.userbox}>
+            <div className="userbox">
               <label>Password</label>
               <input
                 type="password"
@@ -88,11 +89,7 @@ function Login() {
                 onChange={handlePasswordChange}
               />
             </div>
-            <button
-              className={styles.submit}
-              type="submit"
-              disabled={isLoading}
-            >
+            <button className="submit" type="submit" disabled={isLoading}>
               {isLoading ? "Loading..." : "Submit"}
             </button>
           </form>

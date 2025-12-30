@@ -13,7 +13,7 @@ const { Search } = Input;
 function ProductManagement() {
   const [pagination, setPagination] = useState({
     current: 1,
-    pageSize: 10,
+    pageSize: 4,
     total: 0,
   });
 
@@ -22,6 +22,7 @@ function ProductManagement() {
 
   const [keyword, setKeyword] = useState("");
   const [statusFilter, setStatusFilter] = useState("ĐANG_HOAT_DONG");
+
 
   const fetchProductsDetail = async (id) => {
     try {
@@ -47,8 +48,8 @@ function ProductManagement() {
   const fetchApi = async (
     searchText = "",
     current = 1,
-    pageSize = 10,
-    status = "ĐANG_HOAT_DONG"
+    pageSize = 4,
+    status = "ĐANG_HOAT_DONG",
   ) => {
     try {
       setLoading(true);
@@ -136,9 +137,13 @@ function ProductManagement() {
     }
   };
 
+  
+
   useEffect(() => {
     fetchApi("", pagination.current, pagination.pageSize, statusFilter);
   }, []);
+
+
 
   const handleReload = () => {
     fetchApi(keyword, pagination.current, pagination.pageSize, statusFilter);
@@ -189,6 +194,7 @@ function ProductManagement() {
       title: "Ảnh mô tả",
       dataIndex: "images",
       key: "images",
+      hidden: true,
       width: 180,
       render: (images) => {
         if (!Array.isArray(images) || images.length === 0) return "—";
@@ -209,9 +215,7 @@ function ProductManagement() {
                     borderRadius: 4,
                   }}
                 />
-                
               ))}
-              
             </div>
           </Image.PreviewGroup>
         );
@@ -267,6 +271,16 @@ function ProductManagement() {
           : "0 đ",
     },
     {
+      title: "Giá sale",
+      dataIndex: "display_price",
+      key: "display_price",
+      width: 130,
+      render: (value) =>
+        typeof value === "number"
+          ? value.toLocaleString("vi-VN") + " đ" //định dạng tiền tệ theo từng vùng
+          : "0 đ",
+    },
+    {
       title: "Trọng lượng",
       dataIndex: "weight",
       key: "weight",
@@ -285,7 +299,8 @@ function ProductManagement() {
       title: "Size / Số lượng",
       dataIndex: "sizes",
       key: "sizes",
-      width: 200,
+      hidden: true,
+      width: 250,
       render: (sizes) => {
         if (!Array.isArray(sizes) || sizes.length === 0) {
           return <span>—</span>;
@@ -356,7 +371,7 @@ function ProductManagement() {
 
               <EditProduct record={record} onReload={handleReload} />
 
-              <DeleteProduct record={record} onReload={handleReload} />
+              <DeleteProduct record={record} onReload={handleReload} statusFilter={statusFilter} />
             </Space>
           </>
         );
@@ -376,6 +391,7 @@ function ProductManagement() {
         </div>
 
         <div className="action-bar__right">
+
           <Select
             value={statusFilter}
             style={{ width: 160 }}

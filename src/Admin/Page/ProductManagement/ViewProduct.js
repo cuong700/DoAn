@@ -1,5 +1,5 @@
 import { EyeOutlined } from "@ant-design/icons";
-import { Button, Form, Input, InputNumber, Modal, Image } from "antd";
+import { Button, Form, Input, InputNumber, Modal, Image, Row, Col } from "antd";
 import { useState } from "react";
 import dayjs from "dayjs";
 
@@ -41,6 +41,7 @@ function ViewProduct(props) {
         })) || [],
       cost: formatPrice(record.cost),
       price: formatPrice(record.price),
+      display_price: formatPrice(record.display_price),
       weight: formatWeight(record.weight),
     });
   };
@@ -130,17 +131,34 @@ function ViewProduct(props) {
             <Input.TextArea rows={3} />
           </Form.Item>
 
-          <Form.Item label="Giá nhập" name="cost">
-            <Input />
-          </Form.Item>
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item label="Giá nhập" name="cost">
+                <Input />
+              </Form.Item>
+            </Col>
 
-          <Form.Item label="Giá bán" name="price">
-            <Input />
-          </Form.Item>
+            <Col span={12}>
+              <Form.Item label="Giá bán" name="price">
+                <Input />
+              </Form.Item>
+            </Col>
+          </Row>
 
-          <Form.Item label="Trọng lượng" name="weight">
-            <Input />
-          </Form.Item>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item label="Giá sale" name="display_price">
+                <Input />
+              </Form.Item>
+            </Col>
+
+            <Col span={12}>
+              <Form.Item label="Trọng lượng" name="weight">
+                <Input />
+              </Form.Item>
+            </Col>
+          </Row>
 
           <Form.Item label="Bảng size">
             <div className="size-table">
@@ -153,7 +171,15 @@ function ViewProduct(props) {
               <Form.List name="sizes">
                 {(fields) => (
                   <>
-                    <div>
+                    <div
+                      style={{
+                        maxHeight: "200px",
+                        overflowY: "auto",
+                        border: "1px solid #d9d9d9",
+                        borderRadius: "4px",
+                        padding: "8px",
+                      }}
+                    >
                       {fields.map((field) => (
                         <div key={field.key} className="size-table__row">
                           <Form.Item
@@ -192,13 +218,19 @@ function ViewProduct(props) {
             <Input />
           </Form.Item>
 
-          <Form.Item label="Ngày tạo" name="created_at">
-            <Input />
-          </Form.Item>
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item label="Ngày tạo" name="created_at">
+                <Input />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item label="Ngày cập nhật" name="updated_at">
+                <Input />
+              </Form.Item>
+            </Col>
+          </Row>
 
-          <Form.Item label="Ngày cập nhật" name="updated_at">
-            <Input />
-          </Form.Item>
         </Form>
       </Modal>
     </>

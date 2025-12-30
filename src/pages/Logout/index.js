@@ -1,30 +1,28 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import { deleteCookie,deleteAllCookies  } from "../../helpers/cookie"; // Corrected import path
+import { deleteCookie,deleteAllCookies  } from "../../helpers/cookie"; 
 import { useDispatch } from "react-redux";
 import { checkLogin } from "../../actions/login";
-import { useSelector } from "react-redux";
+
 
 function Logout() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const check = useSelector((state) => state.cartReducer.cartItems);
-  console.log(check[0]?.check);
-
   useEffect(() => {
     deleteAllCookies();
     dispatch(checkLogin(false));
     deleteCookie("isLogin");
+    deleteCookie("token");
 
-    alert("Đã đăng xuát");
+    alert("Đăng xuất thành công");
 
     setTimeout(() => {
       navigate("/");
     }, 200);
   }, []);
 
-  return <>đang logout</>;
+  return <>Đang Logout</>;
 }
 
 export default Logout;

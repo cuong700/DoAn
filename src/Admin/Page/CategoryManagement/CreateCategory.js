@@ -21,44 +21,50 @@ function CreateCategory(props) {
     form.resetFields();
   };
 
-  const handleSubmit = async (value) => {
-    try {
-      setSpinning(true);
+const handleSubmit = async (value) => {
+  try {
+    setSpinning(true);
 
-      const token = getCookie("token");
+    const token = getCookie("token");
 
-      const payload = {
-        ...value,
-      };
+    const payload = {
+      ...value,
+    };
 
-      const res = await fetch("http://localhost:8090/api/v1/categories/admin", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
+    const res = await fetch("http://localhost:8090/api/v1/categories/admin/create", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
 
-      if (!res.ok) throw new Error("Thêm danh mục thất bại");
 
-      notiApi.success({
-        message: "Thêm mới thành công",
-        description: "Thông tin danh mục đã được thêm mới.",
-      });
+    const json = await res.json();
 
-      setShowModal(false);
-      onReload();
-    } catch (error) {
-      console.error(error);
-      notiApi.error({
-        message: "Lỗi tải danh sách danh mục",
-        description: "Vui lòng thử lại sau.",
-      });
-    } finally {
-      setSpinning(false);
+    if (!res.ok || json.status !== "CREATED") {
+      throw new Error(json.message || "Thêm danh mục thất bại");
     }
-  };
+
+    notiApi.success({
+      message: "Thêm mới thành công",
+      description: `Đã thêm danh mục: ${json.data.name}`,
+    });
+
+    setShowModal(false);
+    form.resetFields(); // Reset form sau khi thêm thành công
+    onReload();
+  } catch (error) {
+    console.error("Error:", error);
+    notiApi.error({
+      message: "Lỗi thêm danh mục",
+      description: error.message || "Vui lòng thử lại sau.",
+    });
+  } finally {
+    setSpinning(false);
+  }
+};
 
   const rules = [
     {

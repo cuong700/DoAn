@@ -57,13 +57,13 @@ function CategoryManagement() {
       const json = await res.json();
       let categories = json?.data?.content || [];
 
-       // sắp theo id giảm dần
+      // sắp theo id giảm dần
       categories = categories.sort((a, b) => b.id - a.id);
 
       setDataSource(categories);
 
       // Cập nhật lại thông tin phân trang từ backend
-      const total = json?.data?.total_elements ;
+      const total = json?.data?.total_elements;
 
       setPagination((prev) => ({
         ...prev,
@@ -131,7 +131,11 @@ function CategoryManagement() {
             <Space>
               <EditCategory record={record} onReload={handleReload} />
 
-              <DeleteCategory record={record} onReload={handleReload} />
+              <DeleteCategory
+                record={record}
+                onReload={handleReload}
+                activeFilter={activeFilter}
+              />
             </Space>
           </>
         );
