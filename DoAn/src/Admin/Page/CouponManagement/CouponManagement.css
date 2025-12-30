@@ -1,0 +1,29 @@
+.custom-table .ant-table-body {
+    scrollbar-width: thin;
+}
+
+.coupon-management__title {
+  font-size: 24px;
+  margin: 0 0 20px 0;
+  font-weight: 600;
+}
+
+.coupon-management__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 16px;
+}
+
+.coupon-management__left {
+  display: flex;
+  align-items: center;
+
+}
+
+.coupon-management__right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

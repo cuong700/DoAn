@@ -1,0 +1,94 @@
+.register {
+
+  background-image: url('https://cdn1.vectorstock.com/i/1000x1000/88/10/background-with-cartoon-sneakers-skateboard-vector-30928810.jpg');
+  background-size: cover;
+  background-position: center -130px;
+  background-repeat: no-repeat;
+  height: 900px;
+}
+
+
+.registerbox {
+  width: 35%;
+  padding: 19px 40px;
+  transform: translate(90%, 7%);
+  background: rgb(1, 1, 1);
+  box-sizing: border-box;
+  /* box-shadow: 0 15px 25px rgba(0,0,0,.6); */
+  border-radius: 14px;
+}
+
+.register h2 {
+  margin: 0 0 30px;
+  padding: 0;
+  color: #fff;
+  text-align: center;
+}
+
+
+.registerbox .userbox input {
+  width: 100%;
+
+  font-size: 16px;
+  color: #fff;
+  margin-bottom: 30px;
+  border: none;
+  border-bottom: 1px solid #fff;
+  outline: none;
+  background: transparent;
+}
+
+.registerbox .userbox label {
+
+  top: 0;
+  left: 0;
+  padding: 10px 0;
+  font-size: 16px;
+  color: #fff;
+  pointer-events: none;
+  transition: .5s;
+}
+
+.registerbox .userbox input:focus~label,
+.registerbox .userbox input:valid~label {
+  top: -20px;
+  left: 0;
+  color: #ffffff;
+  font-size: 12px;
+}
+
+.registerbox form .submit {
+  position: relative;
+  display: inline-block;
+  padding: 10px 20px;
+  background: none;
+  color: white;
+  border: 2px solid white;
+  font-size: 19px;
+  text-decoration: none;
+  text-transform: uppercase;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: .5s;
+  margin-top: 40px;
+  letter-spacing: 4px
+}
+
+.register button {
+  border: none;
+}
+
+.register form .submit:hover {
+  background: white;
+  color:black;
+  box-shadow: 0 0 12px ;
+  letter-spacing: 5px;
+  cursor: pointer;
+}
+
+
+
+.registerbox .submit {
+  position: absolute;
+  display: block;
+}

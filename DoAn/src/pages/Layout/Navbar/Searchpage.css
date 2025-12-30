@@ -1,0 +1,46 @@
+/* Khối chứa ô tìm kiếm */
+.navbar__search {
+  display: flex;
+  align-items: center;
+}
+
+/* Ô nhập */
+.navbar__search input {
+  border: 1px solid #ccc;
+  border-radius: 999px;
+  /* Bo tròn hoàn toàn */
+  padding: 10px 20px;
+  outline: none;
+  width: 200px;
+  font-size: 14px;
+  color: #333;
+}
+
+/* Placeholder mờ hơn một chút */
+.navbar__search input::placeholder {
+  color: #aaa;
+}
+
+/* Nút Search */
+.navbar__search button {
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  /* Bo tròn hoàn toàn */
+  padding: 10px 25px;
+  margin-left: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.3s;
+}
+
+/* .navbar__search input:focus {
+  border-color: #1677ff;
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.3);
+} */
+
+/* Hiệu ứng hover */
+/* .navbar__search button:hover {
+  background: #1677ff;
+} */

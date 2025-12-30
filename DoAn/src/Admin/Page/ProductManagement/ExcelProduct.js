@@ -1,0 +1,63 @@
+import { FileExcelOutlined } from "@ant-design/icons";
+import { Button, message } from "antd";
+import { useState } from "react";
+import { getCookie } from "../../../helpers/cookie";
+
+function ExcelProduct() {
+  const [exporting, setExporting] = useState(false);
+
+  const handleExportExcel = async () => {
+    try {
+      setExporting(true);
+
+      const token = getCookie("token");
+
+      const res = await fetch(
+        "http://localhost:8090/api/v1/products/export-excel", 
+        {
+          method: "GET",
+          headers: {
+            Authorization: token ? `Bearer ${token}` : undefined,
+          },
+        }
+      );
+
+      if (!res.ok) throw new Error("Xuất Excel thất bại");
+
+      // nhận file nhị phân từ BE
+      const blob = await res.blob();
+
+      // tạo link download tạm thời
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "danh-sach-san-pham.xlsx"; 
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);//Giải phóng URL tạm để tránh tốn bộ nhớ.
+
+      message.success("Xuất Excel thành công");
+    } catch (error) {
+      console.error(error);
+      message.error("Xuất Excel thất bại, vui lòng thử lại!");
+    } finally {
+      setExporting(false);
+    }
+  };
+  
+  return (
+    <>
+      <Button
+        type="primary"
+        icon={<FileExcelOutlined />}
+        onClick={handleExportExcel}
+        loading={exporting}
+      >
+        Xuất Excel
+      </Button>
+    </>
+  );
+}
+
+export default ExcelProduct;

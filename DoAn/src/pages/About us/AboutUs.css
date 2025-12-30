@@ -1,0 +1,142 @@
+
+/* Layout base */
+.about-modern {
+  background: #ffffff;
+  color: #0f172a;
+}
+
+/* Hero */
+.about-hero {
+  position: relative;
+  min-height: 56vh;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 48px 16px;
+  background:
+    linear-gradient(0deg, rgba(0,0,0,0.35), rgba(0,0,0,0.35)),
+    url("https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?q=80&w=1600&auto=format&fit=crop") center/cover no-repeat;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.about-hero .overlay {
+  max-width: 920px;
+  margin: 0 auto;
+  color: #fff;
+}
+
+.hero-title {
+  margin-bottom: 8px !important;
+  color: #fff !important;
+  letter-spacing: 0.3px;
+}
+
+.hero-subtitle {
+  margin-bottom: 20px !important;
+  color: #e5e7eb !important;
+  font-size: 16px;
+}
+
+.hero-btn {
+  padding: 0 28px;
+  height: 44px !important;
+  font-weight: 600;
+}
+
+/* Brand story */
+.brand-story {
+  padding: 64px 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section-title {
+  margin-bottom: 8px !important;
+}
+
+.section-text {
+  color:#667085 !important;
+}
+
+
+.story-poster {
+  width: 100%;
+  height: 320px;
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(22,119,255,0.08), rgba(22,119,255,0.02)),
+    url("https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1400&auto=format&fit=crop") center/cover no-repeat;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+/* Highlights */
+.highlight-section {
+  padding: 32px 16px 56px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.divider {
+  margin: 0 auto 28px !important;
+}
+
+.divider-title {
+  margin: 0 !important;
+}
+
+.highlight-card {
+  border-radius: 16px !important;
+  min-height: 180px;
+  text-align: center;
+}
+
+.highlight-card .icon {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+
+/* Stats strip */
+.stats-strip {
+  background: linear-gradient(90deg, rgba(22,119,255,0.08), rgba(22,119,255,0.02));
+  padding: 32px 16px;
+  border-top: 1px solid #edf0f4;
+  border-bottom: 1px solid #edf0f4;
+  margin: 0;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.stat-label {
+  color:  #667085;
+  font-size: 14px;
+}
+
+/* CTA cuối */
+.cta-section {
+  text-align: center;
+  padding: 56px 16px 72px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.cta-section p {
+  color: #667085;
+  margin-bottom: 18px;
+}
+
+.cta-btn {
+  height: 44px !important;
+  padding: 0 28px;
+  font-weight: 600;
+}
+
+
