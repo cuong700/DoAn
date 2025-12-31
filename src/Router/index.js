@@ -1,4 +1,3 @@
-
 import LayoutDefault from "../pages/Layout/LayoutDefault";
 import Home from "../pages/Home";
 import Login from "../pages/Login";
@@ -9,9 +8,6 @@ import Error404 from "../pages/Error404";
 import Logout from "../pages/Logout";
 import User from "../pages/User";
 import Cart from "../pages/Cart";
-
-
-
 
 import LayoutDefaultAdmin from "../Admin/Layout/LayoutDefaultAdmin";
 import UserAccounts from "../Admin/Page/UserAccounts";

@@ -24,7 +24,7 @@ const { Title, Text, Link } = Typography;
 const ShoeStoreFooter = () => {
   return (
     <Footer className="shoe-store-footer">
-      <Row gutter={[32, 32]}>
+      <Row gutter={[24, 16]}>
         <Col xs={24} sm={12} md={6}>
           <Title level={4} className="footer-section-title">
             SNEAKER STORE

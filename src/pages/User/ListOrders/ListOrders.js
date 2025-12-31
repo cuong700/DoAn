@@ -224,15 +224,7 @@ export function ListOrders() {
                             </h6>
                           </div>
 
-                          {item.coupon_code && (
-                            <div style={{ marginTop: "5px" }}>
-                              <Tag color="green">
-                                Coupon: {item.coupon_code} (-
-                                {item.coupon_discount?.toLocaleString("vi-VN")}
-                                đ)
-                              </Tag>
-                            </div>
-                          )}
+                         
                         </div>
 
                         <h6 className="price">
@@ -283,3 +275,4 @@ export function ListOrders() {
     </>
   );
 }
+

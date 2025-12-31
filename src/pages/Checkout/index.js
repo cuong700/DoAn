@@ -1,45 +1,250 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./Checkout.css";
 import { getCookie } from "../../helpers/cookie";
-
+import axios from "axios";
+import ShippingForm from "./ShippingForm";
 
 function Checkout() {
   const navigate = useNavigate();
   const location = useLocation();
-  const productData = location.state?.product;
+
+  // Lấy data từ state
+  const singleProduct = location.state?.product; // Từ ProductDetail
+  const multipleProducts = location.state?.products; // Từ Cart
+
+  const fromCart = location.state?.fromCart; // Flag từ Cart
+  const initialCoupons = location.state?.selectedCoupons || []; // Coupon từ Cart
+
+  // Xác định products list
+  const productsList =
+    fromCart && multipleProducts
+      ? multipleProducts
+      : singleProduct
+      ? [singleProduct]
+      : [];
+
+  const loadSavedInfo = () => {
+    const saved = localStorage.getItem("shippingInfo");
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        return {};
+      }
+    }
+    return {};
+  };
 
   const [formData, setFormData] = useState({
     fullname: "",
     phone_number: "",
     email: "",
     address: "",
-    province: "",
-    district: "",
-    ward: "",
-    street: "",
-    hamlet: "",
     note: "",
     payment_method: "COD",
-    size_id: productData?.selectedSize || null,
+    ...loadSavedInfo(),
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [saveInfo, setSaveInfo] = useState(true);
+  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
 
+  // Coupon states
+  const [availableCoupons, setAvailableCoupons] = useState({
+    valid: [],
+    invalid: [],
+  });
+  const [selectedCoupons, setSelectedCoupons] = useState(initialCoupons);
+  const [discount, setDiscount] = useState(0);
+  const [loadingCoupons, setLoadingCoupons] = useState(false);
+  const [showCouponModal, setShowCouponModal] = useState(false);
+
+  const token = getCookie("token");
+  const userId = getCookie("userid");
+
+  // Fetch available coupons
+  const fetchAvailableCoupons = async () => {
+    if (productsList.length === 0) return;
+
+    setLoadingCoupons(true);
+
+    const items = productsList.map((product) => ({
+      product_id: parseInt(product.id),
+      quantity: parseInt(product.quantity) || 1,
+      ...(product.selectedSize && { size_id: parseInt(product.selectedSize) }),
+    }));
+
+    try {
+      const res = await axios.post(
+        "http://localhost:8090/api/v1/coupons/user/available",
+        { items },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const coupons = res.data?.data || { valid: [], invalid: [] };
+      setAvailableCoupons(coupons);
+    } catch (error) {
+      console.error("Error fetching coupons:", error);
+      setAvailableCoupons({ valid: [], invalid: [] });
+    } finally {
+      setLoadingCoupons(false);
+    }
+  };
+
+  // Calculate discount
   useEffect(() => {
-  }, [productData]);
+    if (selectedCoupons.length === 0 || productsList.length === 0) {
+      setDiscount(0);
+      return;
+    }
+
+    calculateDiscount();
+  }, [selectedCoupons]);
+
+  const calculateDiscount = async () => {
+    try {
+      const items = productsList.map((product) => ({
+        product_id: parseInt(product.id),
+        quantity: parseInt(product.quantity) || 1,
+        ...(product.selectedSize && {
+          size_id: parseInt(product.selectedSize),
+        }),
+      }));
+
+      const res = await axios.post(
+        "http://localhost:8090/api/v1/coupons/user/calculate",
+        {
+          user_id: Number(userId),
+          coupon_codes: selectedCoupons,
+          items: items,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = res.data?.data;
+
+      if (data) {
+        const calculatedDiscount =
+          (data.sub_total || 0) - (data.total_money || 0);
+        setDiscount(calculatedDiscount);
+      } else {
+        setDiscount(0);
+      }
+    } catch (error) {
+      console.error("Error calculating discount:", error);
+      setDiscount(0);
+    }
+  };
+
+  const handleShowCoupons = () => {
+    if (!token) {
+      alert("Vui lòng đăng nhập để xem mã giảm giá");
+      navigate("/login");
+      return;
+    }
+
+    fetchAvailableCoupons();
+    setShowCouponModal(true);
+  };
+
+  const handleSelectCoupon = (couponCode) => {
+    const coupon = availableCoupons.valid.find((c) => c.code === couponCode);
+
+    if (!coupon) return;
+
+    if (coupon.applyToAll) {
+      const hasGlobalCoupon = selectedCoupons.some((code) => {
+        const c = availableCoupons.valid.find((x) => x.code === code);
+        return c?.applyToAll;
+      });
+
+      if (hasGlobalCoupon) {
+        const filtered = selectedCoupons.filter((code) => {
+          const c = availableCoupons.valid.find((x) => x.code === code);
+          return !c?.applyToAll;
+        });
+        setSelectedCoupons([...filtered, couponCode]);
+      } else {
+        setSelectedCoupons([...selectedCoupons, couponCode]);
+      }
+    } else {
+      const productCoupons = selectedCoupons.filter((code) => {
+        const c = availableCoupons.valid.find((x) => x.code === code);
+        return c?.productId === coupon.productId;
+      });
+
+      if (productCoupons.length > 0) {
+        const filtered = selectedCoupons.filter((code) => {
+          const c = availableCoupons.valid.find((x) => x.code === code);
+          return c?.productId !== coupon.productId;
+        });
+        setSelectedCoupons([...filtered, couponCode]);
+      } else {
+        setSelectedCoupons([...selectedCoupons, couponCode]);
+      }
+    }
+  };
+
+  const handleRemoveCoupon = (couponCode) => {
+    setSelectedCoupons(selectedCoupons.filter((c) => c !== couponCode));
+  };
+
+  const isCouponSelected = (couponCode) => {
+    return selectedCoupons.includes(couponCode);
+  };
+
+  const handleConfirmCoupons = () => {
+    setShowCouponModal(false);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleSaveInfoChange = (e) => {
+    setSaveInfo(e.target.checked);
+  };
+
+  const saveShippingInfo = () => {
+    const infoToSave = {
+      fullname: formData.fullname,
+      phone_number: formData.phone_number,
+      email: formData.email,
+      address: formData.address,
+    };
+    localStorage.setItem("shippingInfo", JSON.stringify(infoToSave));
+    setShowSaveSuccess(true);
+    setTimeout(() => setShowSaveSuccess(false), 3000);
+  };
+
+  const clearSavedInfo = () => {
+    localStorage.removeItem("shippingInfo");
+    setFormData({
+      fullname: "",
+      phone_number: "",
+      email: "",
+      address: "",
+      note: "",
+      payment_method: "COD",
+    });
+    alert("Đã xóa thông tin đã lưu");
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate
     if (!formData.fullname || !formData.phone_number) {
       setError("Vui lòng điền đầy đủ thông tin bắt buộc");
       return;
@@ -50,9 +255,13 @@ function Checkout() {
       return;
     }
 
-    if (!productData || !formData.size_id) {
-      setError("Không tìm thấy thông tin sản phẩm hoặc size");
+    if (productsList.length === 0) {
+      setError("Không tìm thấy thông tin sản phẩm");
       return;
+    }
+
+    if (saveInfo) {
+      saveShippingInfo();
     }
 
     try {
@@ -65,59 +274,40 @@ function Checkout() {
         return;
       }
 
-
       const paymentMethodMap = {
-        "COD": 1,
-        "MOMO": 2,
+        COD: 1,
+        MOMO: 2,
       };
 
-      // Chuẩn bị dữ liệu theo đúng format backend
+      // Build items array từ productsList
+      const items = productsList.map((product) => ({
+        product_id: parseInt(product.id),
+        size_id: parseInt(product.selectedSize),
+        quantity: parseInt(product.quantity) || 1,
+      }));
+
       const orderData = {
         fullname: formData.fullname.trim(),
         phone_number: formData.phone_number.trim(),
         address: formData.address.trim(),
         payment_method_id: paymentMethodMap[formData.payment_method] || 1,
-        // note: formData.note?.trim() || null,
-        items: [
-          {
-            product_id: parseInt(productData.id),
-            size_id: parseInt(formData.size_id),
-            quantity: parseInt(productData.quantity) || 1,
-          },
-        ],
+        items: items,
       };
 
-      // Thêm các field optional nếu có
+      if (selectedCoupons.length > 0) {
+        orderData.coupon_codes = selectedCoupons;
+      }
+
       if (formData.email && formData.email.trim()) {
         orderData.email = formData.email.trim();
       }
-      
+
       if (formData.note && formData.note.trim()) {
         orderData.note = formData.note.trim();
       }
 
-      if (formData.province && formData.province.trim()) {
-        orderData.province = formData.province.trim();
-      }
+      console.log("Order Data:", orderData);
 
-      if (formData.district && formData.district.trim()) {
-        orderData.district = formData.district.trim();
-      }
-
-      if (formData.ward && formData.ward.trim()) {
-        orderData.ward = formData.ward.trim();
-      }
-
-      if (formData.street && formData.street.trim()) {
-        orderData.street = formData.street.trim();
-      }
-
-      if (formData.hamlet && formData.hamlet.trim()) {
-        orderData.hamlet = formData.hamlet.trim();
-      }
-
-
-      // Bước 1: Tạo đơn hàng
       const response = await fetch(
         "http://localhost:8090/api/v1/orders/user/create",
         {
@@ -130,15 +320,24 @@ function Checkout() {
         }
       );
 
+
       const result = await response.json();
 
       if (response.ok) {
         const orderId = result.data?.id;
 
-        // Bước 2: Nếu chọn MoMo, gọi API payment
+        // Nếu từ cart, xóa các sản phẩm đã mua
+        if (fromCart) {
+          const cart = JSON.parse(localStorage.getItem("cart")) || [];
+          const productIds = productsList.map((p) => p.id);
+          const remaining = cart.filter(
+            (item) => !productIds.includes(item.product_id)
+          );
+          localStorage.setItem("cart", JSON.stringify(remaining));
+          window.dispatchEvent(new Event("cartUpdated"));
+        }
+
         if (formData.payment_method === "MOMO" && orderId) {
-          console.log("💳 Processing MoMo payment...");
-          
           try {
             const paymentResponse = await fetch(
               `http://localhost:8090/api/v1/payment/user/create/${orderId}?gateway=momo`,
@@ -156,13 +355,14 @@ function Checkout() {
             if (paymentResponse.ok && paymentResult.data?.payUrl) {
               window.location.href = paymentResult.data.payUrl;
             } else {
-              setError(paymentResult.message || "Không thể tạo thanh toán MoMo");
+              setError(
+                paymentResult.message || "Không thể tạo thanh toán MoMo"
+              );
             }
           } catch (paymentErr) {
             setError("Có lỗi khi tạo thanh toán MoMo");
           }
         } else {
-          // COD hoặc Bank Transfer
           alert(result.message || "Đặt hàng thành công!");
           navigate("/");
         }
@@ -170,18 +370,22 @@ function Checkout() {
         setError(result.message || "Đặt hàng thất bại");
       }
     } catch (err) {
+      console.error("Checkout error:", err);
       setError("Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại!");
     } finally {
       setLoading(false);
     }
   };
 
-  if (!productData) {
+  if (productsList.length === 0) {
     return (
       <div className="checkout-container">
         <div style={{ padding: "20px", textAlign: "center" }}>
           <p>Không tìm thấy thông tin sản phẩm</p>
-          <button onClick={() => navigate(-1)} style={{ padding: "10px 20px", cursor: "pointer" }}>
+          <button
+            onClick={() => navigate(-1)}
+            style={{ padding: "10px 20px", cursor: "pointer" }}
+          >
             Quay lại
           </button>
         </div>
@@ -189,200 +393,220 @@ function Checkout() {
     );
   }
 
-  const quantity = productData.quantity || 1;
-  const unitPrice = productData.display_price || productData.price;
-  const totalPrice = unitPrice * quantity;
+  // Tính tổng tiền
+  const subtotal = productsList.reduce((sum, product) => {
+    const price = product.display_price || product.price;
+    const quantity = product.quantity || 1;
+    return sum + price * quantity;
+  }, 0);
+
+  const totalPrice = Math.max(subtotal - discount, 0);
 
   return (
     <div className="checkout-container">
       <h1>Thanh toán đơn hàng</h1>
 
-      {error && (
-        <div style={{ 
-          padding: "15px", 
-          backgroundColor: "#fee", 
-          color: "#c33",
-          borderRadius: "5px",
-          marginBottom: "20px",
-          border: "2px solid #fcc",
-          fontWeight: "bold"
-        }}>
-           {error}
-        </div>
+      {error && <div className="error-alert">{error}</div>}
+
+      {showSaveSuccess && (
+        <div className="success-alert">✓ Đã lưu thông tin giao hàng</div>
       )}
 
       <div className="checkout-content">
         <div className="product-summary">
-          <h2>Sản phẩm đã chọn</h2>
-          <div className="product-info">
-            <img
-              src={`http://localhost:8090${productData.thumbnail}`}
-              alt={productData.name}
-              crossOrigin="anonymmous"
-              style={{ width: 100, height: 100, objectFit: "cover" }}
-            />
-            <div>
-              <h3>{productData.name}</h3>
-              <p className="price">{unitPrice.toLocaleString("vi-VN")} đ</p>
-              <p>Size: {productData.selectedSizeName || formData.size_id}</p>
-              <p>Số lượng: {quantity}</p>
-            </div>
-          </div>
-          <div className="total">
-            <strong>Tổng tiền: </strong>
-            <span className="total-price">{totalPrice.toLocaleString("vi-VN")} đ</span>
-          </div>
-          {quantity > 1 && (
-            <div className="price-breakdown">
-              <small>
-                {unitPrice.toLocaleString("vi-VN")} đ × {quantity} = {totalPrice.toLocaleString("vi-VN")} đ
-              </small>
-            </div>
-          )}
-        </div>
+          <h2>Sản phẩm đã chọn ({productsList.length})</h2>
 
-        <form className="checkout-form" onSubmit={handleSubmit}>
-          <h2>Thông tin giao hàng</h2>
+          <div className="products-list">
+            {productsList.map((product, index) => {
+              const unitPrice = product.display_price || product.price;
+              const quantity = product.quantity || 1;
 
-          <div className="form-group">
-            <label>Họ và tên *</label>
-            <input
-              type="text"
-              name="fullname"
-              value={formData.fullname}
-              onChange={handleChange}
-              required
-              placeholder="Nhập họ và tên"
-            />
+              return (
+                <div
+                  key={index}
+                  className={`product-info ${
+                    index < productsList.length - 1 ? "with-border" : ""
+                  }`}
+                >
+                  <img
+                    src={`http://localhost:8090${product.thumbnail}`}
+                    alt={product.name}
+                    crossOrigin="anonymous"
+                  />
+                  <div className="product-details">
+                    <h3>{product.name}</h3>
+                    <p className="price">
+                      {unitPrice.toLocaleString("vi-VN")} đ
+                    </p>
+                    <p>Size: {product.selectedSizeName}</p>
+                    <p>Số lượng: {quantity}</p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label>Số điện thoại *</label>
-              <input
-                type="tel"
-                name="phone_number"
-                value={formData.phone_number}
-                onChange={handleChange}
-                required
-                placeholder="Nhập số điện thoại"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Email</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="Nhập email (không bắt buộc)"
-              />
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label>Địa chỉ giao hàng *</label>
-            <textarea
-              name="address"
-              value={formData.address}
-              onChange={handleChange}
-              required
-              placeholder="Số nhà, tên đường"
-              rows="2"
-            />
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label>Tỉnh/Thành phố</label>
-              <input
-                type="text"
-                name="province"
-                value={formData.province}
-                onChange={handleChange}
-                placeholder="VD: Hà Nội"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Quận/Huyện</label>
-              <input
-                type="text"
-                name="district"
-                value={formData.district}
-                onChange={handleChange}
-                placeholder="VD: Quận Đống Đa"
-              />
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label>Phường/Xã</label>
-              <input
-                type="text"
-                name="ward"
-                value={formData.ward}
-                onChange={handleChange}
-                placeholder="VD: Phường Láng Hạ"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Đường</label>
-              <input
-                type="text"
-                name="street"
-                value={formData.street}
-                onChange={handleChange}
-                placeholder="VD: Đường Láng"
-              />
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label>Ghi chú</label>
-            <textarea
-              name="note"
-              value={formData.note}
-              onChange={handleChange}
-              placeholder="Ghi chú cho đơn hàng (không bắt buộc)"
-              rows="3"
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Phương thức thanh toán *</label>
-            <select
-              name="payment_method"
-              value={formData.payment_method}
-              onChange={handleChange}
-              required
-            >
-              <option value="COD">Thanh toán khi nhận hàng (COD)</option>
-              <option value="MOMO">Thanh toán qua MoMo</option>
-            </select>
-          </div>
-
-          <div className="form-actions">
+          <div className="coupon-section">
             <button
               type="button"
-              className="btn-back"
-              onClick={() => navigate(-1)}
+              onClick={handleShowCoupons}
+              className="coupon-button"
             >
-              Quay lại
+              🎁 Chọn mã giảm giá
             </button>
-            <button
-              type="submit"
-              className="btn-submit"
-              disabled={loading}
-            >
-              {loading ? "Đang xử lý..." : "Đặt hàng"}
-            </button>
+
+            {selectedCoupons.length > 0 && (
+              <div className="selected-coupons">
+                <p className="selected-coupons-label">
+                  Đã chọn {selectedCoupons.length} mã:
+                </p>
+                {selectedCoupons.map((code) => {
+                  const coupon = availableCoupons.valid.find(
+                    (c) => c.code === code
+                  );
+                  return (
+                    <div key={code} className="coupon-item">
+                      <span className="coupon-code-badge">{code}</span>
+
+                      {coupon && (
+                        <span className="coupon-desc1">
+                          {coupon.description}
+                        </span>
+                      )}
+                      <button
+                        onClick={() => handleRemoveCoupon(code)}
+                        className="coupon-remove-btn"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
-        </form>
+
+          <div className="price-summary">
+            <div className="price-row">
+              <span>Tạm tính:</span>
+              <span>{subtotal.toLocaleString("vi-VN")} đ</span>
+            </div>
+
+            {discount > 0 && (
+              <div className="price-row discount">
+                <span>Giảm giá:</span>
+                <span>-{discount.toLocaleString("vi-VN")} đ</span>
+              </div>
+            )}
+
+            <div className="price-row total">
+              <span>Tổng tiền:</span>
+              <span className="total-amount">
+                {totalPrice.toLocaleString("vi-VN")} đ
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <ShippingForm
+          formData={formData}
+          onChange={handleChange}
+          onSubmit={handleSubmit}
+          onBack={() => navigate(-1)}
+          loading={loading}
+          saveInfo={saveInfo}
+          onSaveInfoChange={handleSaveInfoChange}
+          onClearSavedInfo={clearSavedInfo}
+        />
       </div>
+
+      {showCouponModal && (
+        <div
+          className="coupon-modal-overlay"
+          onClick={() => setShowCouponModal(false)}
+        >
+          <div className="coupon-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="coupon-modal-header">
+              <h2>Chọn mã giảm giá</h2>
+              <button
+                onClick={() => setShowCouponModal(false)}
+                className="modal-close-btn"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="coupon-modal-body">
+              {loadingCoupons ? (
+                <p className="coupon-loading">Đang tải mã giảm giá...</p>
+              ) : availableCoupons.valid.length > 0 ? (
+                <>
+                  {availableCoupons.valid.map((coupon) => (
+                    <div
+                      key={coupon.id}
+                      className={`coupon-card ${
+                        isCouponSelected(coupon.code) ? "selected" : ""
+                      }`}
+                      onClick={() => {
+                        if (isCouponSelected(coupon.code)) {
+                          handleRemoveCoupon(coupon.code);
+                        } else {
+                          handleSelectCoupon(coupon.code);
+                        }
+                      }}
+                    >
+                      <div className="coupon-card-content">
+                        <div className="coupon-info">
+                          <div className="coupon-tags">
+                            <span className="coupon-tag">{coupon.code}</span>
+                          </div>
+
+                          <h4 className="coupon-name">{coupon.name}</h4>
+
+                          <p className="coupon-description">
+                            💰 {coupon.description}
+                          </p>
+
+                          <div className="coupon-scope">
+                            📌 {coupon.applicableScope}
+                          </div>
+                        </div>
+
+                        <div className="coupon-checkbox">
+                          {isCouponSelected(coupon.code) ? (
+                            <div className="checkbox-checked">✓</div>
+                          ) : (
+                            <div className="checkbox-unchecked" />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              ) : (
+                <p className="no-coupons">
+                  Không có mã giảm giá khả dụng cho đơn hàng này
+                </p>
+              )}
+            </div>
+
+            <div className="coupon-modal-footer">
+              <button
+                onClick={() => setShowCouponModal(false)}
+                className="modal-cancel-btn"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleConfirmCoupons}
+                className="modal-confirm-btn"
+              >
+                Xác nhận
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

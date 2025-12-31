@@ -112,7 +112,6 @@ function Home() {
 
                     <div className="s5-text">
                       <div className="title">NIKE x G-Dragon</div>
-                      <div className="s5-btn">Shop</div>
                     </div>
                   </div>
                 </div>
