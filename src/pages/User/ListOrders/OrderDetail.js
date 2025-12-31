@@ -58,11 +58,7 @@ function OrderDetail(props) {
         <Descriptions.Item label="Phương thức thanh toán">
           <Tag color="blue">{order.payment_method}</Tag>
         </Descriptions.Item>
-
-        <Descriptions.Item label="Mã vận đơn">
-          {order.tracking_number || "Chưa có"}
-        </Descriptions.Item>
-
+        
         {order.note && (
           <Descriptions.Item label="Ghi chú" span={2}>
             {order.note}
@@ -125,11 +121,44 @@ function OrderDetail(props) {
               </Space>
 
               {item.coupon_code && (
-                <div style={{ marginTop: 8 }}>
+                <div
+                  style={{
+                    marginTop: 8,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "2px",
+                    alignItems: "flex-start",
+                  }}
+                >
                   <Tag color="green">
                     Mã giảm giá: {item.coupon_code} (-
                     {item.coupon_discount?.toLocaleString("vi-VN")}đ)
                   </Tag>
+                </div>
+              )}
+
+              {item.coupons && item.coupons.length > 0 && (
+                <div
+                  style={{
+                    marginTop: 8,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "6px",
+                    alignItems: "flex-start",
+                  }}
+                >
+                  {item.coupons.map((coupon, couponIdx) => {
+                    const isPercentage = coupon.discount < 100;
+                    const displayDiscount = isPercentage
+                      ? `${coupon.discount}%`
+                      : `${coupon.discount?.toLocaleString("vi-VN")}đ`;
+
+                    return (
+                      <Tag key={couponIdx} color="green" style={{ margin: 0 }}>
+                        Mã giảm giá: {coupon.code} (-{displayDiscount})
+                      </Tag>
+                    );
+                  })}
                 </div>
               )}
 
@@ -185,7 +214,10 @@ function OrderDetail(props) {
       {order.coupon_code && (
         <div style={{ textAlign: "right", color: "#52c41a" }}>
           Đã áp dụng mã giảm giá: {order.coupon_code} (-
-          {order.coupon_discount?.toLocaleString("vi-VN")}đ)
+          {order.coupon_discount < 100
+            ? `${order.coupon_discount}%`
+            : `${order.coupon_discount?.toLocaleString("vi-VN")}đ`}
+          )
         </div>
       )}
     </Modal>
