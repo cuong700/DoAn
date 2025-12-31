@@ -1,0 +1,188 @@
+/* Container chính với background */
+.register-container {
+  background-image: url('https://cdn1.vectorstock.com/i/1000x1000/88/10/background-with-cartoon-sneakers-skateboard-vector-30928810.jpg');
+  background-size: cover;
+  background-position: center -130px;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+/* Box chứa form đăng ký */
+.register-box {
+  width: 100%;
+  max-width: 500px;
+  padding: 30px 40px;
+  background: rgb(1, 1, 1);
+  box-sizing: border-box;
+  border-radius: 14px;
+}
+
+/* Tiêu đề */
+.register-title {
+  margin: 0 0 30px;
+  padding: 0;
+  color: #fff;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+/* Form */
+.register-form {
+  width: 100%;
+}
+
+/* Thông báo lỗi */
+.error-box {
+  padding: 12px;
+  margin-bottom: 20px;
+  background-color: #fff2f0;
+  border: 1px solid #ffccc7;
+  border-radius: 4px;
+  color: #cf1322;
+  font-size: 14px;
+}
+
+/* Nhóm input */
+.input-group {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+/* Label */
+.input-label {
+  display: block;
+  padding: 5px 0;
+  font-size: 16px;
+  color: #fff;
+  pointer-events: none;
+  transition: 0.5s;
+}
+
+/* Input field */
+.input-field {
+  width: 100%;
+  padding: 10px 0;
+  font-size: 16px;
+  color: #fff;
+  border: none;
+  border-bottom: 1px solid #fff;
+  outline: none;
+  background: transparent;
+}
+
+.input-field::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.input-field:focus {
+  border-bottom-color: #1890ff;
+}
+
+/* Nút submit */
+.submit-btn {
+  width: 100%;
+  padding: 12px 20px;
+  background: transparent;
+  color: white;
+  border: 2px solid white;
+  font-size: 19px;
+  text-decoration: none;
+  text-transform: uppercase;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: 0.5s;
+  margin-top: 20px;
+  letter-spacing: 4px;
+  cursor: pointer;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background: white;
+  color: black;
+  box-shadow: 0 0 12px white;
+  letter-spacing: 5px;
+}
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Container link đăng nhập */
+.login-link-container {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 14px;
+  color: #fff;
+}
+
+/* Chữ link đăng nhập */
+.login-link {
+  color: #1890ff;
+  cursor: pointer;
+  text-decoration: underline;
+  transition: color 0.3s;
+}
+
+.login-link:hover {
+  color: #40a9ff;
+}
+
+/* Responsive cho tablet */
+@media (max-width: 768px) {
+  .register-box {
+    padding: 25px 30px;
+  }
+  
+  .submit-btn {
+    font-size: 17px;
+    letter-spacing: 3px;
+  }
+  
+  .submit-btn:hover:not(:disabled) {
+    letter-spacing: 4px;
+  }
+}
+
+/* Responsive cho mobile */
+@media (max-width: 480px) {
+  .register-container {
+    padding: 15px;
+  }
+  
+  .register-box {
+    padding: 20px;
+  }
+  
+  .register-title {
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .input-group {
+    margin-bottom: 20px;
+  }
+  
+  .input-label {
+    font-size: 14px;
+  }
+  
+  .input-field {
+    font-size: 14px;
+  }
+  
+  .submit-btn {
+    font-size: 16px;
+    padding: 10px 15px;
+    letter-spacing: 2px;
+  }
+  
+  .submit-btn:hover:not(:disabled) {
+    letter-spacing: 3px;
+  }
+}

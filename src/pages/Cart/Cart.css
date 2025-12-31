@@ -18,18 +18,23 @@
 .cart-header {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   margin-bottom: 24px;
 }
 
 .cart-header-icon {
-  font-size: 26px;
+  font-size: 24px;
   color: #ee4d2d;
+  line-height: 1;
+  display: inline-flex;
+  vertical-align: middle;
 }
 
 .cart-title {
   font-size: 24px;
-  font-weight: 600;
+  font-weight: 550;
+  line-height: 1.2;
+  margin: 0;
 }
 
 /* ===============================
@@ -359,7 +364,6 @@
   }
 }
 
-
 /* Cart Select All Header */
 .cart-select-all {
   display: flex;
@@ -631,9 +635,6 @@
 }
 /* Thêm vào Cart.css */
 
-
-
-
 /* Button chọn mã giảm giá */
 
 /* Button chọn mã giảm giá - Kiểu viền nét đứt */
@@ -745,4 +746,3 @@
   background: #d9363e;
   transform: scale(1.1);
 }
-
