@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import {
@@ -7,16 +8,17 @@ import {
   Button,
   Space,
   Modal,
-  Descriptions,
   Image,
-  Divider,
+  Input,
+  message,
 } from "antd";
 import { EyeOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import { getCookie } from "../../../helpers/cookie";
 import "./ListOrders.css";
 import NoData from "../NoData";
-import dayjs from "dayjs";
 import OrderDetail from "./OrderDetail";
+
+const { TextArea } = Input;
 
 export function ListOrders() {
   const [orders, setOrders] = useState([]);
@@ -25,6 +27,10 @@ export function ListOrders() {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [cancelModalVisible, setCancelModalVisible] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const [orderToCancel, setOrderToCancel] = useState(null);
+  const [cancelLoading, setCancelLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -128,6 +134,72 @@ export function ListOrders() {
     setSelectedOrder(null);
   };
 
+  // Mở modal hủy đơn hàng
+  const handleOpenCancelModal = (order) => {
+    setOrderToCancel(order);
+    setCancelReason("");
+    setCancelModalVisible(true);
+  };
+
+  // Đóng modal hủy đơn hàng
+  const handleCloseCancelModal = () => {
+    setCancelModalVisible(false);
+    setOrderToCancel(null);
+    setCancelReason("");
+  };
+
+  // Xử lý hủy đơn hàng
+  const handleCancelOrder = async () => {
+    if (!cancelReason.trim()) {
+      message.warning("Vui lòng nhập lý do hủy đơn hàng!");
+      return;
+    }
+
+    setCancelLoading(true);
+    try {
+      const token = getCookie("token");
+      await axios.put(
+        `http://localhost:8090/api/v1/orders/user/cancel/${orderToCancel.id}?reason=${encodeURIComponent(cancelReason.trim())}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      message.success("Hủy đơn hàng thành công!");
+      
+      // Cập nhật lại danh sách đơn hàng
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order.id === orderToCancel.id
+            ? {
+                ...order,
+                status: "CANCELLED",
+                cancellation_reason: cancelReason.trim(),
+              }
+            : order
+        )
+      );
+
+      handleCloseCancelModal();
+    } catch (error) {
+      console.error("Error canceling order:", error);
+      message.error(
+        error.response?.data?.message ||
+          "Không thể hủy đơn hàng. Vui lòng thử lại!"
+      );
+    } finally {
+      setCancelLoading(false);
+    }
+  };
+
+  // Kiểm tra xem đơn hàng có thể hủy không (chỉ pending)
+  const canCancelOrder = (order) => {
+    return statusToIndex(order.status) === 0; // pending = 0
+  };
+
   return (
     <>
       <div className="order-container">
@@ -181,6 +253,15 @@ export function ListOrders() {
                   >
                     Xem chi tiết
                   </Button>
+                  {canCancelOrder(order) && (
+                    <Button
+                      className="cancel-order-btn"
+                      icon={<CloseCircleOutlined />}
+                      onClick={() => handleOpenCancelModal(order)}
+                    >
+                      Hủy đơn
+                    </Button>
+                  )}
                 </Space>
               </div>
 
@@ -223,8 +304,6 @@ export function ListOrders() {
                               Quantity: {item.number_of_products}
                             </h6>
                           </div>
-
-                         
                         </div>
 
                         <h6 className="price">
@@ -266,13 +345,36 @@ export function ListOrders() {
       </ConfigProvider>
 
       {/* Modal Chi tiết đơn hàng */}
-       <OrderDetail
+      <OrderDetail
         visible={modalVisible}
         order={selectedOrder}
         onClose={handleCloseModal}
         renderStatusTag={renderStatusTag}
       />
+
+      {/* Modal Hủy đơn hàng */}
+      <Modal
+        title="Hủy đơn hàng"
+        className="cancel-order-modal"
+        open={cancelModalVisible}
+        onOk={handleCancelOrder}
+        onCancel={handleCloseCancelModal}
+        okText="Xác nhận hủy"
+        cancelText="Đóng"
+        confirmLoading={cancelLoading}
+        okButtonProps={{ danger: true }}
+      >
+        <p className="cancel-warning-text">
+          Bạn có chắc chắn muốn hủy đơn hàng{" "}
+          <strong>#{orderToCancel?.id}</strong>?
+        </p>
+        <TextArea
+          rows={4}
+          placeholder="Nhập lý do hủy đơn hàng..."
+          value={cancelReason}
+          onChange={(e) => setCancelReason(e.target.value)}
+        />
+      </Modal>
     </>
   );
 }
-

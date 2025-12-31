@@ -1,7 +1,6 @@
 import {
   BarChartOutlined,
   BarsOutlined,
-  CommentOutlined,
   FileTextOutlined,
   GiftOutlined,
   ProductOutlined,
@@ -31,11 +30,6 @@ function MenuSider() {
       key: "Quản lí sản phẩm",
       label: <Link to="product-management">Quản lí sản phẩm</Link>,
       icon: <ProductOutlined />,
-    },
-    {
-      key: "Quản lí bình luận",
-      label: <Link to="comment-management">Quản lí bình luận</Link>,
-      icon: <CommentOutlined />,
     },
     {
       key: "Quản lí mã giảm giá",
