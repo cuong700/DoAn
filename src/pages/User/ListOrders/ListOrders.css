@@ -91,6 +91,48 @@
   margin: 10px;
 }
 
+.cancel-order-btn {
+  background: red !important;
+  border: none !important;
+  color: white !important;
+  font-weight: 600;
+  padding: 8px 20px;
+  height: auto;
+  border-radius: 8px;
+  transition: none !important;
+  cursor: pointer;
+}
+
+.cancel-order-btn:hover {
+  background: red !important;
+  border: none !important;
+  color: white !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.cancel-order-btn:focus {
+  background: red !important;
+  border: none !important;
+  color: white !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.cancel-order-btn:active {
+  background: red !important;
+  border: none !important;
+  color: white !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.cancel-order-btn .anticon {
+  font-size: 16px;
+  margin-right: 6px;
+}
+
+
 /* Order card */
 .order-card {
   border: 2px solid black;
@@ -99,6 +141,7 @@
   margin: 10px;
   background: #ffffff;
 }
+
 
 /* Order details */
 .order-details {

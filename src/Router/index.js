@@ -16,7 +16,6 @@ import ProductList from "../pages/Product/ProductList";
 import ProductDetail from "../pages/Product/ProductDetail";
 import ProductManagement from "../Admin/Page/ProductManagement";
 import Profile from "../Admin/Layout/LayoutDefaultAdmin/Profile";
-import CommentManagement from "../Admin/Page/CommentManagement";
 import Analytics from "../Admin/Page/Analytics";
 import CouponManagement from "../Admin/Page/CouponManagement";
 import InvoiceManagement from "../Admin/Page/InvoiceManagement";
@@ -103,10 +102,6 @@ export const routes = [
       {
         path: "product-management",
         element: <ProductManagement />,
-      },
-      {
-        path: "comment-management",
-        element: <CommentManagement />,
       },
       {
         path: "coupon-management",
