@@ -23,6 +23,7 @@ import {
 } from "@ant-design/icons";
 import "./ProductDetail.css";
 import ProductComment from "./ProductComment";
+import { getCookie } from "../../../helpers/cookie";
 
 const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
@@ -115,6 +116,13 @@ function ProductDetail() {
       : product.price;
 
   const handleBuyNow = () => {
+    const token = getCookie("token");
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
     if (!selectedSize) {
       message.warning("Vui lòng chọn size!");
       return;

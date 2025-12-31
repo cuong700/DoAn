@@ -1,5 +1,4 @@
 
-
 import { useEffect, useState } from "react";
 import "./Cart.css";
 import { Plus, Minus, Trash2, Tag, ShoppingBag } from "lucide-react";
@@ -48,7 +47,6 @@ function Cart() {
   useEffect(() => {
     const loadCart = () => {
       const savedCart = JSON.parse(localStorage.getItem("cart")) || [];
-      console.log("Loaded cart:", savedCart);
       setCartItems(savedCart);
     };
     loadCart();
@@ -103,6 +101,7 @@ function Cart() {
     }
   };
 
+
   // VERIFY CART
   const verifyCart = async () => {
     if (selectedCartItems.length === 0) {
@@ -146,6 +145,7 @@ function Cart() {
     return () => clearTimeout(timer);
   }, [selectedItems, cartItems]);
 
+
   // Tính discount khi có coupon được chọn
   useEffect(() => {
     if (selectedCoupons.length === 0 || selectedCartItems.length === 0) {
@@ -155,6 +155,7 @@ function Cart() {
 
     calculateDiscount();
   }, [selectedCoupons, selectedCartItems]);
+
 
   const calculateDiscount = async () => {
     try {

@@ -58,8 +58,9 @@ function ShippingForm({
             type="email"
             name="email"
             value={formData.email}
+            required
             onChange={onChange}
-            placeholder="Nhập email (không bắt buộc)"
+            placeholder="Nhập email"
           />
         </div>
       </div>

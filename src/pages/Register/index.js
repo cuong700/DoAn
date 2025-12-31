@@ -1,12 +1,11 @@
-import { useState } from "react";
 
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import styles from "./styles.module.css";
+import "./Register.css"; 
 import axios from "axios";
 
 function Register() {
   const navigate = useNavigate();
- 
 
   const [fullname, setFullname] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -14,60 +13,102 @@ function Register() {
   const [password, setPassword] = useState("");
   const [retypePassword, setRetypePassword] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
-  const [isLoading, setIsLoading] = useState(false); // State to track loading status
-
-  // Set default values for google_account_id and role_id
-  const googleAccountId = 0;
-  const roleId = 1;
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true); // Set loading to true when submitting
+    setIsLoading(true);
+    setErrorMessage("");
 
     if (password !== retypePassword) {
-      alert("Passwords do not match");
+      setErrorMessage("Mật khẩu không khớp!");
+      setIsLoading(false);
+      return;
+    }
+
+    if (password.length < 6) {
+      setErrorMessage("Mật khẩu phải có ít nhất 6 ký tự!");
+      setIsLoading(false);
+      return;
+    }
+
+    const phoneRegex = /(84|0[3|5|7|8|9])+([0-9]{8})\b/;
+    if (!phoneRegex.test(phoneNumber)) {
+      setErrorMessage("Số điện thoại không hợp lệ!");
       setIsLoading(false);
       return;
     }
 
     const userData = {
-      fullname: fullname,
-      phone_number: phoneNumber,
-      address: address,
+      fullname: fullname.trim(),
+      phone_number: phoneNumber.trim(),
+      address: address.trim(),
       password: password,
       retype_password: retypePassword,
       date_of_birth: dateOfBirth,
-      facebook_account_id: googleAccountId,
-      google_account_id: googleAccountId,
-      role_id: roleId,
+      role_id: 1,
     };
 
     try {
       const response = await axios.post(
         "http://localhost:8090/api/v1/users/register",
-        userData
+        userData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
-      console.log("Response from API:", response.data);
-      // const data = response.data;
-      setTimeout(() => {
-        alert("Registration successful!");
-        navigate("/login");
-      }, 1000);
+
+      if (response.data && response.data.user) {
+        alert(
+          `Đăng ký thành công!\nChào mừng ${response.data.user.fullname}!`
+        );
+        
+        setTimeout(() => {
+          navigate("/login");
+        }, 1000);
+      }
     } catch (error) {
-      console.error("Error posting to API:", error);
-      alert("Registration failed: ", error);
-      setIsLoading(false); 
+      if (error.response) {
+        const errorMsg = error.response.data?.message || error.response.data?.error;
+        
+        if (errorMsg) {
+          setErrorMessage(errorMsg);
+        } else if (error.response.status === 400) {
+          setErrorMessage("Thông tin đăng ký không hợp lệ. Vui lòng kiểm tra lại!");
+        } else if (error.response.status === 409) {
+          setErrorMessage("Số điện thoại đã được đăng ký!");
+        } else {
+          setErrorMessage("Đăng ký thất bại. Vui lòng thử lại!");
+        }
+      } else if (error.request) {
+        setErrorMessage("Không thể kết nối đến server. Vui lòng kiểm tra kết nối!");
+      } else {
+        setErrorMessage("Đã có lỗi xảy ra. Vui lòng thử lại!");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className={styles.register}>
-      <div className={styles.registerbox}>
-        <h2>Register</h2>
-        <form onSubmit={handleSubmit}>
-          <div className={styles.userbox}>
-            <label>Full Name</label>
+    <div className="register-container">
+      <div className="register-box">
+        <h2 className="register-title">Đăng ký tài khoản</h2>
+        
+        {errorMessage && (
+          <div className="error-box">
+            ⚠️ {errorMessage}
+          </div>
+        )}
+
+        <form className="register-form" onSubmit={handleSubmit}>
+          <div className="input-group">
+            <label className="input-label">Họ và tên *</label>
             <input
+              className="input-field"
               type="text"
               name="fullname"
               required
@@ -75,9 +116,11 @@ function Register() {
               onChange={(e) => setFullname(e.target.value)}
             />
           </div>
-          <div className={styles.userbox}>
-            <label>Phone Number</label>
+
+          <div className="input-group">
+            <label className="input-label">Số điện thoại *</label>
             <input
+              className="input-field"
               type="tel"
               name="phone_number"
               required
@@ -85,9 +128,11 @@ function Register() {
               onChange={(e) => setPhoneNumber(e.target.value)}
             />
           </div>
-          <div className={styles.userbox}>
-            <label>Address</label>
+
+          <div className="input-group">
+            <label className="input-label">Địa chỉ *</label>
             <input
+              className="input-field"
               type="text"
               name="address"
               required
@@ -95,39 +140,63 @@ function Register() {
               onChange={(e) => setAddress(e.target.value)}
             />
           </div>
-          <div className={styles.userbox}>
-            <label>Password</label>
+
+          <div className="input-group">
+            <label className="input-label">Mật khẩu *</label>
             <input
+              className="input-field"
               type="password"
               name="password"
               required
+              minLength="6"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-          <div className={styles.userbox}>
-            <label>Retype Password</label>
+
+          <div className="input-group">
+            <label className="input-label">Nhập lại mật khẩu *</label>
             <input
+              className="input-field"
               type="password"
               name="retype_password"
               required
+              minLength="6"
               value={retypePassword}
               onChange={(e) => setRetypePassword(e.target.value)}
             />
           </div>
-          <div className={styles.userbox}>
-            <label>Date of Birth</label>
+
+          <div className="input-group">
+            <label className="input-label">Ngày sinh *</label>
             <input
+              className="input-field"
               type="date"
               name="date_of_birth"
               required
               value={dateOfBirth}
               onChange={(e) => setDateOfBirth(e.target.value)}
+              max={new Date().toISOString().split("T")[0]}
             />
           </div>
-          <button className={styles.submit} type="submit" disabled={isLoading}>
-            {isLoading ? "Loading..." : "Submit"}
+
+          <button 
+            className="submit-btn" 
+            type="submit" 
+            disabled={isLoading}
+          >
+            {isLoading ? "Đang xử lý..." : "Đăng ký"}
           </button>
+
+          <div className="login-link-container">
+            Đã có tài khoản?{" "}
+            <span
+              className="login-link"
+              onClick={() => navigate("/login")}
+            >
+              Đăng nhập ngay
+            </span>
+          </div>
         </form>
       </div>
     </div>
