@@ -89,10 +89,8 @@ function ProductDetail() {
     return <div className="pd-loading">Không tìm thấy sản phẩm</div>;
 
   const discountPercent =
-    product.display_price > 0
-      ? Math.round(
-          ((product.price - product.display_price) / product.price) * 100
-        )
+    (product.display_price !== null && product.display_price !== undefined)
+      ? Math.round(((product.price - product.display_price) / product.price) * 100)
       : 0;
 
   // Lấy số lượng tồn kho của size đã chọn
@@ -111,8 +109,8 @@ function ProductDetail() {
   };
 
       // Tính giá cuối cùng (ưu tiên display_price nếu có sale)
-    const finalPrice = product.display_price && product.display_price > 0 
-      ? product.display_price 
+    const finalPrice = (product.display_price !== null && product.display_price !== undefined)
+      ? product.display_price
       : product.price;
 
   const handleBuyNow = () => {
@@ -236,7 +234,7 @@ function ProductDetail() {
             <Divider />
 
             <div className="pd-price">
-              {discountPercent > 0 ? (
+              {(product.display_price !== null && product.display_price !== undefined && product.display_price !== product.price) ? (
                 <>
                   <Title level={2} className="pd-price-new">
                     {product.display_price.toLocaleString("vi-VN")} đ

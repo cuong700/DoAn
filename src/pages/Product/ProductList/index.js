@@ -38,7 +38,7 @@ function ProductList() {
 
       const res = await fetch(url);
       const data = await res.json();
-
+      console.log("Dữ liệu sản phẩm trả về:", data.data[0]);
       let fetchedProducts = data.data || [];
 
       setProducts(fetchedProducts);
@@ -128,51 +128,50 @@ function ProductList() {
       ) : (
         <>
           <div className="product">
-            {products.map((item) => (
-              <div
-                className="product__item"
-                key={item.id}
-                onClick={() => handleProductClick(item.id)}
-                style={{ cursor: "pointer" }}
-              >
-                <img
-                  src={`http://localhost:8090${item.thumbnail}`}
-                  alt={item.name}
-                  crossOrigin="anonymous"
-                />
-                <div className="product__category">{item.category_name}</div>
+                  {products.map((item) => {
+                    const salePrice = item.display_price;
+                    const hasSale = salePrice !== null && salePrice !== undefined;
 
-                <h3 className="product__title">{item.name}</h3>
+                    return (
+                      <div
+                        className="product__item"
+                        key={item.id}
+                        onClick={() => handleProductClick(item.id)}
+                        style={{ cursor: "pointer" }}
+                      >
+                        <img
+                          src={`http://localhost:8090${item.thumbnail}`}
+                          alt={item.name}
+                          crossOrigin="anonymous"
+                        />
+                        <div className="product__category">{item.category_name}</div>
 
-                {item.display_price && item.display_price < item.price ? (
-                  <>
-                    <div className="product__price-new">
-                      {item.display_price.toLocaleString("vi-VN")} đ
-                    </div>
-                    <div className="product__price-old">
-                      {item.price.toLocaleString("vi-VN")} đ
-                    </div>
+                        <h3 className="product__title">{item.name}</h3>
 
-                    {item.discount_badge && (
-                      <div className="product__badge">
-                        {item.discount_badge}
+                        {hasSale && salePrice < item.price ? (
+                          <>
+                            <div className="product__price-new" style={{ color: "red", fontWeight: "bold" }}>
+                              {salePrice === 0 ? "0 đ" : salePrice.toLocaleString("vi-VN") + " đ"}
+                            </div>
+                            <div className="product__price-old">
+                              {item.price.toLocaleString("vi-VN")} đ
+                            </div>
+
+                            <div className="product__badge">
+                              {salePrice === 0 ? "-100%" : item.discount_badge}
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="product__price-new">
+                              {item.price.toLocaleString("vi-VN")} đ
+                            </div>
+                            <div className="product__price-old placeholder"></div>
+                          </>
+                        )}
                       </div>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <div className="product__price-new">
-                      {item.price.toLocaleString("vi-VN")} đ
-                    </div>
-
-                    {/* placeholder để giữ chiều cao */}
-                    <div className="product__price-old placeholder"> </div>
-                  </>
-                )}
-
-                {/* <button className="btn-cart">Mua ngay</button> */}
-              </div>
-            ))}
+                    );
+                  })}
           </div>
 
           {totalPages > 1 && (
