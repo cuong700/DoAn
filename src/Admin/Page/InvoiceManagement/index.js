@@ -1,19 +1,9 @@
-import {
-  message,
-  Select,
-  Space,
-  Table,
-  Tag,
-  Tooltip,
-  Input,
-  Button,
-} from "antd";
+import { message, Select, Space, Table, Tag, Tooltip, Input } from "antd";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import ViewInvoice from "./ViewInvoice";
 import { getCookie } from "../../../helpers/cookie";
 import "./InvoiceManagement.css";
-import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
 import SendOutInvoice from "./SendOutInvoice";
 import CheckOutInvoice from "./CheckOutInvoice";
 import CloseOutInvoice from "./CloseOutInvoice";
@@ -190,20 +180,35 @@ function OrderManagement() {
       },
     },
     {
-      title: "Thanh toán",
+      title: "Phương thức thanh toán",
       dataIndex: "payment_method",
       key: "payment_method",
       width: 120,
       render: (value) => value || "—",
     },
     {
-      title: "Trạng thái",
+      title: "Trạng thái thanh toán",
+      dataIndex: "payment_status",
+      key: "payment_status",
+      width: 120,
+      render: (status) => {
+        switch (status) {
+          case "PAID":
+            return <Tag color="green">Đã thanh toán</Tag>;
+          case "UNPAID":
+            return <Tag color="red">Chờ thanh toán</Tag>;
+          default:
+            return <Tag color="default">Chưa thanh toán</Tag>;
+        }
+      },
+    },
+    {
+      title: "Trạng thái đơn",
       dataIndex: "status",
       key: "status",
       width: 130,
       render: (status) => statusTag(status),
     },
-
 
     {
       title: "Thao tác nhanh",
@@ -213,7 +218,7 @@ function OrderManagement() {
       align: "center",
       render: (_, record) => (
         <Space>
-          <EditInvoice onReload={handleReload} record={record}/>
+          <EditInvoice onReload={handleReload} record={record} />
 
           <ViewInvoice record={record} />
         </Space>

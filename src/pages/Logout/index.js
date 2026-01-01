@@ -14,7 +14,12 @@ function Logout() {
     dispatch(checkLogin(false));
     deleteCookie("isLogin");
     deleteCookie("token");
-
+    
+    // Xóa giỏ hàng khỏi localStorage
+    localStorage.removeItem("cart");
+    
+    // Trigger event để Cart component cập nhật
+    window.dispatchEvent(new Event("cartUpdated"));
     alert("Đăng xuất thành công");
 
     setTimeout(() => {

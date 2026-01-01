@@ -244,7 +244,7 @@ function CreateProduct(props) {
                 <Form.Item
                   label="Giá sale (nếu có)"
                   name="display_price"
-                  // Đã bỏ rules={rules} ở đây
+                  // rules={rules}
                 >
                   <InputNumber min={0} style={{ width: "100%" }} />
                 </Form.Item>

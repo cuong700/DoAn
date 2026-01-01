@@ -1,6 +1,4 @@
 
-
-
 // Function to get a cookie
 export function getCookie(cname) {
     var name = cname + "=";

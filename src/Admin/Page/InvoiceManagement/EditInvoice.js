@@ -16,6 +16,7 @@ import { useState } from "react";
 import dayjs from "dayjs";
 import { getCookie } from "../../../helpers/cookie";
 import TextArea from "antd/es/input/TextArea";
+import { API_BASE_URL } from "../../Config/constants";
 
 function EditInvoice(props) {
   const { record, onReload } = props;
@@ -49,6 +50,23 @@ function EditInvoice(props) {
       const json = await res.json();
       setOrderDetail(json.data);
 
+      // Xử lý order_date nếu là mảng [year, month, day]
+      let orderDate = null;
+      if (json.data.order_date) {
+        if (Array.isArray(json.data.order_date)) {
+          // Chuyển mảng [2025, 12, 2] thành "2025-12-02"
+          const [year, month, day] = json.data.order_date;
+          orderDate = dayjs(
+            `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(
+              2,
+              "0"
+            )}`
+          );
+        } else {
+          // Nếu là string thì parse bình thường
+          orderDate = dayjs(json.data.order_date);
+        }
+      }
       form.setFieldsValue({
         fullname: json.data.fullname || "",
         phone_number: json.data.phone_number || "",
@@ -56,7 +74,7 @@ function EditInvoice(props) {
         address: json.data.address || "",
         note: json.data.note || "",
         payment_method: json.data.payment_method || "",
-        order_date: json.data.order_date ? dayjs(json.data.order_date) : null,
+        order_date: orderDate,
       });
     } catch (error) {
       console.error(error);
@@ -79,6 +97,58 @@ function EditInvoice(props) {
     form.resetFields();
   };
 
+  // const handleSubmit = async (values) => {
+  //   try {
+  //     setSpinning(true);
+
+  //     const token = getCookie("token");
+
+  //     const payload = {
+  //       fullname: values.fullname, // Đúng: "fullname"
+  //       phone_number: values.phone_number, // Đúng: "phone_number"
+  //       email: values.email, // Đúng: "email"
+  //       address: values.address, // Đúng: "address"
+  //       note: values.note || "", // Đúng: "note"
+  //       payment_method_id: values.payment_method === "COD" ? 1 : 2,
+  // order_date: values.order_date
+  //   ? values.order_date.format("YYYY-MM-DD")
+  //   : null,
+  //     };
+
+  //     const res = await fetch(
+  //       `http://localhost:8090/api/v1/orders/admin/update/${record.id}`,
+  //       {
+  //         method: "PATCH",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //         body: JSON.stringify(payload),
+  //       }
+  //     );
+
+  //     if (!res.ok) throw new Error("Update thất bại"); //Nếu API trả lỗi thì xuống catch
+
+  //     const json = await res.json();
+  //     notiApi.success({
+  //       message: "Cập nhật thành công",
+  //       description: "Thông tin đơn hàng đã được cập nhật.",
+  //     });
+
+  //     setOrderDetail(json.data);
+  //     setShowModal(false);
+  //     onReload();
+  //   } catch (error) {
+  //     console.error(error);
+  //     notiApi.error({
+  //       message: "Lỗi cập nhật đơn hàng",
+  //       description: "Vui lòng thử lại sau.",
+  //     });
+  //   } finally {
+  //     setSpinning(false);
+  //   }
+  // };
+
   const handleSubmit = async (values) => {
     try {
       setSpinning(true);
@@ -90,15 +160,14 @@ function EditInvoice(props) {
         phone_number: values.phone_number,
         email: values.email,
         address: values.address,
-        note: values.note,
-        payment_method: values.payment_method,
-        order_date: values.order_date
-          ? values.order_date.format("YYYY-MM-DD")
-          : null,
+        note: values.note || "",
+        payment_method_id: values.payment_method === "COD" ? 1 : 2,
       };
 
+      console.log("Payload gửi lên:", JSON.stringify(payload, null, 2));
+
       const res = await fetch(
-        `http://localhost:8090/api/v1/orders/user/update/${record.id}`,
+        `http://localhost:8090/api/v1/orders/admin/update/${record.id}`,
         {
           method: "PATCH",
           headers: {
@@ -109,9 +178,16 @@ function EditInvoice(props) {
         }
       );
 
-      if (!res.ok) throw new Error("Update thất bại"); //Nếu API trả lỗi thì xuống catch
+      const responseText = await res.text();
+      console.log("Response status:", res.status);
+      console.log("Response text:", responseText);
 
-      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(`Update thất bại: ${responseText}`);
+      }
+
+      const json = JSON.parse(responseText);
+
       notiApi.success({
         message: "Cập nhật thành công",
         description: "Thông tin đơn hàng đã được cập nhật.",
@@ -121,10 +197,10 @@ function EditInvoice(props) {
       setShowModal(false);
       onReload();
     } catch (error) {
-      console.error(error);
+      console.error("Chi tiết lỗi:", error);
       notiApi.error({
         message: "Lỗi cập nhật đơn hàng",
-        description: "Vui lòng thử lại sau.",
+        description: error.message || "Vui lòng thử lại sau.",
       });
     } finally {
       setSpinning(false);
@@ -159,12 +235,13 @@ function EditInvoice(props) {
       dataIndex: "product_thumbnail",
       key: "product_thumbnail",
       render: (thumb) => {
+        const url = thumb ? API_BASE_URL + thumb : null;
         return (
           <>
-            {thumb ? (
+            {url ? (
               <img
                 crossOrigin="anonymous"
-                src={thumb}
+                src={url}
                 alt="thumb"
                 style={{
                   width: 60,
@@ -302,15 +379,12 @@ function EditInvoice(props) {
                 <Input placeholder="Nhập email" />
               </Form.Item>
 
-              <Form.Item
-                label="Ngày đặt"
-                name="order_date"
-                rules={[{ required: true, message: "Vui lòng chọn ngày đặt!" }]}
-              >
+              <Form.Item label="Ngày đặt" name="order_date">
                 <DatePicker
                   style={{ width: "100%" }}
                   format="DD/MM/YYYY"
                   placeholder="Chọn ngày đặt"
+                  disabled
                 />
               </Form.Item>
             </div>
@@ -336,8 +410,8 @@ function EditInvoice(props) {
               <Select
                 placeholder="Chọn phương thức thanh toán"
                 options={[
-                  { label: "COD (Thanh toán khi nhận hàng)", value: "COD" },
-                  { label: "Ví điện tử", value: "E_WALLET" },
+                  { label: "Thanh toán khi nhận hàng (COD)", value: "COD" },
+                  { label: "Thanh toán qua MoMo", value: "MOMO" },
                 ]}
               />
             </Form.Item>
@@ -347,7 +421,6 @@ function EditInvoice(props) {
             </Form.Item>
           </Form>
 
-          
           <h4 style={{ marginTop: 24, marginBottom: 12 }}>
             Danh sách sản phẩm
           </h4>
@@ -368,4 +441,3 @@ function EditInvoice(props) {
 }
 
 export default EditInvoice;
-

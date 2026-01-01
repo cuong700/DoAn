@@ -169,15 +169,16 @@ function ViewInvoice(props) {
             {record.address}
           </Descriptions.Item>
 
+              {record.note && (
+            <Descriptions.Item label="Ghi chú" span={2} >
+              {record.note}
+            </Descriptions.Item>
+          )}
+
           <Descriptions.Item label="Phương thức thanh toán">
             {record.payment_method}
           </Descriptions.Item>
 
-          {record.note && (
-            <Descriptions.Item label="Ghi chú" >
-              {record.note}
-            </Descriptions.Item>
-          )}
 
             {record.cancellation_reason && (
             <Descriptions.Item label="Lý do từ chối đơn" >
