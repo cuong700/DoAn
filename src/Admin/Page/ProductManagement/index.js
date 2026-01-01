@@ -271,14 +271,21 @@ function ProductManagement() {
           : "0 đ",
     },
     {
-      title: "Giá sale",
-      dataIndex: "display_price",
-      key: "display_price",
-      width: 130,
-      render: (value) =>
-        typeof value === "number"
-          ? value.toLocaleString("vi-VN") + " đ" //định dạng tiền tệ theo từng vùng
-          : "0 đ",
+     title: "Giá sale",
+     dataIndex: "display_price",
+     key: "display_price",
+     width: 130,
+     render: (value) => {
+       if (value === null || value === undefined) {
+           return "";
+       }
+       return (
+           <span style={{ color: value === 0 ? 'red' : 'green', fontWeight: 'bold' }}>
+           {value.toLocaleString("vi-VN")} đ
+           </span>
+       );
+    },
+
     },
     {
       title: "Trọng lượng",

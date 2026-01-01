@@ -50,7 +50,7 @@ function CreateProduct(props) {
         const json = await res.json();
 
         const mapped = json.data.content
-          .filter((item) => item.active === true) // lọc các phần tử thỏa mãn điều kiện và trả về một mảng mới.
+          .filter((item) => item.active === true)
           .map((item) => ({
             value: item.id,
             label: item.name,
@@ -93,13 +93,15 @@ function CreateProduct(props) {
       formData.append("name", value.name);
       formData.append("price", value.price);
       formData.append("cost", value.cost);
-      formData.append("originalPrice", value.display_price);
+      if (value.display_price !== undefined && value.display_price !== null && value.display_price !== "") {
+          formData.append("originalPrice", value.display_price);
+      }
       formData.append("weight", value.weight);
       formData.append("categoryId", value.category_id);
       formData.append("description", value.description || "");
 
       if (thumbnailFile.length > 0) {
-        const thumbnail = thumbnailFile[0].originFileObj; //Nó chứa file gốc để mang đi upload.
+        const thumbnail = thumbnailFile[0].originFileObj;
         if (thumbnail) {
           formData.append("thumbnail", thumbnail);
         }
@@ -146,8 +148,8 @@ function CreateProduct(props) {
     } catch (error) {
       console.error(error);
       notiApi.error({
-        message: "Lỗi tải danh sách sản phẩm",
-        description: "Vui lòng thử lại sau.",
+        message: "Lỗi thêm sản phẩm",
+        description: "Vui lòng kiểm tra lại thông tin.",
       });
     } finally {
       setSpinning(false);
@@ -160,6 +162,7 @@ function CreateProduct(props) {
       message: "Bắt buộc!",
     },
   ];
+
   return (
     <>
       {contextHolder}
@@ -183,8 +186,8 @@ function CreateProduct(props) {
             <Form.Item label="Ảnh sản phẩm" name="thumbnail" rules={rules}>
               <Upload
                 listType="picture-card"
-                fileList={thumbnailFile} //file trong fileList không phải là File gốc mà là 1 object
-                beforeUpload={() => false} // không upload ngay, để tự submit
+                fileList={thumbnailFile}
+                beforeUpload={() => false}
                 onChange={({ fileList }) => setThumbnailFile(fileList)}
                 maxCount={1}
                 accept="image/*"
@@ -197,8 +200,8 @@ function CreateProduct(props) {
               <Upload
                 listType="picture-card"
                 multiple
-                fileList={imagesFile} //Danh sách các tệp đã được tải lên
-                beforeUpload={() => false} //Upload sẽ tự gửi file lên server ngay khi chọn(chặn lại)
+                fileList={imagesFile}
+                beforeUpload={() => false}
                 onChange={({ fileList }) => setImagesFile(fileList)}
                 accept="image/*"
               >
@@ -241,7 +244,7 @@ function CreateProduct(props) {
                 <Form.Item
                   label="Giá sale (nếu có)"
                   name="display_price"
-                  rules={rules}
+                  // Đã bỏ rules={rules} ở đây
                 >
                   <InputNumber min={0} style={{ width: "100%" }} />
                 </Form.Item>
