@@ -267,7 +267,7 @@ function ProductManagement() {
       width: 130,
       render: (value) =>
         typeof value === "number"
-          ? value.toLocaleString("vi-VN") + " đ" //định dạng tiền tệ theo từng vùng
+          ? value.toLocaleString("vi-VN") + " đ"
           : "0 đ",
     },
     {
