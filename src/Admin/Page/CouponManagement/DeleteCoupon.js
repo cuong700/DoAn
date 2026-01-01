@@ -4,7 +4,7 @@ import { useState } from "react";
 import { getCookie } from "../../../helpers/cookie";
 
 function DeleteCoupon(props) {
-  const { record, onReload } = props;
+  const { record, onReload, activeFilter } = props;
 
   const [loading, setLoading] = useState(false);
 
@@ -44,14 +44,26 @@ function DeleteCoupon(props) {
     }
   };
 
+  
+  const confirmTitle =
+    activeFilter === "NGUNG_HOAT_DONG"
+      ? "Mã giảm giá này đã bị xoá."
+      : "Bạn chắc chắn muốn xoá?";
+
+  const showOkButton = activeFilter !== "NGUNG_HOAT_DONG";
+
   return (
     <>
       {contextHolder}
       <Popconfirm
-        title="Bạn chắc chắn muốn xoá?"
-        onConfirm={handleDelete}
+       title={confirmTitle}
+        onConfirm={showOkButton ? handleDelete : undefined}
         okText="Xoá"
-        cancelText="Huỷ"
+        cancelText={showOkButton ? "Huỷ" : "Đóng"}
+        showCancel={true}
+        okButtonProps={{
+          style: { display: showOkButton ? "inline-block" : "none" },
+        }}
       >
         <Button
           size="small"

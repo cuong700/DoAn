@@ -197,7 +197,7 @@ function EditProduct(props) {
         });
       }
 
-      // ⭐ XỬ LÝ KEPT IMAGES (Ảnh cũ giữ lại)
+      // XỬ LÝ KEPT IMAGES (Ảnh cũ giữ lại)
       // FIX: KHÔNG ĐƯỢC XÓA EXTENSION (.jpg, .png) VÌ DATABASE CẦN TÊN CHÍNH XÁC
       existingImages.forEach((url) => {
         // Lấy tên file từ URL
@@ -212,7 +212,7 @@ function EditProduct(props) {
         try {
           filename = decodeURIComponent(filename);
         } catch (e) {
-          console.warn("⚠️ Không decode được filename:", e);
+          console.warn("Không decode được filename:", e);
         }
 
         // --- ĐÃ XÓA ĐOẠN CODE CẮT EXTENSION TẠI ĐÂY ---

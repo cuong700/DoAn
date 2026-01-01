@@ -8,6 +8,7 @@ import {
   notification,
   Select,
   Spin,
+  Switch,
 } from "antd";
 import { useState } from "react";
 import { getCookie } from "../../../helpers/cookie";
@@ -77,6 +78,7 @@ function EditCoupon(props) {
     form.setFieldsValue({
       ...record,
       product_id: record?.product_id,
+       active: record?.active !== undefined ? record.active : true,
     });
   };
 
@@ -284,6 +286,19 @@ function EditCoupon(props) {
                 ) : null
               }
             </Form.Item>
+
+              {!record.active && (
+              <Form.Item
+                label="Trạng thái"
+                name="active"
+                valuePropName="checked" // prop bắt buộc cho Switch 
+              >
+                <Switch
+                  checkedChildren="Hoạt động"
+                  unCheckedChildren="Ngừng hoạt động"
+                />
+              </Form.Item>
+            )}
 
             <Form.Item>
               <Button type="primary" htmlType="submit">

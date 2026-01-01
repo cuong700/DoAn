@@ -10,6 +10,7 @@ function Profile() {
 
   const [notiApi, contextHolder] = notification.useNotification();
 
+  
   const mapUser = (u) => ({
     fullname: u.fullname ?? "",
     phone_number: u.phone_number ?? "",

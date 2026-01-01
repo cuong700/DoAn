@@ -228,7 +228,7 @@ function CouponManagement() {
             <Space>
               <EditCoupon record={record} onReload={handleReload} />
 
-              <DeleteCoupon record={record} onReload={handleReload} />
+              <DeleteCoupon record={record} onReload={handleReload} activeFilter={activeFilter}/>
             </Space>
           </>
         );

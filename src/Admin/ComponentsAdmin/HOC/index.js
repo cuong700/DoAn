@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getCookie } from "../../../helpers/cookie";
 
 const withAuth = (Component) => {
+  
   return function WithAuthWrapper(props) {
     const navigate = useNavigate();
     const [isAdmin, setIsAdmin] = useState(false);

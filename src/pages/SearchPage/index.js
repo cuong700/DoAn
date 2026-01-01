@@ -128,12 +128,6 @@ function Searchpage() {
                           </span>
                           <span
                             className="original-price"
-                            style={{
-                              textDecoration: "line-through",
-                              color: "#999",
-                              fontSize: "13px",
-                              marginLeft: "8px",
-                            }}
                           >
                             {product.price.toLocaleString("vi-VN")} đ
                           </span>

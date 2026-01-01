@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import "./CouponModal.css";
 
-
 function CouponSelectorModal({
   availableCoupons,
   selectedCoupons,
@@ -148,26 +147,24 @@ function CouponSelectorModal({
                 </div>
               )}
 
-              {Object.entries(productCouponsMap).map(
-                ([productId, coupons]) => (
-                  <div key={productId} className="coupon-section">
-                    <h3>🏷️ Mã cho: {coupons[0]?.productName}</h3>
+              {Object.entries(productCouponsMap).map(([productId, coupons]) => (
+                <div key={productId} className="coupon-section">
+                  <h3>🏷️ Mã cho: {coupons[0]?.productName}</h3>
 
-                    <div className="coupon-list">
-                      {coupons.map((coupon) => (
-                        <CouponItem
-                          key={coupon.id}
-                          coupon={coupon}
-                          isSelected={isSelected(coupon)}
-                          canApply={canApply(coupon)}
-                          onApply={() => handleApplyCoupon(coupon)}
-                          onRemove={() => handleRemoveCoupon(coupon)}
-                        />
-                      ))}
-                    </div>
+                  <div className="coupon-list">
+                    {coupons.map((coupon) => (
+                      <CouponItem
+                        key={coupon.id}
+                        coupon={coupon}
+                        isSelected={isSelected(coupon)}
+                        canApply={canApply(coupon)}
+                        onApply={() => handleApplyCoupon(coupon)}
+                        onRemove={() => handleRemoveCoupon(coupon)}
+                      />
+                    ))}
                   </div>
-                )
-              )}
+                </div>
+              ))}
 
               {availableCoupons.valid.length === 0 && (
                 <div className="no-coupons">
