@@ -9,20 +9,54 @@ function Checkout() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Lấy data từ state
-  const singleProduct = location.state?.product; // Từ ProductDetail
-  const multipleProducts = location.state?.products; // Từ Cart
+  const getInitialProducts = () => {
+    // Ưu tiên lấy từ State (khi từ Cart sang)
+    if (location.state?.products || location.state?.product) {
+      const single = location.state?.product;
+      const multiple = location.state?.products;
+      return {
+        list: multiple ? multiple : single ? [single] : [],
+        fromCart: location.state?.fromCart || false,
+        coupons: location.state?.selectedCoupons || [],
+      };
+    }
 
-  const fromCart = location.state?.fromCart; // Flag từ Cart
-  const initialCoupons = location.state?.selectedCoupons || []; // Coupon từ Cart
+    const savedCheckout = localStorage.getItem("tempCheckoutData");
+    if (savedCheckout) {
+      try {
+        return JSON.parse(savedCheckout);
+      } catch (e) {
+        return { list: [], fromCart: false, coupons: [] };
+      }
+    }
+    return { list: [], fromCart: false, coupons: [] };
+  };
 
-  // Xác định products list
-  const productsList =
-    fromCart && multipleProducts
-      ? multipleProducts
-      : singleProduct
-      ? [singleProduct]
-      : [];
+  const initialData = getInitialProducts();
+  const productsList = initialData.list;
+  const fromCart = initialData.fromCart;
+  const initialCoupons = initialData.coupons;
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const status = params.get("status");
+    const message = params.get("message");
+    const orderId = params.get("orderId");
+
+    if (status) {
+      localStorage.removeItem("tempCheckoutData");
+
+      if (status === "success") {
+        alert(`✅ Thanh toán thành công! Mã đơn hàng: ${orderId}`);
+        navigate("/user");
+      } else {
+        const decodedMessage = message ? decodeURIComponent(message) : "Giao dịch thất bại";
+        alert(`❌ Thanh toán thất bại: ${decodedMessage}. Vui lòng kiểm tra lại trong đơn hàng.`);
+
+        navigate("/user");
+      }
+    }
+  }, [location, navigate]);
 
   const loadSavedInfo = () => {
     const saved = localStorage.getItem("shippingInfo");
@@ -51,7 +85,6 @@ function Checkout() {
   const [saveInfo, setSaveInfo] = useState(true);
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
 
-  // Coupon states
   const [availableCoupons, setAvailableCoupons] = useState({
     valid: [],
     invalid: [],
@@ -64,7 +97,6 @@ function Checkout() {
   const token = getCookie("token");
   const userId = getCookie("userid");
 
-  // Fetch available coupons
   const fetchAvailableCoupons = async () => {
     if (productsList.length === 0) return;
 
@@ -98,7 +130,6 @@ function Checkout() {
     }
   };
 
-  // Calculate discount
   useEffect(() => {
     if (selectedCoupons.length === 0 || productsList.length === 0) {
       setDiscount(0);
@@ -279,7 +310,6 @@ function Checkout() {
         MOMO: 2,
       };
 
-      // Build items array từ productsList
       const items = productsList.map((product) => ({
         product_id: parseInt(product.id),
         size_id: parseInt(product.selectedSize),
@@ -326,7 +356,6 @@ function Checkout() {
       if (response.ok) {
         const orderId = result.data?.id;
 
-        // Nếu từ cart, xóa các sản phẩm đã mua
         if (fromCart) {
           const cart = JSON.parse(localStorage.getItem("cart")) || [];
           const productIds = productsList.map((p) => p.id);
@@ -338,6 +367,12 @@ function Checkout() {
         }
 
         if (formData.payment_method === "MOMO" && orderId) {
+          localStorage.setItem("tempCheckoutData", JSON.stringify({
+            list: productsList,
+            fromCart: fromCart,
+            coupons: selectedCoupons
+          }));
+
           try {
             const paymentResponse = await fetch(
               `http://localhost:8090/api/v1/payment/user/create/${orderId}?gateway=momo`,
@@ -363,6 +398,7 @@ function Checkout() {
             setError("Có lỗi khi tạo thanh toán MoMo");
           }
         } else {
+          localStorage.removeItem("tempCheckoutData");
           alert(result.message || "Đặt hàng thành công!");
           navigate("/");
         }
@@ -377,7 +413,9 @@ function Checkout() {
     }
   };
 
-  if (productsList.length === 0) {
+  const isPaymentRedirect = new URLSearchParams(location.search).get("status");
+
+  if (productsList.length === 0 && !isPaymentRedirect) {
     return (
       <div className="checkout-container">
         <div style={{ padding: "20px", textAlign: "center" }}>
@@ -393,7 +431,17 @@ function Checkout() {
     );
   }
 
-  // Tính tổng tiền
+  if (productsList.length === 0 && isPaymentRedirect) {
+    return (
+      <div className="checkout-container">
+        <div style={{ padding: "50px", textAlign: "center" }}>
+          <h2>Đang xử lý kết quả thanh toán...</h2>
+          <p style={{color: "#666", marginTop: "10px"}}>Vui lòng đợi trong giây lát</p>
+        </div>
+      </div>
+    );
+  }
+
   const subtotal = productsList.reduce((sum, product) => {
     const price = product.display_price || product.price;
     const quantity = product.quantity || 1;
