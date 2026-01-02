@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import {
@@ -12,7 +11,7 @@ import {
   Input,
   message,
 } from "antd";
-import { EyeOutlined, CloseCircleOutlined } from "@ant-design/icons";
+import { EyeOutlined, CloseCircleOutlined, DollarOutlined } from "@ant-design/icons";
 import { getCookie } from "../../../helpers/cookie";
 import "./ListOrders.css";
 import NoData from "../NoData";
@@ -102,7 +101,6 @@ export function ListOrders() {
     );
   };
 
-  // Fetch chi tiết đơn hàng
   const fetchOrderDetail = async (orderId) => {
     setDetailLoading(true);
     try {
@@ -134,21 +132,18 @@ export function ListOrders() {
     setSelectedOrder(null);
   };
 
-  // Mở modal hủy đơn hàng
   const handleOpenCancelModal = (order) => {
     setOrderToCancel(order);
     setCancelReason("");
     setCancelModalVisible(true);
   };
 
-  // Đóng modal hủy đơn hàng
   const handleCloseCancelModal = () => {
     setCancelModalVisible(false);
     setOrderToCancel(null);
     setCancelReason("");
   };
 
-  // Xử lý hủy đơn hàng
   const handleCancelOrder = async () => {
     if (!cancelReason.trim()) {
       message.warning("Vui lòng nhập lý do hủy đơn hàng!");
@@ -169,8 +164,7 @@ export function ListOrders() {
       );
 
       message.success("Hủy đơn hàng thành công!");
-      
-      // Cập nhật lại danh sách đơn hàng
+
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
           order.id === orderToCancel.id
@@ -195,9 +189,37 @@ export function ListOrders() {
     }
   };
 
-  // Kiểm tra xem đơn hàng có thể hủy không (chỉ pending)
+  const handleRepay = async (orderId) => {
+    try {
+      const token = getCookie("token");
+
+      message.loading({ content: "Đang tạo link thanh toán...", key: "repay" });
+
+      const response = await axios.post(
+        `http://localhost:8090/api/v1/payment/user/create/${orderId}?gateway=momo`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const resultData = response.data?.data;
+
+      if (resultData && resultData.payUrl) {
+        message.success({ content: "Đang chuyển hướng...", key: "repay" });
+        window.location.href = resultData.payUrl;
+      } else {
+        message.error({ content: "Không thể lấy link thanh toán!", key: "repay" });
+      }
+    } catch (error) {
+      console.error("Repay error:", error);
+      message.error({ content: "Lỗi kết nối đến cổng thanh toán!", key: "repay" });
+    }
+  };
   const canCancelOrder = (order) => {
-    return statusToIndex(order.status) === 0; // pending = 0
+    return statusToIndex(order.status) === 0;
   };
 
   return (
@@ -245,6 +267,7 @@ export function ListOrders() {
                 <h4 style={{ margin: "10px" }}>Order ID: #{order.id}</h4>
                 <Space>
                   {renderStatusTag(order.status)}
+
                   <Button
                     type="primary"
                     icon={<EyeOutlined />}
@@ -253,6 +276,21 @@ export function ListOrders() {
                   >
                     Xem chi tiết
                   </Button>
+
+                  {String(order.payment_method).toUpperCase() === "MOMO" && statusToIndex(order.status) === 0 && (
+                     <Button
+                       icon={<DollarOutlined />}
+                       style={{
+                         backgroundColor: "#a50064",
+                         borderColor: "#a50064",
+                         color: "white"
+                       }}
+                       onClick={() => handleRepay(order.id)}
+                     >
+                       Thanh toán lại
+                     </Button>
+                  )}
+
                   {canCancelOrder(order) && (
                     <Button
                       className="cancel-order-btn"
