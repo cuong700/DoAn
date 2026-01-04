@@ -15,73 +15,93 @@ function Analytics() {
 
   const [dataSource, setDataSource] = useState([]);
   const [loading, setLoading] = useState(false);
-
   const [monthlyRevenue, setMonthlyRevenue] = useState([]);
 
-  useEffect(() => {
-    const fetchApi = async () => {
-      try {
-        setLoading(true);
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+    total: 0,
+  });
 
-        const token = getCookie("token");
-        const headers = {
-          Authorization: token ? `Bearer ${token}` : undefined,
-        };
+  const fetchApi = async (current = 1, pageSize = 10) => {
+    try {
+      setLoading(true);
 
-        const [resNumber, resChart] = await Promise.all([
-          fetch("http://localhost:8090/api/v1/orders/revenue/products", {
-            method: "GET",
-            headers,
-          }),
-          fetch("http://localhost:8090/api/v1/orders/revenue/chart", {
-            method: "GET",
-            headers,
-          }),
-        ]);
+      const token = getCookie("token");
+      const headers = {
+        Authorization: token ? `Bearer ${token}` : undefined,
+      };
 
-        if (!resNumber.ok || !resChart.ok) {
-          throw new Error("Không lấy được dữ liệu thống kê");
-        }
+      const params = new URLSearchParams({
+        page: String(current - 1),
+        limit: String(pageSize),
+      });
 
-        const dataNumber = await resNumber.json();
-        const dataChart = await resChart.json();
+      const [resNumber, resChart] = await Promise.all([
+        fetch(`http://localhost:8090/api/v1/orders/admin/revenue/products?${params.toString()}`, {
+          method: "GET",
+          headers,
+        }),
+        fetch("http://localhost:8090/api/v1/orders/admin/revenue/chart", {
+          method: "GET",
+          headers,
+        }),
+      ]);
 
-        setSummary({
-          totalRevenue: Number(dataNumber.grand_total_revenue || 0),
-          totalQuantitySold: Number(dataChart.grand_total_quantity || 0),
-          totalCost: Number(dataNumber.grand_total_cost || 0),
-          totalProfit: Number(dataNumber.grand_total_profit || 0),
-        });
-
-        const productData = (dataNumber.products?.content || []).map(
-          (item, index) => ({
-            key: item.productId,
-            productId: item.productId,
-            productName: item.productName,
-            thumbnail: item.thumbnail,
-            totalRevenue: Number(item.totalRevenue || 0),
-            totalQuantitySold: Number(item.totalQuantitySold || 0),
-            totalCost: Number(item.totalCost || 0),
-            totalProfit: Number(item.totalProfit || 0),
-          })
-        );
-        setDataSource(productData);
-
-        // Xử lý chart data
-        const chartData = Array.isArray(dataChart) ? dataChart : [];
-        const revenueData = chartData.map((item) => ({
-          month: `Tháng ${item.month}`,
-          profit: Number(item.profit || 0),
-        }));
-        setMonthlyRevenue(revenueData);
-      } catch (error) {
-        console.error(error);
-        message.error("Lỗi tải dữ liệu thống kê!");
-      } finally {
-        setLoading(false);
+      if (!resNumber.ok || !resChart.ok) {
+        throw new Error("Không lấy được dữ liệu thống kê");
       }
-    };
-    fetchApi();
+
+      const dataNumber = await resNumber.json();
+      const dataChart = await resChart.json();
+
+      setSummary({
+        totalRevenue: Number(dataNumber.grand_total_revenue || 0),
+        totalQuantitySold: Number(dataNumber.grand_total_quantity || 0),
+        totalCost: Number(dataNumber.grand_total_cost || 0),
+        totalProfit: Number(dataNumber.grand_total_profit || 0),
+      });
+
+      const productData = (dataNumber.products?.content || []).map(
+        (item) => ({
+          key: item.productId,
+          productId: item.productId,
+          productName: item.productName,
+          thumbnail: item.thumbnail,
+          totalRevenue: Number(item.totalRevenue || 0),
+          totalQuantitySold: Number(item.totalQuantitySold || 0),
+          totalCost: Number(item.totalCost || 0),
+          totalProfit: Number(item.totalProfit || 0),
+        })
+      );
+      setDataSource(productData);
+
+      // Cập nhật thông tin phân trang từ backend
+      const total = dataNumber.products?.totalElements || 0;
+      setPagination((prev) => ({
+        ...prev,
+        current,
+        pageSize,
+        total,
+      }));
+
+      // Xử lý chart data
+      const chartData = Array.isArray(dataChart) ? dataChart : [];
+      const revenueData = chartData.map((item) => ({
+        month: `Tháng ${item.month}`,
+        profit: Number(item.profit || 0),
+      }));
+      setMonthlyRevenue(revenueData);
+    } catch (error) {
+      console.error(error);
+      message.error("Lỗi tải dữ liệu thống kê!");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchApi(pagination.current, pagination.pageSize);
   }, []);
 
   const config = {
@@ -96,9 +116,8 @@ function Analytics() {
     },
     meta: {
       month: { alias: "Tháng" },
-      revenue: { alias: "Lợi nhuận (VND)" },
+      profit: { alias: "Lợi nhuận (VND)" },
     },
-
     yAxis: {
       label: {
         formatter: (v) => {
@@ -120,6 +139,15 @@ function Analytics() {
 
   const columns = [
     {
+      title: "STT",
+      render: (_, __, index) => {
+        const page = pagination.current;
+        const pageSize = pagination.pageSize;
+        return (page - 1) * pageSize + index + 1;
+      },
+      width: 80,
+    },
+    {
       title: "Sản phẩm",
       dataIndex: "productName",
       key: "productName",
@@ -131,6 +159,7 @@ function Analytics() {
             <img
               src={record.thumbnail}
               alt={record.productName}
+              crossOrigin="anonymous"
               className="analytics-product-image"
               style={{
                 width: 50,
@@ -186,6 +215,7 @@ function Analytics() {
       ),
     },
   ];
+
   return (
     <>
       <h2 className="analytics-title">Thống kê doanh thu</h2>
@@ -279,9 +309,15 @@ function Analytics() {
           <Table
             dataSource={dataSource}
             columns={columns}
+            loading={loading}
+            rowKey="productId"
             pagination={{
-              pageSize: 10,
+              ...pagination,
               showTotal: (total) => `Tổng ${total} sản phẩm`,
+            }}
+            onChange={(newPagination) => {
+              setPagination(newPagination);
+              fetchApi(newPagination.current, newPagination.pageSize);
             }}
             scroll={{ x: 900 }}
           />

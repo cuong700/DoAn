@@ -86,7 +86,6 @@ function Profile() {
         }
       );
 
-      console.log(payload);
 
       if (!res.ok) throw new Error("Update thất bại");
 

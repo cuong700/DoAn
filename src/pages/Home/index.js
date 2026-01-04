@@ -209,7 +209,8 @@ function Home() {
                       {product.category_name}
                     </div>
 
-                    {product.display_price && product.display_price < product.price ? (
+                    {product.display_price &&
+                    product.display_price < product.price ? (
                       <>
                         <div className="product__price-new1">
                           {product.display_price.toLocaleString("vi-VN")} đ
@@ -223,16 +224,19 @@ function Home() {
                         <div className="product__price-new1">
                           {product.price.toLocaleString("vi-VN")} đ
                         </div>
-
-                        {/* placeholder để giữ chiều cao */}
-                        <div className="product__price-old placeholder"> </div>
+                        <div className="product__price-old1 placeholder">
+                          &nbsp;
+                        </div>
                       </>
                     )}
-                    {product.special_offer && product.discount_badge && (
-                      <div className="product-badge1">
-                        {product.discount_badge}
-                      </div>
-                    )}
+
+                    <div className="product-badge-container">
+                      {product.special_offer && product.discount_badge && (
+                        <div className="product-badge1">
+                          {product.discount_badge}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

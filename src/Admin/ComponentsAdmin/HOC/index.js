@@ -35,7 +35,6 @@ const withAuth = (Component) => {
 
           const data = await res.json();
 
-          // JSON bạn gửi ở trên -> đọc role.name
           const roleName = data?.role?.name;
 
           if (roleName === "ADMIN") {

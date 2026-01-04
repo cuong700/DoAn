@@ -57,7 +57,7 @@ function CategoryManagement() {
       const json = await res.json();
       let categories = json?.data?.content || [];
 
-      // sắp theo id giảm dần
+
       categories = categories.sort((a, b) => b.id - a.id);
 
       setDataSource(categories);

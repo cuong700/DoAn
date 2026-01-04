@@ -18,7 +18,7 @@ import withAuth from "../../ComponentsAdmin/HOC";
 
 function LayoutDefault() {
   const [collapsed, setCollapsed] = useState(false);
-  const [user, setUser] = useState(false);
+  const [user, setUser] = useState("");
 
   const navigate = useNavigate();
 
@@ -112,15 +112,13 @@ function LayoutDefault() {
           </div>
 
           <div className="header__nav">
-            
-              <div
-                className="header__collapse"
-                onClick={() => setCollapsed(!collapsed)}
-              >
-                <MenuFoldOutlined />
-              </div>
+            <div
+              className="header__collapse"
+              onClick={() => setCollapsed(!collapsed)}
+            >
+              <MenuFoldOutlined />
+            </div>
 
-             
             <div className="header__right">
               <Dropdown
                 menu={{ items: menuItems, onClick: handleMenuClick }}

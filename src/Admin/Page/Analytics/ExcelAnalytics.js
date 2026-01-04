@@ -17,7 +17,7 @@ function ExcelAnalytics() {
       if (end) query.append("end", end);
 
       const res = await fetch(
-        `http://localhost:8090/api/v1/orders/revenue/products/export?${query.toString()}`,
+        `http://localhost:8090/api/v1/orders/admin/revenue/products/export?${query.toString()}`,
         {
           method: "GET",
           headers: {
@@ -38,7 +38,7 @@ function ExcelAnalytics() {
       link.download = "doanh-thu.xlsx";
       document.body.appendChild(link);
       link.click();
-      link.remove();
+      link.remove();//xoá thẻ a sau khi click
       window.URL.revokeObjectURL(url); //Giải phóng URL tạm để tránh tốn bộ nhớ.
 
       message.success("Xuất Excel thành công");
