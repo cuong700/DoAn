@@ -4,7 +4,6 @@ import Login from "../pages/Login";
 import Register from "../pages/Register";
 import AboutUs from "../pages/About us";
 import Contact from "../pages/Contact";
-import Error404 from "../pages/Error404";
 import Logout from "../pages/Logout";
 import User from "../pages/User";
 import Cart from "../pages/Cart";
@@ -75,10 +74,6 @@ export const routes = [
       {
         path: "checkout",
         element: <Checkout />,
-      },
-      {
-        path: "*",
-        element: <Error404 />,
       },
     ],
   },

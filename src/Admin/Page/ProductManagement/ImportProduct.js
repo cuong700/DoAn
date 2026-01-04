@@ -5,7 +5,8 @@ import { getCookie } from "../../../helpers/cookie";
 
 const { Dragger } = Upload;
 
-function ImportProduct({ onReload }) {
+function ImportProduct(props) {
+  const { onReload } = props;
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [fileList, setFileList] = useState([]);
@@ -88,7 +89,7 @@ function ImportProduct({ onReload }) {
 
   const uploadProps = {
     accept: ".xlsx,.xls",
-    maxCount: 1,
+    maxCount: 1,  
     beforeUpload: (file) => {
       const isExcel =
         file.type ===

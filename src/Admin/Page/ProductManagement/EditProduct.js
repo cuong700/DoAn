@@ -15,15 +15,7 @@ import {
 } from "antd";
 import { useState, useEffect } from "react";
 // import "./ProductManagement.css"; // Removed to prevent compilation error
-// import { getCookie } from "../../../helpers/cookie"; // Removed to prevent compilation error
-
-// Local implementation of getCookie to replace the missing import
-const getCookie = (name) => {
-  if (typeof document === 'undefined') return '';
-  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-  if (match) return match[2];
-  return '';
-};
+import { getCookie } from "../../../helpers/cookie";
 
 function EditProduct(props) {
   const { record, onReload } = props;
@@ -49,29 +41,18 @@ function EditProduct(props) {
         setLoading(true);
         const token = getCookie("token");
 
-        // Attempt to fetch, catch network errors individually
-        let res;
-        try {
-            res = await fetch(
-                "http://localhost:8090/api/v1/categories/public/search?active=true",
-                {
-                    method: "GET",
-                    headers: { Authorization: `Bearer ${token}` },
-                }
-            );
-        } catch (netError) {
-            console.warn("Backend unavailable (Network Error), using mock categories.");
-            // Mock categories for preview environment
-            setCategories([
-                { value: 1, label: "Giày Thể Thao (Mock)" },
-                { value: 2, label: "Giày Sneaker (Mock)" },
-                { value: 3, label: "Giày Da (Mock)" },
-                { value: 4, label: "Dép Sandal (Mock)" },
-            ]);
-            return;
+        const res = await fetch(
+          "http://localhost:8090/api/v1/categories/public/search?active=true",
+          {
+            method: "GET",
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        if (!res.ok) {
+          throw new Error(`Lỗi server: ${res.status}`);
         }
 
-        if (!res.ok) throw new Error("Không lấy được danh mục");
         const json = await res.json();
         const mapped = json.data.content
           .filter((item) => item.active === true)
@@ -80,16 +61,15 @@ function EditProduct(props) {
             label: item.name,
           }));
         setCategories(mapped);
+
       } catch (error) {
-        console.error(error);
-        // Even if json parsing fails, set mocks so UI works
-        setCategories([
-            { value: 1, label: "Giày Thể Thao (Mock)" },
-            { value: 2, label: "Giày Sneaker (Mock)" },
-        ]);
+        console.error("Lỗi khi tải danh mục:", error);
+        setCategories([]); 
         notiApi.error({
-          message: "Lỗi tải danh mục",
-          description: "Vui lòng thử lại sau.",
+          message: "Không thể tải danh mục",
+          description:
+            error.message || "Vui lòng kiểm tra kết nối và thử lại sau.",
+          duration: 5,
         });
       } finally {
         setLoading(false);
@@ -98,11 +78,8 @@ function EditProduct(props) {
     fetchCategory();
   }, []);
 
-  // Safety check: if record is undefined, don't render anything to avoid crashes
-  if (!record) return null;
 
   const handleShowModal = () => {
-    // Reset state trước khi mở
     setExistingImages([]);
     setThumbnailFile([]);
     setImagesFile([]);
@@ -180,7 +157,7 @@ function EditProduct(props) {
         value.active !== undefined ? value.active : true
       );
 
-      // Xử lý thumbnail mới
+      
       if (thumbnailFile.length > 0) {
         const thumbnail = thumbnailFile[0].originFileObj;
         if (thumbnail) {
@@ -197,31 +174,28 @@ function EditProduct(props) {
         });
       }
 
-      // XỬ LÝ KEPT IMAGES (Ảnh cũ giữ lại)
-      // FIX: KHÔNG ĐƯỢC XÓA EXTENSION (.jpg, .png) VÌ DATABASE CẦN TÊN CHÍNH XÁC
+      // Xử lý ảnh cũ giữ lại
       existingImages.forEach((url) => {
-        // Lấy tên file từ URL
+        
         let filename = url.substring(url.lastIndexOf("/") + 1);
 
-        // Loại bỏ query params nếu có
+       
         if (filename.includes("?")) {
           filename = filename.split("?")[0];
         }
 
-        // Decode tên file (đề phòng tiếng Việt hoặc ký tự đặc biệt)
+
         try {
           filename = decodeURIComponent(filename);
         } catch (e) {
           console.warn("Không decode được filename:", e);
         }
 
-        // --- ĐÃ XÓA ĐOẠN CODE CẮT EXTENSION TẠI ĐÂY ---
-        // Chúng ta cần gửi tên đầy đủ (VD: image.jpg) để Backend so sánh chính xác
-
+       
         formData.append("keptImages", filename);
       });
 
-      // Xử lý sizes
+  
       if (value.sizes && Array.isArray(value.sizes) && value.sizes.length > 0) {
         value.sizes.forEach((item, index) => {
           formData.append(`sizeQuantities[${index}].sizeName`, item.name);
@@ -231,40 +205,18 @@ function EditProduct(props) {
 
       const token = getCookie("token");
 
-      let res;
-      try {
-        res = await fetch(
-            `http://localhost:8090/api/v1/products/admin/update/${record.id}`,
-            {
-            method: "PUT", // <-- ĐÃ ĐỔI TỪ PATCH SANG PUT
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-            body: formData,
-            }
-        );
-      } catch (networkError) {
-        // Handle network error (simulated success)
-        console.warn("Backend unavailable, simulating success for demo.");
-        notiApi.success({
-            message: "Cập nhật thành công (Giả lập)",
-            description: "Backend offline - Đã cập nhật giao diện giả lập.",
-        });
-        setShowModal(false);
-        form.resetFields();
-        setThumbnailFile([]);
-        setImagesFile([]);
-        setExistingImages([]);
-        if (onReload && typeof onReload === "function") {
-            await onReload();
+      const res = await fetch(
+        `http://localhost:8090/api/v1/products/admin/update/${record.id}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
         }
-        return; // Exit function
-      }
+      );
 
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(`Update thất bại: ${res.status} - ${errorText}`);
-      }
+      if (!res.ok) throw new Error("Update thất bại");
 
       notiApi.success({
         message: "Cập nhật thành công",
@@ -277,15 +229,14 @@ function EditProduct(props) {
       setImagesFile([]);
       setExistingImages([]);
 
-      if (onReload && typeof onReload === "function") {
-        await onReload();
-      }
-
+      setTimeout(() => {
+        onReload();
+      }, 1000);
     } catch (error) {
-      console.error("LỖI UPDATE:", error);
+      console.error(error);
       notiApi.error({
-        message: "Lỗi cập nhật sản phẩm",
-        description: error.message || "Vui lòng thử lại sau.",
+        message: "Lỗi tải danh sách sản phẩm",
+        description: "Vui lòng thử lại sau.",
       });
     } finally {
       setSpinning(false);
@@ -314,11 +265,7 @@ function EditProduct(props) {
         destroyOnClose
       >
         <Spin spinning={spinning} tip="Đang cập nhật...">
-          <Form
-            layout="vertical"
-            onFinish={handleSubmit}
-            form={form}
-          >
+          <Form layout="vertical" onFinish={handleSubmit} form={form}>
             {/* Ảnh đại diện */}
             <Form.Item label="Ảnh đại diện (Thumbnail)">
               {record.thumbnail && thumbnailFile.length === 0 && (
