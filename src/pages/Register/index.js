@@ -47,7 +47,6 @@ function Register() {
       password: password,
       retype_password: retypePassword,
       date_of_birth: dateOfBirth,
-      role_id: 1,
     };
 
     try {
