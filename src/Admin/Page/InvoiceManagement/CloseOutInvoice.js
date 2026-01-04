@@ -104,6 +104,7 @@ function CloseOutInvoice(props) {
     form.resetFields();
   };
 
+  //Kiểm tra xem đơn hàng nào có thể từ chối
   const canReject = () => {
     if (selectedRowKeys.length === 0) return false;
 

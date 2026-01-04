@@ -7,13 +7,12 @@ import CreateCoupon from "./CreateCoupon";
 import { getCookie } from "../../../helpers/cookie";
 import "./CouponManagement.css";
 
-
 const { Search } = Input;
 
 function CouponManagement() {
   const [pagination, setPagination] = useState({
     current: 1,
-    pageSize: 10,
+    pageSize: 5,
     total: 0,
   });
   const [loading, setLoading] = useState(false);
@@ -25,7 +24,7 @@ function CouponManagement() {
   const fetchApi = async (
     searchText = "",
     current = 1,
-    pageSize = 10,
+    pageSize = 5,
     active = "ĐANG_HOAT_DONG"
   ) => {
     try {
@@ -228,7 +227,11 @@ function CouponManagement() {
             <Space>
               <EditCoupon record={record} onReload={handleReload} />
 
-              <DeleteCoupon record={record} onReload={handleReload} activeFilter={activeFilter}/>
+              <DeleteCoupon
+                record={record}
+                onReload={handleReload}
+                activeFilter={activeFilter}
+              />
             </Space>
           </>
         );
@@ -276,7 +279,17 @@ function CouponManagement() {
         columns={columns}
         dataSource={dataSource}
         loading={loading}
-        onChange={(newPagination) => setPagination(newPagination)}
+        rowKey="id"
+        pagination={pagination}
+        onChange={(newPagination) => {
+          setPagination(newPagination);
+          fetchApi(
+            keyword,
+            newPagination.current,
+            newPagination.pageSize,
+            activeFilter
+          );
+        }}
         scroll={{ x: 1800 }}
       />
     </>

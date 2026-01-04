@@ -90,6 +90,7 @@ function EditCoupon(props) {
   const discountValidator = (_, value) => {
     if (value == null) return Promise.reject("Bắt buộc!");
 
+    //Chỉ hiện Select sản phẩm khi áp dụng có điều kiện
     const isPercent = form.getFieldValue("is_percent");
 
     if (isPercent) {

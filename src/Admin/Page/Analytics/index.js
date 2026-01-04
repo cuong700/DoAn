@@ -88,7 +88,10 @@ function Analytics() {
 
       // Xử lý chart data
       const chartData = Array.isArray(dataChart) ? dataChart : [];
-      const revenueData = chartData.map((item) => ({
+
+      const sortedData = chartData.sort((a, b) => a.month - b.month);
+      
+      const revenueData = sortedData.map((item) => ({
         month: `Tháng ${item.month}`,
         profit: Number(item.profit || 0),
       }));

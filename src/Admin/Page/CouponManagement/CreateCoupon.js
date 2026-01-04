@@ -96,18 +96,6 @@ function CreateCoupon(props) {
 
       const token = getCookie("token");
 
-      // let productIds = [];
-
-      // if (value.product_id) {
-      //   if (Array.isArray(value.product_ids)) {
-      //     // Trường hợp 1: Dùng mode="multiple"
-      //     productIds = value.product_ids.map((id) => Number(id));
-      //   } else {
-      //     // Trường hợp 2: Không dùng mode="multiple" (chỉ 1 giá trị)
-      //     productIds = [Number(value.product_ids)];
-      //   }
-      // }
-
       if (
         value.apply_to_all === false &&
         (!value.product_id || value.product_id.length === 0)

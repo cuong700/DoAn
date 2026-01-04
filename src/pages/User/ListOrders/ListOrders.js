@@ -11,7 +11,11 @@ import {
   Input,
   message,
 } from "antd";
-import { EyeOutlined, CloseCircleOutlined, DollarOutlined } from "@ant-design/icons";
+import {
+  EyeOutlined,
+  CloseCircleOutlined,
+  DollarOutlined,
+} from "@ant-design/icons";
 import { getCookie } from "../../../helpers/cookie";
 import "./ListOrders.css";
 import NoData from "../NoData";
@@ -154,7 +158,9 @@ export function ListOrders() {
     try {
       const token = getCookie("token");
       await axios.put(
-        `http://localhost:8090/api/v1/orders/user/cancel/${orderToCancel.id}?reason=${encodeURIComponent(cancelReason.trim())}`,
+        `http://localhost:8090/api/v1/orders/user/cancel/${
+          orderToCancel.id
+        }?reason=${encodeURIComponent(cancelReason.trim())}`,
         {},
         {
           headers: {
@@ -211,11 +217,17 @@ export function ListOrders() {
         message.success({ content: "Đang chuyển hướng...", key: "repay" });
         window.location.href = resultData.payUrl;
       } else {
-        message.error({ content: "Không thể lấy link thanh toán!", key: "repay" });
+        message.error({
+          content: "Không thể lấy link thanh toán!",
+          key: "repay",
+        });
       }
     } catch (error) {
       console.error("Repay error:", error);
-      message.error({ content: "Lỗi kết nối đến cổng thanh toán!", key: "repay" });
+      message.error({
+        content: "Lỗi kết nối đến cổng thanh toán!",
+        key: "repay",
+      });
     }
   };
   const canCancelOrder = (order) => {
@@ -277,19 +289,20 @@ export function ListOrders() {
                     Xem chi tiết
                   </Button>
 
-                  {String(order.payment_method).toUpperCase() === "MOMO" && statusToIndex(order.status) === 0 && (
-                     <Button
-                       icon={<DollarOutlined />}
-                       style={{
-                         backgroundColor: "#a50064",
-                         borderColor: "#a50064",
-                         color: "white"
-                       }}
-                       onClick={() => handleRepay(order.id)}
-                     >
-                       Thanh toán lại
-                     </Button>
-                  )}
+                  {String(order.payment_method).toUpperCase() === "MOMO" &&
+                    String(order.payment_status).toUpperCase() === "UNPAID" && (
+                      <Button
+                        icon={<DollarOutlined />}
+                        style={{
+                          backgroundColor: "#a50064",
+                          borderColor: "#a50064",
+                          color: "white",
+                        }}
+                        onClick={() => handleRepay(order.id)}
+                      >
+                        Thanh toán lại
+                      </Button>
+                    )}
 
                   {canCancelOrder(order) && (
                     <Button

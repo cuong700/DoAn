@@ -1,4 +1,5 @@
 import {
+  HomeOutlined,
   LogoutOutlined,
   MenuFoldOutlined,
   RightOutlined,
@@ -34,6 +35,10 @@ function LayoutDefault() {
       case "profile":
         navigate("/admin/profile");
         break;
+
+      case "home":
+      navigate("/"); 
+      break;
 
       case "logout":
         deleteCookie("token");
@@ -80,6 +85,19 @@ function LayoutDefault() {
           <Space>
             <UserOutlined />
             <span>Profile</span>
+          </Space>
+          <RightOutlined className="admin-dropdown__arrow" />
+        </div>
+      ),
+    },
+
+    {
+      key: "home",
+      label: (
+        <div className="admin-dropdown__item">
+          <Space>
+            <HomeOutlined />
+            <span>Về trang chủ</span>
           </Space>
           <RightOutlined className="admin-dropdown__arrow" />
         </div>
