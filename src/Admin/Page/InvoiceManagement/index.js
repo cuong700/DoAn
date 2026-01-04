@@ -63,6 +63,7 @@ function OrderManagement() {
         key: item.id,
       }));
       setDataSource(mapped);
+      
       setPagination((prev) => ({
         ...prev,
         current,

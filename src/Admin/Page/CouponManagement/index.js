@@ -6,7 +6,7 @@ import DeleteCoupon from "./DeleteCoupon";
 import CreateCoupon from "./CreateCoupon";
 import { getCookie } from "../../../helpers/cookie";
 import "./CouponManagement.css";
-import { render } from "@testing-library/react";
+
 
 const { Search } = Input;
 
@@ -57,7 +57,7 @@ function CouponManagement() {
       const json = await res.json();
 
       const coupons = json.data || [];
-      coupons.sort((a, b) => b.id - a.id); // Sắp xếp theo id giảm dần
+      coupons.sort((a, b) => b.id - a.id);
 
       setDataSource(coupons);
 

@@ -38,7 +38,7 @@ function CreateProduct(props) {
 
         const token = getCookie("token");
         const res = await fetch(
-          "http://localhost:8090/api/v1/categories/public/search",
+          "http://localhost:8090/api/v1/categories/public/search?active=true",
           {
             method: "GET",
             headers: { Authorization: `Bearer ${token}` },

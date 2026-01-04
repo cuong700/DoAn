@@ -3,7 +3,6 @@ import {
   Space,
   Table,
   Tag,
-  Tooltip,
   Input,
   Select,
   Switch,
@@ -11,9 +10,8 @@ import {
 } from "antd";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
-import DeleteUser from "./DeleteUser";
 import ViewUser from "./ViewUser";
-import EditUser from "./EditUser";
+
 
 import "./UserAccounts.css";
 import { getCookie } from "../../../helpers/cookie";

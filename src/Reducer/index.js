@@ -1,12 +1,11 @@
 
 
-import { combineReducers } from 'redux'; // Import thêm combineReducers
-import cartReducer from './cart'; // Điều chỉnh đường dẫn nếu cần
+import { combineReducers } from 'redux'; 
 import Checkstatus from './status'; 
 
 
 const allReducer = combineReducers({
-  cartReducer, Checkstatus
+   Checkstatus
 
 });
 
