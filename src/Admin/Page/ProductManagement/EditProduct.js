@@ -1,4 +1,4 @@
-import { EditOutlined, PlusOutlined, DeleteOutlined } from "@ant-design/icons";
+import { EditOutlined, PlusOutlined } from "@ant-design/icons";
 import {
   Button,
   Col,
@@ -13,66 +13,46 @@ import {
   Switch,
   Upload,
 } from "antd";
-import { useState, useEffect } from "react";
-// import "./ProductManagement.css"; // Removed to prevent compilation error
-// import { getCookie } from "../../../helpers/cookie"; // Removed to prevent compilation error
-
-// Local implementation of getCookie to replace the missing import
-const getCookie = (name) => {
-  if (typeof document === 'undefined') return '';
-  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-  if (match) return match[2];
-  return '';
-};
+import { useEffect, useState } from "react";
+import "./ProductManagement.css";
+import { getCookie } from "../../../helpers/cookie";
 
 function EditProduct(props) {
   const { record, onReload } = props;
   const [showModal, setShowModal] = useState(false);
 
   const [form] = Form.useForm();
+
   const [spinning, setSpinning] = useState(false);
+
   const [notiApi, contextHolder] = notification.useNotification();
 
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // State cho ảnh mới (Upload)
   const [thumbnailFile, setThumbnailFile] = useState([]);
   const [imagesFile, setImagesFile] = useState([]);
-
-  // State quản lý danh sách ảnh CŨ
-  const [existingImages, setExistingImages] = useState([]);
+  const [deletedThumbnail, setDeletedThumbnail] = useState(false);
+  const [deletedImages, setDeletedImages] = useState([]);
 
   useEffect(() => {
     const fetchCategory = async () => {
       try {
         setLoading(true);
-        const token = getCookie("token");
 
-        // Attempt to fetch, catch network errors individually
-        let res;
-        try {
-            res = await fetch(
-                "http://localhost:8090/api/v1/categories/public/search?active=true",
-                {
-                    method: "GET",
-                    headers: { Authorization: `Bearer ${token}` },
-                }
-            );
-        } catch (netError) {
-            console.warn("Backend unavailable (Network Error), using mock categories.");
-            // Mock categories for preview environment
-            setCategories([
-                { value: 1, label: "Giày Thể Thao (Mock)" },
-                { value: 2, label: "Giày Sneaker (Mock)" },
-                { value: 3, label: "Giày Da (Mock)" },
-                { value: 4, label: "Dép Sandal (Mock)" },
-            ]);
-            return;
-        }
+        const token = getCookie("token");
+        const res = await fetch(
+          "http://localhost:8090/api/v1/categories/public/search?active=true",
+          {
+            method: "GET",
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
         if (!res.ok) throw new Error("Không lấy được danh mục");
+
         const json = await res.json();
+
         const mapped = json.data.content
           .filter((item) => item.active === true)
           .map((item) => ({
@@ -82,38 +62,23 @@ function EditProduct(props) {
         setCategories(mapped);
       } catch (error) {
         console.error(error);
-        // Even if json parsing fails, set mocks so UI works
-        setCategories([
-            { value: 1, label: "Giày Thể Thao (Mock)" },
-            { value: 2, label: "Giày Sneaker (Mock)" },
-        ]);
         notiApi.error({
-          message: "Lỗi tải danh mục",
+          message: "Lỗi tải danh mục sản phẩm",
           description: "Vui lòng thử lại sau.",
         });
       } finally {
         setLoading(false);
       }
     };
+
     fetchCategory();
   }, []);
 
-  // Safety check: if record is undefined, don't render anything to avoid crashes
-  if (!record) return null;
-
   const handleShowModal = () => {
-    // Reset state trước khi mở
-    setExistingImages([]);
-    setThumbnailFile([]);
-    setImagesFile([]);
-
-    // Load ảnh từ record hiện tại
-    if (record?.images && Array.isArray(record.images)) {
-      setExistingImages([...record.images]);
-    }
+    setShowModal(true);
 
     const currentSizes =
-      Array.isArray(record?.sizes) && record.sizes.length > 0
+      Array.isArray(record.sizes) && record.sizes.length > 0
         ? record.sizes.map((s) => ({
             name: s.name || "",
             total: s.total || 0,
@@ -121,19 +86,19 @@ function EditProduct(props) {
         : [];
 
     form.setFieldsValue({
-      name: record?.name,
-      category_id: record?.category_id,
-      description: record?.description,
-      cost: typeof record?.cost === "number" ? record.cost : null,
-      price: typeof record?.price === "number" ? record.price : null,
+      name: record.name,
+      category_id: record.category_id,
+      description: record.description,
+      cost: typeof record.cost === "number" ? record.cost : null,
+      price: typeof record.price === "number" ? record.price : null,
       display_price:
-        typeof record?.display_price === "number" ? record.display_price : null,
-      weight: typeof record?.weight === "number" ? record.weight : null,
+        typeof record.display_price === "number" ? record.display_price : null,
+      weight: typeof record.weight === "number" ? record.weight : null,
+      total_stock:
+        typeof record.total_stock === "number" ? record.total_stock : undefined,
       sizes: currentSizes,
       active: record?.active !== undefined ? record.active : true,
     });
-
-    setShowModal(true);
   };
 
   const handleCancel = () => {
@@ -141,46 +106,57 @@ function EditProduct(props) {
     form.resetFields();
     setThumbnailFile([]);
     setImagesFile([]);
-    setExistingImages([]);
+    setDeletedThumbnail(false);
+    setDeletedImages([]);
   };
 
-  const handleRemoveExistingImage = (imageToRemove) => {
-    setExistingImages((prev) => prev.filter((img) => img !== imageToRemove));
+  const handleDeleteThumbnail = () => {
+    setDeletedThumbnail(true);
+  };
+
+  const handleDeleteImage = (imageUrl) => {
+    setDeletedImages([...deletedImages, imageUrl]);
   };
 
   const handleSubmit = async (value) => {
     try {
       setSpinning(true);
+
       const formData = new FormData();
 
-      const parseSafeInt = (val) => {
-        if (val === undefined || val === null || val === "") return 0;
-        return parseInt(val.toString().replace(/\D/g, ""));
-      };
-
       formData.append("name", value.name);
-      formData.append("price", parseSafeInt(value.price));
-      formData.append("cost", parseSafeInt(value.cost));
-
-      if (
-        value.display_price !== undefined &&
-        value.display_price !== null &&
-        value.display_price !== ""
-      ) {
-        formData.append("originalPrice", value.display_price);
-      } else {
-        formData.append("originalPrice", -1);
-      }
-
-      formData.append("weight", parseSafeInt(value.weight));
+      formData.append(
+        "price",
+        parseInt(value.price.toString().replace(/\D/g, ""))
+      );
+      formData.append(
+        "cost",
+        parseInt(value.cost.toString().replace(/\D/g, ""))
+      );
+      formData.append(
+        "originalPrice",
+        parseInt(value.display_price.toString().replace(/\D/g, ""))
+      );
+      formData.append(
+        "weight",
+        parseInt(value.weight.toString().replace(/\D/g, ""))
+      );
       formData.append("categoryId", value.category_id);
       formData.append("description", value.description || "");
-      formData.append(
-        "active",
-        value.active !== undefined ? value.active : true
-      );
 
-      // Xử lý thumbnail mới
+      formData.append("active", value.active !== undefined ? value.active : true);
+
+      // Gửi thông tin ảnh đã xóa (nếu backend hỗ trợ)
+      if (deletedThumbnail) {
+        formData.append("deleteThumbnail", "true");
+      }
+
+      if (deletedImages.length > 0) {
+        deletedImages.forEach((url, index) => {
+          formData.append(`deletedImages[${index}]`, url);
+        });
+      }
+
       if (thumbnailFile.length > 0) {
         const thumbnail = thumbnailFile[0].originFileObj;
         if (thumbnail) {
@@ -188,7 +164,6 @@ function EditProduct(props) {
         }
       }
 
-      // Xử lý images mới (upload thêm)
       if (imagesFile.length > 0) {
         imagesFile.forEach((file) => {
           if (file.originFileObj) {
@@ -197,31 +172,6 @@ function EditProduct(props) {
         });
       }
 
-      // XỬ LÝ KEPT IMAGES (Ảnh cũ giữ lại)
-      // FIX: KHÔNG ĐƯỢC XÓA EXTENSION (.jpg, .png) VÌ DATABASE CẦN TÊN CHÍNH XÁC
-      existingImages.forEach((url) => {
-        // Lấy tên file từ URL
-        let filename = url.substring(url.lastIndexOf("/") + 1);
-
-        // Loại bỏ query params nếu có
-        if (filename.includes("?")) {
-          filename = filename.split("?")[0];
-        }
-
-        // Decode tên file (đề phòng tiếng Việt hoặc ký tự đặc biệt)
-        try {
-          filename = decodeURIComponent(filename);
-        } catch (e) {
-          console.warn("Không decode được filename:", e);
-        }
-
-        // --- ĐÃ XÓA ĐOẠN CODE CẮT EXTENSION TẠI ĐÂY ---
-        // Chúng ta cần gửi tên đầy đủ (VD: image.jpg) để Backend so sánh chính xác
-
-        formData.append("keptImages", filename);
-      });
-
-      // Xử lý sizes
       if (value.sizes && Array.isArray(value.sizes) && value.sizes.length > 0) {
         value.sizes.forEach((item, index) => {
           formData.append(`sizeQuantities[${index}].sizeName`, item.name);
@@ -230,41 +180,18 @@ function EditProduct(props) {
       }
 
       const token = getCookie("token");
-
-      let res;
-      try {
-        res = await fetch(
-            `http://localhost:8090/api/v1/products/admin/update/${record.id}`,
-            {
-            method: "PUT", // <-- ĐÃ ĐỔI TỪ PATCH SANG PUT
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-            body: formData,
-            }
-        );
-      } catch (networkError) {
-        // Handle network error (simulated success)
-        console.warn("Backend unavailable, simulating success for demo.");
-        notiApi.success({
-            message: "Cập nhật thành công (Giả lập)",
-            description: "Backend offline - Đã cập nhật giao diện giả lập.",
-        });
-        setShowModal(false);
-        form.resetFields();
-        setThumbnailFile([]);
-        setImagesFile([]);
-        setExistingImages([]);
-        if (onReload && typeof onReload === "function") {
-            await onReload();
+      const res = await fetch(
+        `http://localhost:8090/api/v1/products/admin/update/${record.id}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
         }
-        return; // Exit function
-      }
+      );
 
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(`Update thất bại: ${res.status} - ${errorText}`);
-      }
+      if (!res.ok) throw new Error("Update thất bại");
 
       notiApi.success({
         message: "Cập nhật thành công",
@@ -275,24 +202,29 @@ function EditProduct(props) {
       form.resetFields();
       setThumbnailFile([]);
       setImagesFile([]);
-      setExistingImages([]);
+      setDeletedThumbnail(false);
+      setDeletedImages([]);
 
-      if (onReload && typeof onReload === "function") {
-        await onReload();
-      }
-
+      setTimeout(() => {
+        onReload();
+      }, 1000);
     } catch (error) {
-      console.error("LỖI UPDATE:", error);
+      console.error(error);
       notiApi.error({
-        message: "Lỗi cập nhật sản phẩm",
-        description: error.message || "Vui lòng thử lại sau.",
+        message: "Lỗi tải danh sách sản phẩm",
+        description: "Vui lòng thử lại sau.",
       });
     } finally {
       setSpinning(false);
     }
   };
 
-  const rules = [{ required: true, message: "Bắt buộc!" }];
+  const rules = [
+    {
+      required: true,
+      message: "Bắt buộc!",
+    },
+  ];
 
   return (
     <>
@@ -310,32 +242,48 @@ function EditProduct(props) {
         open={showModal}
         onCancel={handleCancel}
         footer={null}
-        width={800}
-        destroyOnClose
       >
         <Spin spinning={spinning} tip="Đang cập nhật...">
           <Form
             layout="vertical"
             onFinish={handleSubmit}
             form={form}
+            destroyOnClose
           >
-            {/* Ảnh đại diện */}
-            <Form.Item label="Ảnh đại diện (Thumbnail)">
-              {record.thumbnail && thumbnailFile.length === 0 && (
-                <img
-                  src={record.thumbnail}
-                  alt="thumbnail"
-                  crossOrigin="anonymous"
-                  style={{
-                    width: 100,
-                    height: 100,
-                    objectFit: "cover",
-                    marginBottom: 8,
-                    borderRadius: 8,
-                    border: "1px solid #d9d9d9",
-                  }}
-                />
+            <Form.Item label="Ảnh sản phẩm" rules={rules}>
+              {record.thumbnail && thumbnailFile.length === 0 && !deletedThumbnail && (
+                <div style={{ position: "relative", display: "inline-block", marginBottom: 8 }}>
+                  <img
+                    src={record.thumbnail}
+                    alt="thumbnail"
+                    crossOrigin="anonymous"
+                    style={{
+                      width: 80,
+                      height: 80,
+                      objectFit: "cover",
+                      borderRadius: 4,
+                      border: "1px solid #eee",
+                    }}
+                  />
+                  <Button
+                    danger
+                    size="small"
+                    type="primary"
+                    style={{
+                      position: "absolute",
+                      top: -8,
+                      right: -8,
+                      padding: "0 8px",
+                      minWidth: "auto",
+                      height: 24,
+                    }}
+                    onClick={handleDeleteThumbnail}
+                  >
+                    ×
+                  </Button>
+                </div>
               )}
+
               <Upload
                 listType="picture-card"
                 fileList={thumbnailFile}
@@ -344,74 +292,61 @@ function EditProduct(props) {
                 maxCount={1}
                 accept="image/*"
               >
-                {thumbnailFile.length >= 1 ? null : <div>Thay ảnh</div>}
+                {thumbnailFile.length >= 1 ? null : <div>Chọn ảnh</div>}
               </Upload>
             </Form.Item>
 
-            {/* Ảnh mô tả */}
-            <Form.Item label="Ảnh mô tả (Album)">
-              {existingImages.length > 0 && (
-                <div
-                  style={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: 12,
-                    marginBottom: 12,
-                    padding: "10px",
-                    border: "1px dashed #d9d9d9",
-                    borderRadius: 8,
-                    background: "#fafafa",
-                  }}
-                >
-                  {existingImages.map((url, index) => (
-                    <div
-                      key={`existing-${index}-${url}`}
-                      style={{
-                        position: "relative",
-                        width: 90,
-                        height: 90,
-                      }}
-                    >
-                      <img
-                        src={url}
-                        alt={`old-${index}`}
-                        crossOrigin="anonymous"
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                          borderRadius: 4,
-                          border: "1px solid #eee",
-                        }}
-                        onError={(e) => {
-                          e.target.style.display = "none";
-                        }}
-                      />
-                      <Button
-                        type="primary"
-                        danger
-                        size="small"
-                        icon={<DeleteOutlined />}
-                        style={{
-                          position: "absolute",
-                          top: -8,
-                          right: -8,
-                          width: 24,
-                          height: 24,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          borderRadius: "50%",
-                          padding: 0,
-                          zIndex: 10,
-                          boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-                        }}
-                        onClick={() => handleRemoveExistingImage(url)}
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
+            <Form.Item label="Ảnh mô tả" rules={rules}>
+              {Array.isArray(record.images) &&
+                record.images.length > 0 &&
+                imagesFile.length === 0 && (
+                  <div
+                    style={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: 8,
+                      marginBottom: 8,
+                    }}
+                  >
+                    {record.images
+                      .filter((url) => !deletedImages.includes(url))
+                      .map((url, index) => (
+                        <div
+                          key={index}
+                          style={{ position: "relative", display: "inline-block" }}
+                        >
+                          <img
+                            src={url}
+                            crossOrigin="anonymous"
+                            alt={`image-${index}`}
+                            style={{
+                              width: 60,
+                              height: 60,
+                              objectFit: "cover",
+                              borderRadius: 4,
+                              border: "1px solid #eee",
+                            }}
+                          />
+                          <Button
+                            danger
+                            size="small"
+                            type="primary"
+                            style={{
+                              position: "absolute",
+                              top: -8,
+                              right: -8,
+                              padding: "0 8px",
+                              minWidth: "auto",
+                              height: 24,
+                            }}
+                            onClick={() => handleDeleteImage(url)}
+                          >
+                            ×
+                          </Button>
+                        </div>
+                      ))}
+                  </div>
+                )}
 
               <Upload
                 listType="picture-card"
@@ -421,10 +356,7 @@ function EditProduct(props) {
                 onChange={({ fileList }) => setImagesFile(fileList)}
                 accept="image/*"
               >
-                <div>
-                  <PlusOutlined />
-                  <div style={{ marginTop: 8 }}>Thêm ảnh</div>
-                </div>
+                <div>Chọn ảnh</div>
               </Upload>
             </Form.Item>
 
@@ -450,22 +382,25 @@ function EditProduct(props) {
                   <InputNumber
                     min={0}
                     style={{ width: "100%" }}
+                    controls={false}
                     formatter={(value) =>
-                      `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+                      `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " đ"
                     }
-                    parser={(value) => value.replace(/\./g, "")}
+                    parser={(value) => value.replace(/[^\d]/g, "")}
                   />
                 </Form.Item>
               </Col>
+
               <Col span={12}>
                 <Form.Item label="Giá bán" name="price" rules={rules}>
                   <InputNumber
                     min={0}
                     style={{ width: "100%" }}
+                    controls={false}
                     formatter={(value) =>
-                      `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+                      `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " đ"
                     }
-                    parser={(value) => value.replace(/\./g, "")}
+                    parser={(value) => value.replace(/[^\d]/g, "")}
                   />
                 </Form.Item>
               </Col>
@@ -473,29 +408,27 @@ function EditProduct(props) {
 
             <Row gutter={16}>
               <Col span={12}>
-                <Form.Item label="Giá sale" name="display_price">
+                <Form.Item label="Giá sale" name="display_price" rules={rules}>
                   <InputNumber
                     min={0}
+                    controls={false}
                     style={{ width: "100%" }}
                     formatter={(value) =>
-                      value
-                        ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
-                        : ""
+                      `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " đ"
                     }
-                    parser={(value) => value.replace(/\./g, "")}
-                    placeholder="Để trống nếu không sale"
+                    parser={(value) => value.replace(/[^\d]/g, "")}
                   />
                 </Form.Item>
               </Col>
+
               <Col span={12}>
-                <Form.Item label="Trọng lượng (gram)" name="weight">
+                <Form.Item label="Trọng lượng" name="weight" >
                   <InputNumber
-                    min={0}
-                    style={{ width: "100%" }}
-                    formatter={(value) =>
-                      `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
-                    }
-                    parser={(value) => value.replace(/\./g, "")}
+                  min={0}
+                   style={{ width: "100%" }}
+                   controls={false}
+                    formatter={(v) => (v ? `${v} g` : "")}
+                    parser={(v) => v.replace(/[^\d]/g, "")}
                   />
                 </Form.Item>
               </Col>
@@ -508,6 +441,7 @@ function EditProduct(props) {
                   <span>Số lượng</span>
                   <span></span>
                 </div>
+
                 <Form.List name="sizes">
                   {(fields, { add, remove }) => (
                     <>
@@ -515,9 +449,9 @@ function EditProduct(props) {
                         style={{
                           maxHeight: "200px",
                           overflowY: "auto",
+                          border: "1px solid #d9d9d9",
+                          borderRadius: "4px",
                           padding: "8px",
-                          border: "1px solid #f0f0f0",
-                          borderRadius: 4,
                         }}
                       >
                         {fields.map((field) => (
@@ -525,23 +459,25 @@ function EditProduct(props) {
                             <Form.Item
                               name={[field.name, "name"]}
                               rules={[{ required: true, message: "Nhập size" }]}
-                              style={{ marginBottom: 0, flex: 1 }}
+                              style={{ marginBottom: 0 }}
                             >
-                              <Input placeholder="Size" />
+                              <Input placeholder="VD: 41" />
                             </Form.Item>
+
                             <Form.Item
                               name={[field.name, "total"]}
                               rules={[
                                 { required: true, message: "Nhập số lượng" },
                               ]}
-                              style={{ marginBottom: 0, flex: 1 }}
+                              style={{ marginBottom: 0 }}
                             >
                               <InputNumber
                                 min={0}
-                                placeholder="SL"
+                                placeholder="Số lượng"
                                 style={{ width: "100%" }}
                               />
                             </Form.Item>
+
                             <Button
                               type="link"
                               danger
@@ -551,11 +487,12 @@ function EditProduct(props) {
                             </Button>
                           </div>
                         ))}
+
                         <Button
                           type="dashed"
                           onClick={() => add()}
                           icon={<PlusOutlined />}
-                          style={{ marginTop: 8, width: "100%" }}
+                          style={{ marginTop: 8 }}
                         >
                           Thêm size
                         </Button>
@@ -566,7 +503,7 @@ function EditProduct(props) {
               </div>
             </Form.Item>
 
-            {!record.active && (
+             {!record.active && (
               <Form.Item
                 label="Trạng thái"
                 name="active"
@@ -579,11 +516,8 @@ function EditProduct(props) {
               </Form.Item>
             )}
 
-            <Form.Item style={{ marginTop: 20, textAlign: "right" }}>
-              <Button onClick={handleCancel} style={{ marginRight: 8 }}>
-                Hủy
-              </Button>
-              <Button type="primary" htmlType="submit" loading={spinning}>
+            <Form.Item>
+              <Button type="primary" htmlType="submit">
                 Cập nhật
               </Button>
             </Form.Item>
