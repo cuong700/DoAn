@@ -38,10 +38,13 @@ function Analytics() {
       });
 
       const [resNumber, resChart] = await Promise.all([
-        fetch(`http://localhost:8090/api/v1/orders/admin/revenue/products?${params.toString()}`, {
-          method: "GET",
-          headers,
-        }),
+        fetch(
+          `http://localhost:8090/api/v1/orders/admin/revenue/products?${params.toString()}`,
+          {
+            method: "GET",
+            headers,
+          }
+        ),
         fetch("http://localhost:8090/api/v1/orders/admin/revenue/chart", {
           method: "GET",
           headers,
@@ -62,18 +65,16 @@ function Analytics() {
         totalProfit: Number(dataNumber.grand_total_profit || 0),
       });
 
-      const productData = (dataNumber.products?.content || []).map(
-        (item) => ({
-          key: item.productId,
-          productId: item.productId,
-          productName: item.productName,
-          thumbnail: item.thumbnail,
-          totalRevenue: Number(item.totalRevenue || 0),
-          totalQuantitySold: Number(item.totalQuantitySold || 0),
-          totalCost: Number(item.totalCost || 0),
-          totalProfit: Number(item.totalProfit || 0),
-        })
-      );
+      const productData = (dataNumber.products?.content || []).map((item) => ({
+        key: item.productId,
+        productId: item.productId,
+        productName: item.productName,
+        thumbnail: item.thumbnail,
+        totalRevenue: Number(item.totalRevenue || 0),
+        totalQuantitySold: Number(item.totalQuantitySold || 0),
+        totalCost: Number(item.totalCost || 0),
+        totalProfit: Number(item.totalProfit || 0),
+      }));
       setDataSource(productData);
 
       // Cập nhật thông tin phân trang từ backend
@@ -157,7 +158,7 @@ function Analytics() {
         <div className="analytics-product-cell">
           {record.thumbnail && (
             <img
-              src={record.thumbnail}
+              src={`http://localhost:8090${record.thumbnail}`}
               alt={record.productName}
               crossOrigin="anonymous"
               className="analytics-product-image"

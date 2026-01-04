@@ -84,7 +84,7 @@ function ProductManagement() {
 
       const products = json?.data || [];
 
-      // sắp xếp theo id giảm dần
+
       products.sort((a, b) => b.id - a.id);
 
       const buildImageUrl = (path) => {
@@ -180,7 +180,7 @@ function ProductManagement() {
         <Image
           src={url}
           alt="product"
-          crossOrigin="anonymous" //Load ảnh từ domain khác mà không gửi cookie
+          crossOrigin="anonymous" //Load ảnh từ domain khác 
           style={{
             width: 100,
             height: 100,
