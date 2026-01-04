@@ -118,12 +118,20 @@ function EditProduct(props) {
     setDeletedImages([...deletedImages, imageUrl]);
   };
 
+  // Helper function: Extract filename từ URL
+  const extractFilename = (url) => {
+    if (!url) return "";
+    const parts = url.split("/");
+    return parts[parts.length - 1];
+  };
+
   const handleSubmit = async (value) => {
     try {
       setSpinning(true);
 
       const formData = new FormData();
 
+      // Thông tin cơ bản
       formData.append("name", value.name);
       formData.append(
         "price",
@@ -143,18 +151,11 @@ function EditProduct(props) {
       );
       formData.append("categoryId", value.category_id);
       formData.append("description", value.description || "");
-
       formData.append("active", value.active !== undefined ? value.active : true);
 
-      // Gửi thông tin ảnh đã xóa (nếu backend hỗ trợ)
+      // ===== XỬ LÝ THUMBNAIL =====
       if (deletedThumbnail) {
         formData.append("deleteThumbnail", "true");
-      }
-
-      if (deletedImages.length > 0) {
-        deletedImages.forEach((url, index) => {
-          formData.append(`deletedImages[${index}]`, url);
-        });
       }
 
       if (thumbnailFile.length > 0) {
@@ -164,6 +165,42 @@ function EditProduct(props) {
         }
       }
 
+      // ===== DEBUG: Kiểm tra dữ liệu trước khi gửi =====
+      console.log("🔍 DEBUG - record.images:", record.images);
+      console.log("🔍 DEBUG - deletedImages:", deletedImages);
+      console.log("🔍 DEBUG - imagesFile.length:", imagesFile.length);
+
+      // ===== XỬ LÝ DANH SÁCH ẢNH MÔ TẢ =====
+      // Nếu user CHƯA upload ảnh mới, gửi danh sách ảnh CÒN LẠI
+      if (imagesFile.length === 0 && Array.isArray(record.images) && record.images.length > 0) {
+        const keptImages = record.images
+          .filter((url) => {
+            const isDeleted = deletedImages.includes(url);
+            console.log(`   🔍 URL: ${url}`);
+            console.log(`   🔍 Extracted: ${extractFilename(url)}`);
+            console.log(`   🔍 isDeleted: ${isDeleted}`);
+            return !isDeleted;
+          })
+          .map((url) => {
+            const filename = extractFilename(url);
+            // Thử nhiều cách extract khác nhau
+            const alternatives = [
+              filename,                                           // abc.jpg
+              filename.replace(/\.(jpg|jpeg|png|gif|webp)$/i, ''), // abc (no extension)
+            ];
+
+            console.log(`   🔧 Alternatives for ${url}:`, alternatives);
+            return alternatives[0]; // Gửi cả extension
+          });
+
+        console.log("📤 Gửi keptImages lên backend:", keptImages);
+
+        keptImages.forEach((filename, index) => {
+          formData.append(`keptImages[${index}]`, filename);
+        });
+      }
+
+      // Nếu user upload ảnh mới, gửi ảnh mới
       if (imagesFile.length > 0) {
         imagesFile.forEach((file) => {
           if (file.originFileObj) {
@@ -172,6 +209,7 @@ function EditProduct(props) {
         });
       }
 
+      // ===== XỬ LÝ SIZE =====
       if (value.sizes && Array.isArray(value.sizes) && value.sizes.length > 0) {
         value.sizes.forEach((item, index) => {
           formData.append(`sizeQuantities[${index}].sizeName`, item.name);
@@ -179,6 +217,7 @@ function EditProduct(props) {
         });
       }
 
+      // ===== GỬI REQUEST =====
       const token = getCookie("token");
       const res = await fetch(
         `http://localhost:8090/api/v1/products/admin/update/${record.id}`,
@@ -211,7 +250,7 @@ function EditProduct(props) {
     } catch (error) {
       console.error(error);
       notiApi.error({
-        message: "Lỗi tải danh sách sản phẩm",
+        message: "Lỗi cập nhật sản phẩm",
         description: "Vui lòng thử lại sau.",
       });
     } finally {
