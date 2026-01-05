@@ -1,4 +1,5 @@
 const Checkstatus = (
+  // trạng thái ban đầu
   state = {
     Checking: [
       {
@@ -14,7 +15,7 @@ const Checkstatus = (
       return {
         Checking: [
           {
-            check: action.check,
+            check: action.check,//Lấy action.check Gán vào state mới
           },
         ],
       };
