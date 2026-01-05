@@ -277,7 +277,8 @@ export function ListOrders() {
                     Xem chi tiết
                   </Button>
 
-                  {String(order.payment_method).toUpperCase() === "MOMO" && statusToIndex(order.status) === 0 && (
+                  {String(order.payment_method).toUpperCase() === "MOMO" &&
+                   String(order.payment_status).toUpperCase() === "UNPAID" && (
                      <Button
                        icon={<DollarOutlined />}
                        style={{
