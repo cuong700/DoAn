@@ -138,7 +138,7 @@ function ProductManagement() {
     }
   };
 
-  
+
 
   useEffect(() => {
     fetchApi("", pagination.current, pagination.pageSize, statusFilter);
@@ -180,7 +180,7 @@ function ProductManagement() {
         <Image
           src={url}
           alt="product"
-          crossOrigin="anonymous" //Load ảnh từ domain khác 
+          crossOrigin="anonymous" //Load ảnh từ domain khác
           style={{
             width: 100,
             height: 100,
