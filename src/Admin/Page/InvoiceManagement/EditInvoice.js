@@ -97,58 +97,6 @@ function EditInvoice(props) {
     form.resetFields();
   };
 
-  // const handleSubmit = async (values) => {
-  //   try {
-  //     setSpinning(true);
-
-  //     const token = getCookie("token");
-
-  //     const payload = {
-  //       fullname: values.fullname, // Đúng: "fullname"
-  //       phone_number: values.phone_number, // Đúng: "phone_number"
-  //       email: values.email, // Đúng: "email"
-  //       address: values.address, // Đúng: "address"
-  //       note: values.note || "", // Đúng: "note"
-  //       payment_method_id: values.payment_method === "COD" ? 1 : 2,
-  // order_date: values.order_date
-  //   ? values.order_date.format("YYYY-MM-DD")
-  //   : null,
-  //     };
-
-  //     const res = await fetch(
-  //       `http://localhost:8090/api/v1/orders/admin/update/${record.id}`,
-  //       {
-  //         method: "PATCH",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //         body: JSON.stringify(payload),
-  //       }
-  //     );
-
-  //     if (!res.ok) throw new Error("Update thất bại"); //Nếu API trả lỗi thì xuống catch
-
-  //     const json = await res.json();
-  //     notiApi.success({
-  //       message: "Cập nhật thành công",
-  //       description: "Thông tin đơn hàng đã được cập nhật.",
-  //     });
-
-  //     setOrderDetail(json.data);
-  //     setShowModal(false);
-  //     onReload();
-  //   } catch (error) {
-  //     console.error(error);
-  //     notiApi.error({
-  //       message: "Lỗi cập nhật đơn hàng",
-  //       description: "Vui lòng thử lại sau.",
-  //     });
-  //   } finally {
-  //     setSpinning(false);
-  //   }
-  // };
-
   const handleSubmit = async (values) => {
     try {
       setSpinning(true);

@@ -56,6 +56,7 @@ function SendOutInvoice(props) {
       selectedRowKeys.includes(item.id)
     );
 
+    //Lọc ra các đơn không hợp lệ
     const invalidOrders = selectedOrders.filter(
       (order) => !["PENDING", "PROCESSING"].includes(order.status)
     );

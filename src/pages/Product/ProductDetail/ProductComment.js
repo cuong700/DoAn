@@ -57,7 +57,6 @@ function ProductComment(props) {
       );
 
       if (!response.ok) {
-        // Nếu API trả về lỗi (403/401) => không phải admin
         setIsAdmin(false);
         return;
       }
@@ -194,19 +193,19 @@ function ProductComment(props) {
     });
   };
 
-  // Mở modal sửa bình luận
+
   const handleOpenEditModal = (comment) => {
     setEditingComment(comment);
     setShowEditModal(true);
   };
 
-  // Đóng modal sửa
+
   const handleCloseEditModal = () => {
     setShowEditModal(false);
     setEditingComment(null);
   };
 
-  // Callback sau khi update thành công
+
   const handleUpdateSuccess = () => {
     fetchComments();
   };

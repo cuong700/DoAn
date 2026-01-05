@@ -17,8 +17,6 @@ const withAuth = (Component) => {
         return;
       }
 
-      console.log(getCookie("token"));
-
       const fetchData = async () => {
         try {
           const res = await fetch(

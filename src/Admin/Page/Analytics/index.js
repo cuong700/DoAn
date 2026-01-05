@@ -1,5 +1,18 @@
+
 import { Line } from "@ant-design/plots";
-import { Button, Card, Col, DatePicker, Form, message, Row, Space, Spin, Statistic, Table } from "antd";
+import {
+  Button,
+  Card,
+  Col,
+  DatePicker,
+  Form,
+  message,
+  Row,
+  Space,
+  Spin,
+  Statistic,
+  Table,
+} from "antd";
 import { useEffect, useState } from "react";
 import { getCookie } from "../../../helpers/cookie";
 import "./Analytics.css";
@@ -30,7 +43,12 @@ function Analytics() {
 
   const [form] = Form.useForm();
 
-  const fetchApi = async (current = 1, pageSize = 10, startMonth = null, endMonth = null) => {
+  const fetchApi = async (
+    current = 1,
+    pageSize = 10,
+    startMonth = null,
+    endMonth = null
+  ) => {
     try {
       setLoading(true);
       const token = getCookie("token");
@@ -59,10 +77,13 @@ function Analytics() {
             headers,
           }
         ),
-        fetch(`http://localhost:8090/api/v1/orders/admin/revenue/chart?${params.toString()}`, {
-          method: "GET",
-          headers,
-        }),
+        fetch(
+          `http://localhost:8090/api/v1/orders/admin/revenue/chart?${params.toString()}`,
+          {
+            method: "GET",
+            headers,
+          }
+        ),
       ]);
 
       if (!resNumber.ok || !resChart.ok) {
@@ -92,6 +113,7 @@ function Analytics() {
 
       setDataSource(productData);
 
+      // Cập nhật thông tin phân trang từ backend
       const total = dataNumber.products?.totalElements || 0;
       setPagination((prev) => ({
         ...prev,
@@ -101,7 +123,10 @@ function Analytics() {
       }));
 
       const chartData = Array.isArray(dataChart) ? dataChart : [];
-      const revenueData = chartData.map((item) => ({
+
+      const sortedData = chartData.sort((a, b) => a.month - b.month);
+
+      const revenueData = sortedData.map((item) => ({
         month: `Tháng ${item.month}`,
         profit: Number(item.profit || 0),
       }));
@@ -205,9 +230,15 @@ function Analytics() {
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           {record.thumbnail && (
             <img
-              src={record.thumbnail}
+              src={`http://localhost:8090${record.thumbnail}`}
+              crossOrigin="anonymous"
               alt={record.productName}
-              style={{ width: 50, height: 50, objectFit: "cover", borderRadius: "4px" }}
+              style={{
+                width: 50,
+                height: 50,
+                objectFit: "cover",
+                borderRadius: "4px",
+              }}
             />
           )}
           <span>{record.productName}</span>
@@ -225,14 +256,22 @@ function Analytics() {
       title: "Doanh thu",
       dataIndex: "totalRevenue",
       key: "totalRevenue",
-      render: (value) => <span>{Number(value).toLocaleString("vi-VN") + " đ"}</span>,
+      render: (value) => (
+        <span style={{ color: "#1890ff" }}>
+          {Number(value).toLocaleString("vi-VN") + " đ"}
+        </span>
+      ),
     },
     {
       title: "Chi phí",
       dataIndex: "totalCost",
       key: "totalCost",
       width: 180,
-      render: (value) => <span>{Number(value).toLocaleString("vi-VN") + " đ"}</span>,
+      render: (value) => (
+        <span style={{ color: "#ff4d4f" }}>
+          {Number(value).toLocaleString("vi-VN") + " đ"}
+        </span>
+      ),
     },
     {
       title: "Lợi nhuận",
@@ -240,16 +279,27 @@ function Analytics() {
       key: "totalProfit",
       align: "right",
       width: 180,
-      render: (value) => <span>{Number(value).toLocaleString("vi-VN") + " đ"}</span>,
+      render: (value) => (
+        <b style={{ color: "#52c41a" }}>
+          {Number(value).toLocaleString("vi-VN") + " đ"}
+        </b>
+      ),
     },
   ];
 
   return (
     <>
-      <div className="revenue-header">
-        <h2 className="revenue-title">Thống kê doanh thu</h2>
-        <ExcelAnalytics startMonth={dateFilter.start} endMonth={dateFilter.end} />
-      </div>
+      
+        <h2 className="analytics-title">Thống kê doanh thu</h2>
+        <div className="analytics-header">
+          <div className="analytics__right">
+            <ExcelAnalytics
+              startMonth={dateFilter.start}
+              endMonth={dateFilter.end}
+            />
+          </div>
+        </div>
+   
 
       {/* Bộ lọc ngày tháng */}
       <Card style={{ marginBottom: 16 }}>
@@ -290,9 +340,7 @@ function Analytics() {
               <Button type="primary" htmlType="submit" loading={loading}>
                 Tìm kiếm
               </Button>
-              <Button onClick={handleReset}>
-                Đặt lại
-              </Button>
+              <Button onClick={handleReset}>Đặt lại</Button>
             </Space>
           </Form.Item>
         </Form>
@@ -305,8 +353,10 @@ function Analytics() {
               title="Tổng doanh thu"
               value={summary.totalRevenue}
               precision={0}
-              valueStyle={{ color: "#3f8600" }}
-              formatter={(value) => Number(value).toLocaleString("vi-VN") + " đ"}
+              valueStyle={{ color: "#1890ff" }}
+              formatter={(value) =>
+                Number(value).toLocaleString("vi-VN") + " đ"
+              }
             />
           </Card>
         </Col>
@@ -316,7 +366,7 @@ function Analytics() {
               title="Tổng số lượng bán"
               value={summary.totalQuantitySold}
               precision={0}
-              valueStyle={{ color: "#1677ff" }}
+              valueStyle={{ color: "#090909ff" }}
             />
           </Card>
         </Col>
@@ -326,8 +376,10 @@ function Analytics() {
               title="Tổng chi phí"
               value={summary.totalCost}
               precision={0}
-              valueStyle={{ color: "#cf1322" }}
-              formatter={(value) => Number(value).toLocaleString("vi-VN") + " đ"}
+              valueStyle={{ color: "#ff4d4f" }}
+              formatter={(value) =>
+                Number(value).toLocaleString("vi-VN") + " đ"
+              }
             />
           </Card>
         </Col>
@@ -338,7 +390,9 @@ function Analytics() {
               value={summary.totalProfit}
               precision={0}
               valueStyle={{ color: "#52c41a" }}
-              formatter={(value) => Number(value).toLocaleString("vi-VN") + " đ"}
+              formatter={(value) =>
+                Number(value).toLocaleString("vi-VN") + " đ"
+              }
             />
           </Card>
         </Col>
@@ -349,7 +403,9 @@ function Analytics() {
         {monthlyRevenue.length > 0 ? (
           <Line {...config} />
         ) : (
-          <div style={{ textAlign: "center", padding: "40px 0", color: "#999" }}>
+          <div
+            style={{ textAlign: "center", padding: "40px 0", color: "#999" }}
+          >
             Chưa có dữ liệu biểu đồ
           </div>
         )}
