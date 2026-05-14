@@ -1,3 +1,4 @@
+
 import { Image, Select, Space, Table, Tooltip, Input, Tag } from "antd";
 import { useEffect, useState } from "react";
 import EditProduct from "./EditProduct";
@@ -5,7 +6,6 @@ import DeleteProduct from "./DeleteProduct";
 import CreateProduct from "./CreateProduct";
 import ViewProduct from "./ViewProduct";
 import { getCookie } from "../../../helpers/cookie";
-
 import { API_BASE_URL } from "../../Config/constants";
 import ImportProduct from "./ImportProduct";
 
@@ -17,32 +17,31 @@ function ProductManagement() {
     pageSize: 4,
     total: 0,
   });
-
   const [loading, setLoading] = useState(false);
   const [dataSource, setDataSource] = useState([]);
-
   const [keyword, setKeyword] = useState("");
   const [statusFilter, setStatusFilter] = useState("ĐANG_HOAT_DONG");
 
+  const buildImageUrl = (path) => {
+    if (!path) return "";
+    if (path.startsWith("http")) return path;
+    return `${API_BASE_URL}${path}`;
+  };
 
-  const fetchProductsDetail = async (id) => {
+  // Fetch chi tiết 1 sản phẩm 
+  const fetchProductDetail = async (id) => {
     try {
       const token = getCookie("token");
-
       const res = await fetch(
         `http://localhost:8090/api/v1/products/public/${id}`,
-        {
-          method: "GET",
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { method: "GET", headers: { Authorization: `Bearer ${token}` } },
       );
-
-      if (!res.ok) throw new Error("Không lấy được chi tiết sản phẩm");
-
+      if (!res.ok) throw new Error(`Lỗi ${res.status}`);
       const json = await res.json();
-      return json;
-    } catch (error) {
-      console.error(`Lỗi lấy chi tiết sản phẩm ID ${id}:`, error);
+      return json?.data ?? json;
+    } catch (err) {
+      console.error(`Lỗi fetch detail product ${id}:`, err);
+      return null;
     }
   };
 
@@ -54,7 +53,6 @@ function ProductManagement() {
   ) => {
     try {
       setLoading(true);
-
       const token = getCookie("token");
 
       const params = new URLSearchParams({
@@ -62,101 +60,63 @@ function ProductManagement() {
         page: String(current - 1),
         limit: String(pageSize),
       });
-
-      if (status === "ĐANG_HOAT_DONG") {
-        params.append("active", "true");
-      } else if (status === "NGUNG_HOAT_DONG") {
-        params.append("active", "false");
-      }
+      if (status === "ĐANG_HOAT_DONG") params.append("active", "true");
+      else if (status === "NGUNG_HOAT_DONG") params.append("active", "false");
 
       const res = await fetch(
         `http://localhost:8090/api/v1/products/public/search?${params.toString()}`,
-
-        {
-          method: "GET",
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { method: "GET", headers: { Authorization: `Bearer ${token}` } },
       );
-
       if (!res.ok) throw new Error("Không lấy được danh sách sản phẩm");
 
       const json = await res.json();
+      const products = (json?.data || []).sort((a, b) => b.id - a.id);
 
-      const products = json?.data || [];
-
-
-      products.sort((a, b) => b.id - a.id);
-
-      const buildImageUrl = (path) => {
-        if (!path) return "";
-        if (path.startsWith("http")) return path;
-        return `${API_BASE_URL}${path}`;
-      };
-
-      // Tải chi tiết cho từng sản phẩm
-      const productsWithDetails = await Promise.all(
+      // Fetch detail song song cho tất cả sản phẩm trong trang
+      const productsWithDetail = await Promise.all(
         products.map(async (product) => {
-          try {
-            const details = await fetchProductsDetail(product.id);
-
-            return {
-              ...product,
-              thumbnail: buildImageUrl(product.thumbnail),
-              images: (details?.images || []).map((img) => buildImageUrl(img)),
-              sizes:
-                details?.sizes?.map((s) => ({
-                  name: s?.name,
-                  total: s?.total,
-                })) ?? [],
-            };
-          } catch (err) {
-            console.error(`Lỗi load detail cho product ${product.id}`, err);
-            return {
-              ...product,
-              thumbnail: buildImageUrl(product.thumbnail),
-              images: (product.images || []).map((img) => buildImageUrl(img)),
-              sizes: product.sizes ?? [],
-            };
-          }
-        })
+          const detail = await fetchProductDetail(product.id);
+          return {
+            ...product,
+            thumbnail: buildImageUrl(product.thumbnail),
+            // Dữ liệu đầy đủ từ detail để truyền vào EditProduct
+            images: (detail?.images || []).map(buildImageUrl),
+            sizes: detail?.sizes ?? [], // [{ id, name }]
+            colors: detail?.colors ?? [], // [{ id, color_name, color_code }]
+            variants: detail?.variants ?? [], // [{ id, size_id, size_name, color_id, ... }]
+            // Ghi đè các field có thể mới hơn từ detail
+            display_price: detail?.display_price ?? product.display_price,
+            total_stock: detail?.total_stock ?? product.total_stock,
+          };
+        }),
       );
-      setDataSource(productsWithDetails);
 
-      // Cập nhật lại thông tin phân trang từ backend
-      const total = json?.total_elements || 0;
-
+      setDataSource(productsWithDetail);
       setPagination((prev) => ({
         ...prev,
         current,
         pageSize,
-        total,
+        total: json?.total_elements || 0,
       }));
     } catch (error) {
-      console.error("Lỗi tải danh sách sản phẩm!");
+      console.error("Lỗi tải danh sách sản phẩm!", error);
     } finally {
       setLoading(false);
     }
   };
 
-  
-
   useEffect(() => {
     fetchApi("", pagination.current, pagination.pageSize, statusFilter);
   }, []);
 
-
-
-  const handleReload = () => {
+  const handleReload = () =>
     fetchApi(keyword, pagination.current, pagination.pageSize, statusFilter);
-  };
 
   const handleSearch = (value) => {
-    const trimmed = value.trim(); // Xóa khoảng trắng đầu/cuối
+    const trimmed = value.trim();
     setKeyword(trimmed);
-    // reset về trang 1 khi search
-    const newPagination = { ...pagination, current: 1 };
-    setPagination(newPagination);
-    fetchApi(trimmed, 1, newPagination.pageSize, statusFilter);
+    setPagination((p) => ({ ...p, current: 1 }));
+    fetchApi(trimmed, 1, pagination.pageSize, statusFilter);
   };
 
   const columns = [
@@ -164,11 +124,8 @@ function ProductManagement() {
       title: "STT",
       fixed: "left",
       width: 60,
-      render: (_, __, index) => {
-        const page = pagination.current; // trang hiện tại
-        const pageSize = pagination.pageSize; //số dong mỗi trang
-        return (page - 1) * pageSize + index + 1;
-      },
+      render: (_, __, index) =>
+        (pagination.current - 1) * pagination.pageSize + index + 1,
     },
     {
       title: "Ảnh sản phẩm",
@@ -180,7 +137,7 @@ function ProductManagement() {
         <Image
           src={url}
           alt="product"
-          crossOrigin="anonymous" //Load ảnh từ domain khác 
+          crossOrigin="anonymous"
           style={{
             width: 100,
             height: 100,
@@ -190,7 +147,6 @@ function ProductManagement() {
         />
       ),
     },
-
     {
       title: "Ảnh mô tả",
       dataIndex: "images",
@@ -199,20 +155,19 @@ function ProductManagement() {
       width: 180,
       render: (images) => {
         if (!Array.isArray(images) || images.length === 0) return "—";
-
         return (
           <Image.PreviewGroup>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              {images.map((url, index) => (
+              {images.map((url, i) => (
                 <Image
-                  key={index}
+                  key={i}
                   src={url}
-                  alt={`mô tả-${index}`}
+                  alt={`mô tả-${i}`}
                   crossOrigin="anonymous"
                   style={{
                     width: 40,
                     height: 40,
-                    objectFit: "cover", //không bị méo
+                    objectFit: "cover",
                     borderRadius: 4,
                   }}
                 />
@@ -222,12 +177,7 @@ function ProductManagement() {
         );
       },
     },
-    {
-      title: "Tên sản phẩm",
-      dataIndex: "name",
-      key: "name",
-      width: 150,
-    },
+    { title: "Tên sản phẩm", dataIndex: "name", key: "name", width: 150 },
     {
       title: "Danh mục",
       dataIndex: "category_name",
@@ -241,12 +191,10 @@ function ProductManagement() {
       width: 250,
       render: (text) => {
         if (!text) return null;
-
-        const shortText = text.length > 50 ? text.slice(0, 50) + "..." : text; // hiển thị 1 phần
-
+        const short = text.length > 50 ? text.slice(0, 50) + "..." : text;
         return (
           <Tooltip title={text}>
-            <span>{shortText}</span>
+            <span>{short}</span>
           </Tooltip>
         );
       },
@@ -256,91 +204,47 @@ function ProductManagement() {
       dataIndex: "cost",
       key: "cost",
       width: 130,
-      render: (value) =>
-        typeof value === "number"
-          ? value.toLocaleString("vi-VN") + " đ" //định dạng tiền tệ theo từng vùng
-          : "0 đ",
+      render: (v) =>
+        typeof v === "number" ? v.toLocaleString("vi-VN") + " đ" : "0 đ",
     },
     {
       title: "Giá bán",
       dataIndex: "price",
       key: "price",
       width: 130,
-      render: (value) =>
-        typeof value === "number"
-          ? value.toLocaleString("vi-VN") + " đ"
-          : "0 đ",
+      render: (v) =>
+        typeof v === "number" ? v.toLocaleString("vi-VN") + " đ" : "0 đ",
     },
     {
-     title: "Giá sale",
-     dataIndex: "display_price",
-     key: "display_price",
-     width: 130,
-     render: (value) => {
-       if (value === null || value === undefined) {
-           return "";
-       }
-       return (
-           <span style={{ color: value === 0 ? 'red' : 'green', fontWeight: 'bold' }}>
-           {value.toLocaleString("vi-VN")} đ
-           </span>
-       );
-    },
-
+      title: "Giá sale",
+      dataIndex: "display_price",
+      key: "display_price",
+      width: 130,
+      render: (v) =>
+        v != null ? (
+          <span
+            style={{ color: v === 0 ? "red" : "green", fontWeight: "bold" }}
+          >
+            {v.toLocaleString("vi-VN")} đ
+          </span>
+        ) : (
+          ""
+        ),
     },
     {
       title: "Trọng lượng",
       dataIndex: "weight",
       key: "weight",
       width: 120,
-      render: (value) => {
-        const weightGrams = value;
-        if (weightGrams < 1000) {
-          return `${weightGrams.toLocaleString("vi-VN")} g`;
-        } else {
-          const weightKg = weightGrams / 1000;
-          return `${weightKg.toLocaleString("vi-VN")} kg`;
-        }
+      render: (v) => {
+        if (!v) return "—";
+        return v < 1000
+          ? `${v.toLocaleString("vi-VN")} g`
+          : `${(v / 1000).toLocaleString("vi-VN")} kg`;
       },
     },
     {
-      title: "Size / Số lượng",
-      dataIndex: "sizes",
-      key: "sizes",
-      hidden: true,
-      width: 250,
-      render: (sizes) => {
-        if (!Array.isArray(sizes) || sizes.length === 0) {
-          return <span>—</span>;
-        }
-
-        return (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            {sizes.map((item, index) => (
-              <div
-                key={index}
-                style={{
-                  border: "1px solid #ddd",
-                  borderRadius: 4,
-                  padding: "4px 8px",
-                  fontSize: 12,
-                  background: "#fafafa",
-                }}
-              >
-                <div>
-                  Size: <b>{item.name}</b>
-                </div>
-                <div>
-                  SL: <b>{item.total}</b>
-                </div>
-              </div>
-            ))}
-          </div>
-        );
-      },
-    },
-    {
-      title: "Số lượng tồn kho (đôi)",
+      title: "Tồn kho (đôi)",
       dataIndex: "total_stock",
       key: "total_stock",
       width: 150,
@@ -350,40 +254,28 @@ function ProductManagement() {
       dataIndex: "active",
       key: "active",
       width: 150,
-      render: (active) => {
-        return (
-          <>
-            {active ? (
-              <>
-                <Tag color="green">Hoạt động</Tag>
-              </>
-            ) : (
-              <>
-                <Tag color="red">Ngừng hoạt động</Tag>
-              </>
-            )}
-          </>
-        );
-      },
+      render: (active) => (
+        <Tag color={active ? "green" : "red"}>
+          {active ? "Hoạt động" : "Ngừng hoạt động"}
+        </Tag>
+      ),
     },
     {
       title: "Thao tác nhanh",
       key: "action",
       fixed: "right",
       width: 180,
-      render: (_, record) => {
-        return (
-          <>
-            <Space>
-              <ViewProduct record={record} />
-
-              <EditProduct record={record} onReload={handleReload} />
-
-              <DeleteProduct record={record} onReload={handleReload} statusFilter={statusFilter} />
-            </Space>
-          </>
-        );
-      },
+      render: (_, record) => (
+        <Space>
+          <ViewProduct record={record} />
+          <EditProduct record={record} onReload={handleReload} />
+          <DeleteProduct
+            record={record}
+            onReload={handleReload}
+            statusFilter={statusFilter}
+          />
+        </Space>
+      ),
     },
   ];
 
@@ -398,24 +290,20 @@ function ProductManagement() {
           <CreateProduct onReload={handleReload} />
           <ImportProduct onReload={handleReload} />
         </div>
-
         <div className="action-bar__right">
-
           <Select
             value={statusFilter}
             style={{ width: 160 }}
             onChange={(value) => {
               setStatusFilter(value);
-              const newPagination = { ...pagination, current: 1 };
-              setPagination(newPagination);
-              fetchApi(keyword, 1, newPagination.pageSize, value);
+              setPagination((p) => ({ ...p, current: 1 }));
+              fetchApi(keyword, 1, pagination.pageSize, value);
             }}
             options={[
               { label: "Hoạt động", value: "ĐANG_HOAT_DONG" },
               { label: "Ngừng hoạt động", value: "NGUNG_HOAT_DONG" },
             ]}
           />
-
           <Search
             placeholder="Tìm theo tên sản phẩm..."
             allowClear
@@ -435,7 +323,7 @@ function ProductManagement() {
         pagination={{
           ...pagination,
           onChange: (page, pageSize) => {
-            setPagination({ ...pagination, current: page, pageSize });
+            setPagination((p) => ({ ...p, current: page, pageSize }));
             fetchApi(keyword, page, pageSize, statusFilter);
           },
         }}
