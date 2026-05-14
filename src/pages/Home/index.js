@@ -106,7 +106,7 @@ function Home() {
                 <div className="s5-box">
                   <div className="s5-card large">
                     <img
-                      src="https://sneakernews.com/wp-content/uploads/2019/11/g-dragon-nike-air-force-1-release-date-1.jpg"
+                      src="https://sneakerdaily.vn/wp-content/uploads/2021/01/g-dragon-nike-air-force-1-07-paranoise-aq3692-001-5.jpg"
                       alt=""
                     />
 

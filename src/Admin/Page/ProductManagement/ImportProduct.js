@@ -43,14 +43,25 @@ function ImportProduct(props) {
         "http://localhost:8090/api/v1/products/admin/uploads/excel",
         {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
           body: formData,
         }
       );
 
-      const data = await res.json();
+      // Kiểm tra Content-Type để xử lý đúng format
+      const contentType = res.headers.get("content-type");
+      let data;
+
+      if (contentType && contentType.includes("application/json")) {
+        data = await res.json();
+      } else {
+        // Server trả về text thuần, chuyển thành object
+        const text = await res.text();
+        data = {
+          message: text,
+          errors: []
+        };
+      }
 
       if (res.ok) {
         setImportResult({
