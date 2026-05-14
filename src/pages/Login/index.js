@@ -34,7 +34,7 @@ function Login() {
     try {
       const response = await axios.post(
         "http://localhost:8090/api/v1/users/login",
-        userData
+        userData,
       );
       console.log("Response from API:", response.data);
       const data = response.data;
@@ -43,14 +43,9 @@ function Login() {
         navigate("/");
         dispatch(checkLogin(true));
         setCookie("token", data.token, 1);
-        setCookie("name", data.user_name, 1);
         setCookie("userid", data.user_id, 1);
-        setCookie("phone", data.phone_number, 1);
-        setCookie("address", data.address, 1);
-        setCookie("date", data.date, 1);
         setCookie("isLogin", "true", 1);
 
-          
         setIsLoading(false); // Set loading to false after navigation
         alert("Đăng nhập thành công", data.token, 1);
       }, 2000);
