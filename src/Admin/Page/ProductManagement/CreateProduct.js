@@ -2,11 +2,12 @@
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import {
   Button, Col, Form, Input, InputNumber, Modal, notification,
-  Row, Select, Spin, Upload, ColorPicker, Table, Tag, Popconfirm, Tabs,
+  Row, Select, Spin, Upload, ColorPicker, Table, Tag, Popconfirm, Tabs, DatePicker,
 } from "antd";
 import { useEffect, useState } from "react";
 import "./ProductManagement.css";
 import { getCookie } from "../../../helpers/cookie";
+import dayjs from "dayjs";
 
 function CreateProduct({ onReload }) {
   const [showModal, setShowModal] = useState(false);
@@ -19,7 +20,8 @@ function CreateProduct({ onReload }) {
 
   // Ảnh
   const [thumbnailFile, setThumbnailFile] = useState([]);
-  const [imagesFile,    setImagesFile]    = useState([]);
+  // Ảnh album mới: [{ file: File, previewUrl: string, colorId: null }]
+  const [imagesFile, setImagesFile] = useState([]);
 
   // Size / Color / Variant
   const [sizes,    setSizes]    = useState([]);
@@ -60,6 +62,7 @@ function CreateProduct({ onReload }) {
   const resetAll = () => {
     form.resetFields();
     setThumbnailFile([]);
+    imagesFile.forEach((item) => { if (item.previewUrl) URL.revokeObjectURL(item.previewUrl); });
     setImagesFile([]);
     setSizes([]);
     setColors([]);
@@ -154,13 +157,20 @@ function CreateProduct({ onReload }) {
       formData.append("categoryId",  value.category_id);
       formData.append("description", value.description || "");
 
+      // Thời gian sale — format ISO không có Z để Spring parse được
+      if (value.sale_range?.[0])
+        formData.append("saleStart", value.sale_range[0].format("YYYY-MM-DDTHH:mm:ss"));
+      if (value.sale_range?.[1])
+        formData.append("saleEnd", value.sale_range[1].format("YYYY-MM-DDTHH:mm:ss"));
+
       // Thumbnail
       if (thumbnailFile[0]?.originFileObj)
         formData.append("thumbnail", thumbnailFile[0].originFileObj);
 
-      // Album
-      imagesFile.forEach((f) => {
-        if (f.originFileObj) formData.append("images", f.originFileObj);
+      // Album + imageColorIds
+      imagesFile.forEach((item, i) => {
+        formData.append("images", item.file);
+        formData.append(`imageColorIds[${i}]`, item.colorId ?? "");
       });
 
       // Sizes
@@ -288,12 +298,51 @@ function CreateProduct({ onReload }) {
             </Form.Item>
 
             {/* ── Album ── */}
-            <Form.Item label="Ảnh mô tả" name="images" rules={rules}>
-              <Upload listType="picture-card" multiple fileList={imagesFile}
-                beforeUpload={() => false} accept="image/*"
-                onChange={({ fileList }) => setImagesFile(fileList)}>
-                <div>Chọn ảnh</div>
-              </Upload>
+            <Form.Item label="Ảnh mô tả — Gán màu cho từng ảnh">
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 12, padding: 10, border: "1px dashed #d9d9d9", borderRadius: 8, background: "#fafafa", minHeight: 60 }}>
+                {imagesFile.map((item, idx) => (
+                  <div key={idx} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                    <div style={{ position: "relative", width: 90, height: 90 }}>
+                      <img src={item.previewUrl} alt={`new-${idx}`}
+                        style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 4, border: "2px solid #1677ff" }}
+                      />
+                      {item.colorId && (() => {
+                        const c = colors.find((c) => c.color_name === item.colorId || c.color_name === item.colorId);
+                        return c ? <span style={{ position: "absolute", bottom: 4, right: 4, width: 14, height: 14, borderRadius: "50%", background: c.color_code, border: "1.5px solid #fff", boxShadow: "0 0 0 1px #aaa" }} /> : null;
+                      })()}
+                      <Button type="primary" danger size="small" icon={<DeleteOutlined />}
+                        onClick={() => { URL.revokeObjectURL(item.previewUrl); setImagesFile((prev) => prev.filter((_, i) => i !== idx)); }}
+                        style={{ position: "absolute", top: -8, right: -8, width: 24, height: 24, borderRadius: "50%", padding: 0, zIndex: 10, display: "flex", alignItems: "center", justifyContent: "center" }}
+                      />
+                    </div>
+                    <Select size="small" style={{ width: 90 }} placeholder="Màu" allowClear
+                      value={item.colorId ?? undefined}
+                      onChange={(val) => setImagesFile((prev) => prev.map((f, i) => i === idx ? { ...f, colorId: val ?? null } : f))}
+                      options={colors.filter((c) => c.color_name?.trim()).map((c) => ({
+                        label: (
+                          <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                            <span style={{ width: 10, height: 10, borderRadius: "50%", background: c.color_code, display: "inline-block", border: "1px solid #d9d9d9", flexShrink: 0 }} />
+                            {c.color_name}
+                          </span>
+                        ),
+                        value: c.color_name,
+                      }))}
+                    />
+                  </div>
+                ))}
+                <Upload accept="image/*" showUploadList={false} multiple
+                  beforeUpload={(file) => {
+                    const previewUrl = URL.createObjectURL(file);
+                    setImagesFile((prev) => [...prev, { file, previewUrl, colorId: null }]);
+                    return false;
+                  }}
+                >
+                  <div style={{ width: 90, height: 90, border: "1px dashed #d9d9d9", borderRadius: 4, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer", background: "#fff", gap: 4 }}>
+                    <PlusOutlined style={{ fontSize: 18, color: "#999" }} />
+                    <span style={{ fontSize: 12, color: "#999" }}>Chọn ảnh</span>
+                  </div>
+                </Upload>
+              </div>
             </Form.Item>
 
             {/* ── Thông tin cơ bản ── */}
@@ -343,6 +392,20 @@ function CreateProduct({ onReload }) {
                 </Form.Item>
               </Col>
             </Row>
+
+            <Form.Item
+              label="Thời gian sale"
+              name="sale_range"
+              help="Để trống nếu sale vĩnh viễn (không giới hạn thời gian)"
+            >
+              <DatePicker.RangePicker
+                showTime={{ format: "HH:mm" }}
+                format="DD/MM/YYYY HH:mm"
+                style={{ width: "100%" }}
+                placeholder={["Bắt đầu sale", "Kết thúc sale"]}
+                disabledDate={(current) => current && current < dayjs().startOf("day")}
+              />
+            </Form.Item>
 
             {/* ── Tabs Size / Màu / Biến thể ── */}
             <Form.Item label="Quản lý size, màu & biến thể">

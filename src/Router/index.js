@@ -18,6 +18,8 @@ import Profile from "../Admin/Layout/LayoutDefaultAdmin/Profile";
 import Analytics from "../Admin/Page/Analytics";
 import CouponManagement from "../Admin/Page/CouponManagement";
 import InvoiceManagement from "../Admin/Page/InvoiceManagement";
+import BannerManagement from "../Admin/Page/BannerManagement";
+import ShopConfig from "../Admin/Page/ShopConfig";
 import Checkout from "../pages/Checkout";
 import SearchPage from "../pages/SearchPage";
 
@@ -105,6 +107,14 @@ export const routes = [
       {
         path: "invoice-management",
         element: <InvoiceManagement />,
+      },
+      {
+        path: "banner-management",
+        element: <BannerManagement />,
+      },
+      {
+        path: "shop-config",
+        element: <ShopConfig />,
       },
       {
         path: "profile",
