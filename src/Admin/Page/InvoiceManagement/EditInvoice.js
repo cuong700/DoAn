@@ -1,4 +1,4 @@
-﻿import API_BASE_URL from '../../../config/api';
+import API_BASE_URL from '../../../config/api';
 import { EditOutlined } from "@ant-design/icons";
 import {
   Button,
@@ -17,7 +17,6 @@ import { useState } from "react";
 import dayjs from "dayjs";
 import { getCookie } from "../../../helpers/cookie";
 import TextArea from "antd/es/input/TextArea";
-import { API_BASE_URL } from "../../Config/constants";
 
 function EditInvoice(props) {
   const { record, onReload } = props;

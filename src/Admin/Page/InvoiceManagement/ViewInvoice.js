@@ -1,15 +1,13 @@
-﻿import { EyeOutlined } from "@ant-design/icons";
+import { EyeOutlined } from "@ant-design/icons";
 import { Button, Descriptions, Modal, Table, Tag } from "antd";
 import { useState } from "react";
 import dayjs from "dayjs";
-import { API_BASE_URL } from "../../Config/constants";
 import { getCookie } from "../../../helpers/cookie";
 import API_BASE_URL from '../../../config/api';
 
 function ViewInvoice(props) {
   const { record } = props;
   const [showModal, setShowModal] = useState(false);
-
   const [orderDetail, setOrderDetail] = useState(null);
 
   const handleShowModal = async () => {

@@ -1,4 +1,4 @@
-﻿import API_BASE_URL from '../../../config/api';
+import API_BASE_URL from '../../../config/api';
 
 
 import { useEffect, useState } from "react";
@@ -15,7 +15,7 @@ import ProductComment from "./ProductComment";
 import { getCookie } from "../../../helpers/cookie";
 
 const { Title, Text, Paragraph } = Typography;
-const API = "http://localhost:8090";
+const API = API_BASE_URL;
 
 function ProductDetail() {
   const { id } = useParams();
@@ -208,7 +208,7 @@ function ProductDetail() {
                     key={index}
                     width={70}
                     height={70}
-                    src={`${API_BASE_URL}${item}`}
+                    src={buildUrl(img.image_url)}
                     alt={`thumb-${index}`}
                     crossOrigin="anonymous"
                     className="pd-thumb"

@@ -1,4 +1,4 @@
-﻿
+
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import {
   Button, Col, Form, Input, InputNumber, Modal, notification,
@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import "./ProductManagement.css";
 import { getCookie } from "../../../helpers/cookie";
 import API_BASE_URL from '../../../config/api';
+import dayjs from "dayjs";
 
 function CreateProduct({ onReload }) {
   const [showModal, setShowModal] = useState(false);
