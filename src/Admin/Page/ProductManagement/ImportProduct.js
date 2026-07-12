@@ -1,7 +1,8 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Button, Modal, Upload, message, Alert } from "antd";
 import { UploadOutlined, InboxOutlined } from "@ant-design/icons";
 import { getCookie } from "../../../helpers/cookie";
+import API_BASE_URL from '../../../config/api';
 
 const { Dragger } = Upload;
 
@@ -40,7 +41,7 @@ function ImportProduct(props) {
 
     try {
       const res = await fetch(
-        "http://localhost:8090/api/v1/products/admin/uploads/excel",
+        `${API_BASE_URL}/api/v1/products/admin/uploads/excel`,
         {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },

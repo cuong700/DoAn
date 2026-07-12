@@ -1,7 +1,8 @@
-import { PlusOutlined } from "@ant-design/icons";
+﻿import { PlusOutlined } from "@ant-design/icons";
 import { Button, Form, Input, Modal, notification, Spin } from "antd";
 import { useState } from "react";
 import { getCookie } from "../../../helpers/cookie";
+import API_BASE_URL from '../../../config/api';
 
 function CreateCategory(props) {
   const { onReload } = props;
@@ -31,7 +32,7 @@ const handleSubmit = async (value) => {
       ...value,
     };
 
-    const res = await fetch("http://localhost:8090/api/v1/categories/admin/create", {
+    const res = await fetch(`${API_BASE_URL}/api/v1/categories/admin/create`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -1,10 +1,11 @@
-import "./home.css";
+﻿import "./home.css";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { Row, Col } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import API_BASE_URL from '../../config/api';
 
 function Home() {
   const [products, setProducts] = useState([]);
@@ -19,7 +20,7 @@ function Home() {
   const fetchProducts = async () => {
     try {
       const response = await fetch(
-        "http://localhost:8090/api/v1/products/public/search"
+        `${API_BASE_URL}/api/v1/products/public/search`
       );
       const data = await response.json();
       setProducts(data.data || []);
@@ -195,7 +196,7 @@ function Home() {
                 >
                   <div className="product-image-wrapper1">
                     <img
-                      src={`http://localhost:8090${product.thumbnail}`}
+                      src={`${API_BASE_URL}${product.thumbnail}`}
                       alt={product.name}
                       className="product-image1"
                       crossOrigin="anonymous"

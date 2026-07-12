@@ -1,3 +1,6 @@
+﻿import API_BASE_URL from '../../../config/api';
+
+
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -28,7 +31,7 @@ function ProductDetail() {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`${API}/api/v1/products/public/${id}`)
+    fetch(`${API_BASE_URL}/api/v1/products/public/${id}`)
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         return res.json();
@@ -172,7 +175,10 @@ function ProductDetail() {
             <div style={{ borderRadius: 8, overflow: "hidden", background: "#f5f5f5" }}>
               <Image
                 className="pd-main-image"
-                src={mainImage || buildUrl(product.thumbnail)}
+                preview={{
+                  mask: null,
+                }}
+                src={`${API_BASE_URL}${product.thumbnail}`}
                 alt={product.name}
                 crossOrigin="anonymous"
                 preview={{ mask: null }}
@@ -200,8 +206,9 @@ function ProductDetail() {
                 {thumbImages.map((img, index) => (
                   <Image
                     key={index}
-                    width={70} height={70}
-                    src={buildUrl(img.image_url)}
+                    width={70}
+                    height={70}
+                    src={`${API_BASE_URL}${item}`}
                     alt={`thumb-${index}`}
                     crossOrigin="anonymous"
                     className="pd-thumb"

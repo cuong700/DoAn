@@ -1,4 +1,4 @@
-
+﻿
 import { Image, Select, Space, Table, Tooltip, Input, Tag } from "antd";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
@@ -9,6 +9,7 @@ import ViewProduct from "./ViewProduct";
 import { getCookie } from "../../../helpers/cookie";
 import { API_BASE_URL } from "../../Config/constants";
 import ImportProduct from "./ImportProduct";
+import API_BASE_URL from '../../../config/api';
 
 const { Search } = Input;
 
@@ -34,7 +35,7 @@ function ProductManagement() {
     try {
       const token = getCookie("token");
       const res = await fetch(
-        `http://localhost:8090/api/v1/products/public/${id}`,
+        `${API_BASE_URL}/api/v1/products/public/${id}`,
         { method: "GET", headers: { Authorization: `Bearer ${token}` } },
       );
       if (!res.ok) throw new Error(`Lỗi ${res.status}`);
@@ -65,7 +66,7 @@ function ProductManagement() {
       else if (status === "NGUNG_HOAT_DONG") params.append("active", "false");
 
       const res = await fetch(
-        `http://localhost:8090/api/v1/products/public/search?${params.toString()}`,
+        `${API_BASE_URL}/api/v1/products/public/search?${params.toString()}`,
         { method: "GET", headers: { Authorization: `Bearer ${token}` } },
       );
       if (!res.ok) throw new Error("Không lấy được danh sách sản phẩm");

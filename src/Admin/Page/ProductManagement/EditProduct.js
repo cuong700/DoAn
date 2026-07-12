@@ -1,3 +1,4 @@
+﻿import API_BASE_URL from '../../../config/api';
 
 import { EditOutlined, PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import {
@@ -61,7 +62,7 @@ function EditProduct({ record, onReload }) {
         setCatLoading(true);
         const token = getCookie("token");
         const res = await fetch(
-          "http://localhost:8090/api/v1/categories/public/search?active=true",
+          `${API_BASE_URL}/api/v1/categories/public/search?active=true`,
           { headers: { Authorization: `Bearer ${token}` } },
         );
         if (!res.ok) throw new Error(`${res.status}`);
@@ -402,7 +403,7 @@ function EditProduct({ record, onReload }) {
 
       const token = getCookie("token");
       const res = await fetch(
-        `http://localhost:8090/api/v1/products/admin/update/${record.id}`,
+        `${API_BASE_URL}/api/v1/products/admin/update/${record.id}`,
         {
           method: "PATCH",
           headers: { Authorization: `Bearer ${token}` },

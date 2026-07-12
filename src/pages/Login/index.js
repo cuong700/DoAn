@@ -1,10 +1,11 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useDispatch } from "react-redux"; // Import both useDispatch and useSelector from 'react-redux'
 import { useNavigate } from "react-router-dom";
 import { setCookie } from "../../helpers/cookie"; // Corrected import path
 import { checkLogin } from "../../actions/login"; // Corrected import path
 import "./Login.css";
 import axios from "axios";
+import API_BASE_URL from '../../config/api';
 
 function Login() {
   const navigate = useNavigate();
@@ -33,7 +34,7 @@ function Login() {
 
     try {
       const response = await axios.post(
-        "http://localhost:8090/api/v1/users/login",
+        `${API_BASE_URL}/api/v1/users/login`,
         userData,
       );
       console.log("Response from API:", response.data);

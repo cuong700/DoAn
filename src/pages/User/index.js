@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./User.css";
 import { getCookie } from "../../helpers/cookie";
@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { message, notification, Input } from "antd";
 import { ListOrders } from "./ListOrders/ListOrders";
 import ChangePassword from "./ChangePassword";
+import API_BASE_URL from '../../config/api';
 
 export default function User() {
   const [editMode, setEditMode] = useState(false);
@@ -44,7 +45,7 @@ export default function User() {
         }
 
         const res = await axios.get(
-          `http://localhost:8090/api/v1/users/user/detail-self`,
+          `${API_BASE_URL}/api/v1/users/user/detail-self`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
@@ -94,7 +95,7 @@ export default function User() {
       }
 
       const res = await axios.patch(
-        `http://localhost:8090/api/v1/users/user/details/${userData.id}`,
+        `${API_BASE_URL}/api/v1/users/user/details/${userData.id}`,
         {
           fullname: userData.fullname,
           address: userData.address,

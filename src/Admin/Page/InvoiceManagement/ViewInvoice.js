@@ -1,9 +1,10 @@
-import { EyeOutlined } from "@ant-design/icons";
+﻿import { EyeOutlined } from "@ant-design/icons";
 import { Button, Descriptions, Modal, Table, Tag } from "antd";
 import { useState } from "react";
 import dayjs from "dayjs";
 import { API_BASE_URL } from "../../Config/constants";
 import { getCookie } from "../../../helpers/cookie";
+import API_BASE_URL from '../../../config/api';
 
 function ViewInvoice(props) {
   const { record } = props;
@@ -16,7 +17,7 @@ function ViewInvoice(props) {
 
     const token = getCookie("token");
     const res = await fetch(
-      `http://localhost:8090/api/v1/orders/user/${record.user_id}`,
+      `${API_BASE_URL}/api/v1/orders/user/${record.user_id}`,
       {
         headers: { Authorization: `Bearer ${token}` },
       }

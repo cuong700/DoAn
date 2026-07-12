@@ -1,4 +1,4 @@
-
+﻿
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import {
   Button, Col, Form, Input, InputNumber, Modal, notification,
@@ -7,7 +7,7 @@ import {
 import { useEffect, useState } from "react";
 import "./ProductManagement.css";
 import { getCookie } from "../../../helpers/cookie";
-import dayjs from "dayjs";
+import API_BASE_URL from '../../../config/api';
 
 function CreateProduct({ onReload }) {
   const [showModal, setShowModal] = useState(false);
@@ -39,7 +39,7 @@ function CreateProduct({ onReload }) {
         setLoading(true);
         const token = getCookie("token");
         const res = await fetch(
-          "http://localhost:8090/api/v1/categories/public/search?active=true",
+          `${API_BASE_URL}/api/v1/categories/public/search?active=true`,
           { method: "GET", headers: { Authorization: `Bearer ${token}` } }
         );
         if (!res.ok) throw new Error("Không lấy được danh mục");
@@ -189,7 +189,7 @@ function CreateProduct({ onReload }) {
       });
 
       const res = await fetch(
-        "http://localhost:8090/api/v1/products/admin/create",
+        `${API_BASE_URL}/api/v1/products/admin/create`,
         { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: formData }
       );
 

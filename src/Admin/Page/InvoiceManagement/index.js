@@ -1,4 +1,4 @@
-import { message, Select, Space, Table, Tag, Tooltip, Input } from "antd";
+﻿import { message, Select, Space, Table, Tag, Tooltip, Input } from "antd";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import ViewInvoice from "./ViewInvoice";
@@ -8,6 +8,7 @@ import SendOutInvoice from "./SendOutInvoice";
 import CheckOutInvoice from "./CheckOutInvoice";
 import CloseOutInvoice from "./CloseOutInvoice";
 import EditInvoice from "./EditInvoice";
+import API_BASE_URL from '../../../config/api';
 
 const { Search } = Input;
 
@@ -47,7 +48,7 @@ function OrderManagement() {
       const token = getCookie("token");
 
       const res = await fetch(
-        `http://localhost:8090/api/v1/orders/admin/get-all-orders?${params.toString()}`,
+        `${API_BASE_URL}/api/v1/orders/admin/get-all-orders?${params.toString()}`,
         {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
