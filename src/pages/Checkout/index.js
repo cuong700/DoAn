@@ -10,6 +10,10 @@ function Checkout() {
   const navigate = useNavigate();
   const location = useLocation();
 
+
+  /**
+     * Hàm lấy danh sách sản phẩm ban đầu
+     */
   const getInitialProducts = () => {
     // Ưu tiên lấy từ State (khi từ Cart sang)
     if (location.state?.products || location.state?.product) {
@@ -22,6 +26,7 @@ function Checkout() {
       };
     }
 
+     // Lấy từ localStorage nếu không có trong state
     const savedCheckout = localStorage.getItem("tempCheckoutData");
     if (savedCheckout) {
       try {
@@ -38,6 +43,9 @@ function Checkout() {
   const fromCart = initialData.fromCart;
   const initialCoupons = initialData.coupons;
 
+  /**
+     * useEffect xử lý kết quả thanh toán khi quay lại từ cổng thanh toán
+     */
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const status = params.get("status");
@@ -45,20 +53,24 @@ function Checkout() {
     const orderId = params.get("orderId");
 
     if (status) {
+       // Xóa dữ liệu tạm thời sau khi xử lý
       localStorage.removeItem("tempCheckoutData");
 
       if (status === "success") {
-        alert(`✅ Thanh toán thành công! Mã đơn hàng: ${orderId}`);
+        alert(`Thanh toán thành công! Mã đơn hàng: ${orderId}`);
         navigate("/user");
       } else {
         const decodedMessage = message ? decodeURIComponent(message) : "Giao dịch thất bại";
-        alert(`❌ Thanh toán thất bại: ${decodedMessage}. Vui lòng kiểm tra lại trong đơn hàng.`);
+        alert(`Thanh toán thất bại: ${decodedMessage}. Vui lòng kiểm tra lại trong đơn hàng.`);
 
         navigate("/user");
       }
     }
   }, [location, navigate]);
 
+  /**
+     * Hàm tải thông tin giao hàng đã lưu từ localStorage
+     */
   const loadSavedInfo = () => {
     const saved = localStorage.getItem("shippingInfo");
     if (saved) {
@@ -71,6 +83,7 @@ function Checkout() {
     return {};
   };
 
+  // Khởi tạo state cho form dữ liệu
   const [formData, setFormData] = useState({
     fullname: "",
     phone_number: "",
@@ -78,14 +91,17 @@ function Checkout() {
     address: "",
     note: "",
     payment_method: "COD",
-    ...loadSavedInfo(),
+    ...loadSavedInfo(),// Gộp thông tin đã lưu vào
   });
 
+  // Các state quản lý trạng thái UI
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [saveInfo, setSaveInfo] = useState(true);
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
 
+
+  // Các state quản lý coupon
   const [availableCoupons, setAvailableCoupons] = useState({
     valid: [],
     invalid: [],
@@ -95,6 +111,7 @@ function Checkout() {
   const [loadingCoupons, setLoadingCoupons] = useState(false);
   const [showCouponModal, setShowCouponModal] = useState(false);
 
+  // Lấy thông tin xác thực từ cookie
   const token = getCookie("token");
   const userId = getCookie("userid");
 
@@ -103,6 +120,7 @@ function Checkout() {
 
     setLoadingCoupons(true);
 
+    // Chuẩn bị dữ liệu sản phẩm
     const items = productsList.map((product) => ({
       product_id: parseInt(product.id),
       quantity: parseInt(product.quantity) || 1,
@@ -131,6 +149,9 @@ function Checkout() {
     }
   };
 
+   /**
+     * useEffect tính toán lại giảm giá khi danh sách coupon được chọn thay đổi
+     */
   useEffect(() => {
     if (selectedCoupons.length === 0 || productsList.length === 0) {
       setDiscount(0);
@@ -140,6 +161,9 @@ function Checkout() {
     calculateDiscount();
   }, [selectedCoupons]);
 
+   /**
+     * Hàm gọi API để tính toán số tiền giảm giá
+     */
   const calculateDiscount = async () => {
     try {
       const items = productsList.map((product) => ({
@@ -167,6 +191,7 @@ function Checkout() {
       const data = res.data?.data;
 
       if (data) {
+         // Tính số tiền giảm = tạm tính - tổng tiền sau giảm
         const calculatedDiscount =
           (data.sub_total || 0) - (data.total_money || 0);
         setDiscount(calculatedDiscount);
@@ -190,18 +215,26 @@ function Checkout() {
     setShowCouponModal(true);
   };
 
+   /**
+     * Hàm xử lý khi người dùng chọn một mã coupon
+     * Áp dụng logic:
+     * - Nếu coupon áp dụng toàn bộ đơn: thay thế coupon toàn bộ cũ
+     * - Nếu coupon áp dụng cho sản phẩm cụ thể: thay thế coupon cùng sản phẩm
+     */
   const handleSelectCoupon = (couponCode) => {
     const coupon = availableCoupons.valid.find((c) => c.code === couponCode);
 
     if (!coupon) return;
 
     if (coupon.applyToAll) {
+      // Xử lý coupon áp dụng toàn bộ
       const hasGlobalCoupon = selectedCoupons.some((code) => {
         const c = availableCoupons.valid.find((x) => x.code === code);
         return c?.applyToAll;
       });
 
       if (hasGlobalCoupon) {
+         // Thay thế coupon toàn bộ cũ
         const filtered = selectedCoupons.filter((code) => {
           const c = availableCoupons.valid.find((x) => x.code === code);
           return !c?.applyToAll;
@@ -211,12 +244,14 @@ function Checkout() {
         setSelectedCoupons([...selectedCoupons, couponCode]);
       }
     } else {
+       // Xử lý coupon áp dụng cho sản phẩm cụ thể
       const productCoupons = selectedCoupons.filter((code) => {
         const c = availableCoupons.valid.find((x) => x.code === code);
         return c?.productId === coupon.productId;
       });
 
       if (productCoupons.length > 0) {
+         // Thay thế coupon cùng sản phẩm
         const filtered = selectedCoupons.filter((code) => {
           const c = availableCoupons.valid.find((x) => x.code === code);
           return c?.productId !== coupon.productId;
@@ -261,6 +296,10 @@ function Checkout() {
     setTimeout(() => setShowSaveSuccess(false), 3000);
   };
 
+   /**
+     * Hàm xóa thông tin đã lưu trong localStorage
+     * Reset form về trạng thái ban đầu
+     */
   const clearSavedInfo = () => {
     localStorage.removeItem("shippingInfo");
     setFormData({
@@ -277,6 +316,7 @@ function Checkout() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validate thông tin bắt buộc
     if (!formData.fullname || !formData.phone_number) {
       setError("Vui lòng điền đầy đủ thông tin bắt buộc");
       return;
@@ -292,6 +332,7 @@ function Checkout() {
       return;
     }
 
+    // Lưu thông tin nếu được chọn
     if (saveInfo) {
       saveShippingInfo();
     }
@@ -306,17 +347,20 @@ function Checkout() {
         return;
       }
 
+      // Mapping phương thức thanh toán
       const paymentMethodMap = {
         COD: 1,
         MOMO: 2,
       };
 
+        // Chuẩn bị dữ liệu sản phẩm
       const items = productsList.map((product) => ({
         product_id: parseInt(product.id),
         size_id: parseInt(product.selectedSize),
         quantity: parseInt(product.quantity) || 1,
       }));
 
+      // Chuẩn bị dữ liệu đơn hàng
       const orderData = {
         fullname: formData.fullname.trim(),
         phone_number: formData.phone_number.trim(),
@@ -337,8 +381,8 @@ function Checkout() {
         orderData.note = formData.note.trim();
       }
 
-      console.log("Order Data:", orderData);
 
+      // Gọi API tạo đơn hàng
       const response = await fetch(
         `${API_BASE_URL}/api/v1/orders/user/create`,
         {
@@ -351,12 +395,12 @@ function Checkout() {
         }
       );
 
-
       const result = await response.json();
 
       if (response.ok) {
         const orderId = result.data?.id;
 
+        // Xóa sản phẩm khỏi giỏ hàng nếu đặt từ cart
         if (fromCart) {
           const cart = JSON.parse(localStorage.getItem("cart")) || [];
           const productIds = productsList.map((p) => p.id);
@@ -367,7 +411,9 @@ function Checkout() {
           window.dispatchEvent(new Event("cartUpdated"));
         }
 
+        // Xử lý thanh toán MoMo
         if (formData.payment_method === "MOMO" && orderId) {
+          // Lưu dữ liệu tạm để khôi phục sau khi thanh toán
           localStorage.setItem("tempCheckoutData", JSON.stringify({
             list: productsList,
             fromCart: fromCart,
@@ -375,6 +421,7 @@ function Checkout() {
           }));
 
           try {
+            // Gọi API tạo thanh toán MoMo
             const paymentResponse = await fetch(
               `${API_BASE_URL}/api/v1/payment/user/create/${orderId}?gateway=momo`,
               {
@@ -388,6 +435,7 @@ function Checkout() {
 
             const paymentResult = await paymentResponse.json();
 
+              // Chuyển hướng đến cổng thanh toán MoMo
             if (paymentResponse.ok && paymentResult.data?.payUrl) {
               window.location.href = paymentResult.data.payUrl;
             } else {
@@ -399,6 +447,7 @@ function Checkout() {
             setError("Có lỗi khi tạo thanh toán MoMo");
           }
         } else {
+          // Xử lý thanh toán COD
           localStorage.removeItem("tempCheckoutData");
           alert(result.message || "Đặt hàng thành công!");
           navigate("/");
@@ -414,8 +463,10 @@ function Checkout() {
     }
   };
 
+  // Kiểm tra xem có phải đang xử lý kết quả thanh toán không
   const isPaymentRedirect = new URLSearchParams(location.search).get("status");
 
+  // Hiển thị thông báo nếu không có sản phẩm và không phải redirect thanh toán
   if (productsList.length === 0 && !isPaymentRedirect) {
     return (
       <div className="checkout-container">
@@ -431,7 +482,7 @@ function Checkout() {
       </div>
     );
   }
-
+  // Hiển thị thông báo đang xử lý thanh toán
   if (productsList.length === 0 && isPaymentRedirect) {
     return (
       <div className="checkout-container">
@@ -442,14 +493,15 @@ function Checkout() {
       </div>
     );
   }
-
+  // Tính tạm tính (tổng tiền trước giảm giá)
   const subtotal = productsList.reduce((sum, product) => {
     const price = product.display_price || product.price;
     const quantity = product.quantity || 1;
     return sum + price * quantity;
   }, 0);
-
+  // Tính tổng tiền sau giảm giá (không âm)
   const totalPrice = Math.max(subtotal - discount, 0);
+
 
   return (
     <div className="checkout-container">
@@ -504,6 +556,7 @@ function Checkout() {
               🎁 Chọn mã giảm giá
             </button>
 
+             { /* Hiển thị các coupon đã chọn */ }
             {selectedCoupons.length > 0 && (
               <div className="selected-coupons">
                 <p className="selected-coupons-label">
@@ -568,7 +621,8 @@ function Checkout() {
           onClearSavedInfo={clearSavedInfo}
         />
       </div>
-
+      
+        { /* Modal chọn mã giảm giá */ } 
       {showCouponModal && (
         <div
           className="coupon-modal-overlay"

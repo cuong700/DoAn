@@ -9,7 +9,7 @@ import API_BASE_URL from '../../config/api';
 
 function Login() {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch();//Gửi action lên Redux Store
 
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
@@ -17,12 +17,10 @@ function Login() {
 
   const handlePhoneNumberChange = (e) => {
     setPhoneNumber(e.target.value);
-    console.log("Value of phone number:", e.target.value);
   };
 
   const handlePasswordChange = (e) => {
     setPassword(e.target.value);
-    console.log("Value of password:", e.target.value);
   };
 
   const handleSubmit = async (e) => {

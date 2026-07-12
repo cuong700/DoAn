@@ -6,7 +6,6 @@ import Checkstatus from './status';
 
 const allReducer = combineReducers({
    Checkstatus
-
 });
 
 

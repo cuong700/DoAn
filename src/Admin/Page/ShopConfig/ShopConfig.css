@@ -1,0 +1,13 @@
+.shop-config__title {
+  margin-bottom: 16px;
+}
+
+.shop-config__desc {
+  color: #888;
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+
+.shop-config__card {
+  max-width: 800px;
+}
