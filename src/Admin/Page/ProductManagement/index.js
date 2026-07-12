@@ -1,4 +1,4 @@
-﻿
+
 import { Image, Select, Space, Table, Tooltip, Input, Tag } from "antd";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
@@ -7,7 +7,6 @@ import DeleteProduct from "./DeleteProduct";
 import CreateProduct from "./CreateProduct";
 import ViewProduct from "./ViewProduct";
 import { getCookie } from "../../../helpers/cookie";
-import { API_BASE_URL } from "../../Config/constants";
 import ImportProduct from "./ImportProduct";
 import API_BASE_URL from '../../../config/api';
 
