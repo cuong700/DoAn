@@ -1,8 +1,9 @@
-import { CloseOutlined } from "@ant-design/icons";
+﻿import { CloseOutlined } from "@ant-design/icons";
 import { Button, Form, message, Modal } from "antd";
 import { useState } from "react";
 import { getCookie } from "../../../helpers/cookie";
 import TextArea from "antd/es/input/TextArea";
+import API_BASE_URL from '../../../config/api';
 
 function CloseOutInvoice(props) {
   const { selectedRowKeys, dataSource, onReload } = props;
@@ -24,7 +25,7 @@ function CloseOutInvoice(props) {
       console.log("PAYLOAD SEND:", payload);
 
       const res = await fetch(
-        `http://localhost:8090/api/v1/orders/admin/order/${order.id}/status`,
+        `${API_BASE_URL}/api/v1/orders/admin/order/${order.id}/status`,
         {
           method: "PATCH",
           headers: {

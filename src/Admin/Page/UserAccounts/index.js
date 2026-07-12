@@ -1,3 +1,4 @@
+﻿import API_BASE_URL from '../../../config/api';
 import {
   message,
   Space,
@@ -58,7 +59,7 @@ function UserAccounts() {
       }
 
       const res = await fetch(
-        `http://localhost:8090/api/v1/users/admin/get-all-user?${params.toString()}`,
+        `${API_BASE_URL}/api/v1/users/admin/get-all-user?${params.toString()}`,
 
         {
           method: "GET",
@@ -123,7 +124,7 @@ function UserAccounts() {
       const statusValue = checked ? 1 : 0; 
 
       const res = await fetch(
-        `http://localhost:8090/api/v1/users/admin/block/${record.id}/${statusValue}`,
+        `${API_BASE_URL}/api/v1/users/admin/block/${record.id}/${statusValue}`,
         {
           method: "PUT",
           headers: {

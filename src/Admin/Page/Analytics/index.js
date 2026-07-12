@@ -1,9 +1,10 @@
-import { Line } from "@ant-design/plots";
+﻿import { Line } from "@ant-design/plots";
 import { Card, Col, message, Row, Spin, Statistic, Table } from "antd";
 import { useEffect, useState } from "react";
 import { getCookie } from "../../../helpers/cookie";
 import "./Analytics.css";
 import ExcelAnalytics from "./ExcelAnalytics";
+import API_BASE_URL from '../../../config/api';
 
 function Analytics() {
   const [summary, setSummary] = useState({
@@ -39,13 +40,13 @@ function Analytics() {
 
       const [resNumber, resChart] = await Promise.all([
         fetch(
-          `http://localhost:8090/api/v1/orders/admin/revenue/products?${params.toString()}`,
+          `${API_BASE_URL}/api/v1/orders/admin/revenue/products?${params.toString()}`,
           {
             method: "GET",
             headers,
           }
         ),
-        fetch("http://localhost:8090/api/v1/orders/admin/revenue/chart", {
+        fetch(`${API_BASE_URL}/api/v1/orders/admin/revenue/chart`, {
           method: "GET",
           headers,
         }),
@@ -161,7 +162,7 @@ function Analytics() {
         <div className="analytics-product-cell">
           {record.thumbnail && (
             <img
-              src={`http://localhost:8090${record.thumbnail}`}
+              src={`${API_BASE_URL}${record.thumbnail}`}
               alt={record.productName}
               crossOrigin="anonymous"
               className="analytics-product-image"

@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { Modal, Input, notification } from "antd";
 import axios from "axios";
 import { getCookie } from "../../helpers/cookie";
+import API_BASE_URL from '../../config/api';
 
 export default function ChangePasswordModal({ 
   open, 
@@ -71,14 +72,14 @@ export default function ChangePasswordModal({
 
       // Bước 1: Kiểm tra mật khẩu cũ
       await axios.post(
-        `http://localhost:8090/api/v1/users/user/verify-password?phoneNumber=${phone}&password=${oldPassword}`,
+        `${API_BASE_URL}/api/v1/users/user/verify-password?phoneNumber=${phone}&password=${oldPassword}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       // Bước 2: Đổi mật khẩu mới
       const res = await axios.patch(
-        `http://localhost:8090/api/v1/users/user/details/${userData.id}`,
+        `${API_BASE_URL}/api/v1/users/user/details/${userData.id}`,
         {
           password: newPassword,
           retype_password: rePassword,

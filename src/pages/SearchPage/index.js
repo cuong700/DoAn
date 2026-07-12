@@ -1,6 +1,7 @@
-import { useLocation, useNavigate } from "react-router-dom";
+﻿import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import "./SearchPage.css";
+import API_BASE_URL from '../../config/api';
 
 function Searchpage() {
   const location = useLocation();
@@ -24,7 +25,7 @@ function Searchpage() {
     setLoading(true);
 
     fetch(
-      `http://localhost:8090/api/v1/products/public/search?keyword=${encodeURIComponent(
+      `${API_BASE_URL}/api/v1/products/public/search?keyword=${encodeURIComponent(
         keyword
       )}&page=${currentPage}&size=10`
     )
@@ -94,7 +95,7 @@ function Searchpage() {
                 >
                   <div className="product-image">
                     <img
-                      src={`http://localhost:8090${product.thumbnail}`}
+                      src={`${API_BASE_URL}${product.thumbnail}`}
                       alt={product.name}
                       crossOrigin="anonymous"
                     />

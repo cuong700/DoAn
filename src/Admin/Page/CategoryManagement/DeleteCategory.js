@@ -1,7 +1,8 @@
-import { DeleteOutlined } from "@ant-design/icons";
+﻿import { DeleteOutlined } from "@ant-design/icons";
 import { Button, message, notification, Popconfirm } from "antd";
 import { useState } from "react";
 import { getCookie } from "../../../helpers/cookie";
+import API_BASE_URL from '../../../config/api';
 
 function DeleteCategory(props) {
   const { record, onReload, activeFilter } = props;
@@ -16,7 +17,7 @@ function DeleteCategory(props) {
       const token = getCookie("token");
 
       const res = await fetch(
-        `http://localhost:8090/api/v1/categories/admin/delete/${record.id}`,
+        `${API_BASE_URL}/api/v1/categories/admin/delete/${record.id}`,
         {
           method: "DELETE",
           headers: {

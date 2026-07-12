@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import "./ProductList.css";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import API_BASE_URL from '../../../config/api';
 
 function ProductList() {
   const { categoryId } = useParams();
@@ -25,7 +26,7 @@ function ProductList() {
     try {
       setLoading(true);
 
-      let url = `http://localhost:8090/api/v1/products/public/search?page=${page}&limit=${limit}`;
+      let url = `${API_BASE_URL}/api/v1/products/public/search?page=${page}&limit=${limit}`;
 
       if (categoryId) {
         url += `&categoryId=${categoryId}`;
@@ -140,7 +141,7 @@ function ProductList() {
                         style={{ cursor: "pointer" }}
                       >
                         <img
-                          src={`http://localhost:8090${item.thumbnail}`}
+                          src={`${API_BASE_URL}${item.thumbnail}`}
                           alt={item.name}
                           crossOrigin="anonymous"
                         />

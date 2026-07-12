@@ -1,7 +1,8 @@
-import { SendOutlined } from "@ant-design/icons";
+﻿import { SendOutlined } from "@ant-design/icons";
 import { Button, message, Modal, notification } from "antd";
 import { getCookie } from "../../../helpers/cookie";
 import { useState } from "react";
+import API_BASE_URL from '../../../config/api';
 
 function SendOutInvoice(props) {
   const { selectedRowKeys, dataSource, onReload } = props;
@@ -20,7 +21,7 @@ function SendOutInvoice(props) {
       };
 
       const res = await fetch(
-        `http://localhost:8090/api/v1/orders/admin/order/${order.id}/status`,
+        `${API_BASE_URL}/api/v1/orders/admin/order/${order.id}/status`,
         {
           method: "PATCH",
           headers: {

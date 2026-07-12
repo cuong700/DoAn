@@ -1,3 +1,4 @@
+﻿import API_BASE_URL from '../../../config/api';
 
 
 import { useEffect, useState } from "react";
@@ -50,7 +51,7 @@ function ProductDetail() {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`http://localhost:8090/api/v1/products/public/${id}`)
+    fetch(`${API_BASE_URL}/api/v1/products/public/${id}`)
       .then((res) => {
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
@@ -190,7 +191,7 @@ function ProductDetail() {
                 preview={{
                   mask: null,
                 }}
-                src={`http://localhost:8090${product.thumbnail}`}
+                src={`${API_BASE_URL}${product.thumbnail}`}
                 alt={product.name}
                 crossOrigin="anonymous"
       
@@ -201,7 +202,7 @@ function ProductDetail() {
                     key={index}
                     width={70}
                     height={70}
-                    src={`http://localhost:8090${item}`}
+                    src={`${API_BASE_URL}${item}`}
                     alt={`thumb-${index}`}
                     className="pd-thumb"
                     preview={{

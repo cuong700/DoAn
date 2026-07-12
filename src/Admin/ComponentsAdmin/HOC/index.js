@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCookie } from "../../../helpers/cookie";
+import API_BASE_URL from '../../../config/api';
 
 const withAuth = (Component) => {
   
@@ -20,7 +21,7 @@ const withAuth = (Component) => {
       const fetchData = async () => {
         try {
           const res = await fetch(
-            "http://localhost:8090/api/v1/users/user/detail-self",
+            `${API_BASE_URL}/api/v1/users/user/detail-self`,
             {
               method: "GET",
               headers: {

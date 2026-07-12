@@ -1,3 +1,4 @@
+﻿import API_BASE_URL from '../../../config/api';
 import { MoreOutlined, UserOutlined } from "@ant-design/icons";
 import {
   Avatar,
@@ -47,7 +48,7 @@ function ProductComment(props) {
     try {
       // Gọi API lấy danh sách tất cả user
       const response = await fetch(
-        `http://localhost:8090/api/v1/users/admin/get-all-user`,
+        `${API_BASE_URL}/api/v1/users/admin/get-all-user`,
         {
           method: "GET",
           headers: {
@@ -84,7 +85,7 @@ function ProductComment(props) {
   const fetchComments = async () => {
     try {
       const res = await fetch(
-        `http://localhost:8090/api/v1/comments/public/get-all?product_id=${productId}`
+        `${API_BASE_URL}/api/v1/comments/public/get-all?product_id=${productId}`
       );
 
       if (!res.ok) throw new Error("Fetch comments failed");
@@ -116,7 +117,7 @@ function ProductComment(props) {
 
     try {
       const response = await fetch(
-        `http://localhost:8090/api/v1/comments/user/create`,
+        `${API_BASE_URL}/api/v1/comments/user/create`,
         {
           method: "POST",
           headers: {
@@ -158,7 +159,7 @@ function ProductComment(props) {
           // Nếu là admin, gọi API admin
           if (isAdmin) {
             response = await fetch(
-              `http://localhost:8090/api/v1/comments/admin/delete/${commentId}`,
+              `${API_BASE_URL}/api/v1/comments/admin/delete/${commentId}`,
               {
                 method: "DELETE",
                 headers: {
@@ -169,7 +170,7 @@ function ProductComment(props) {
           } else {
             // Nếu là user thường, gọi API user
             response = await fetch(
-              `http://localhost:8090/api/v1/comments/user/delete/${commentId}`,
+              `${API_BASE_URL}/api/v1/comments/user/delete/${commentId}`,
               {
                 method: "DELETE",
                 headers: {

@@ -1,3 +1,4 @@
+﻿import API_BASE_URL from '../../../config/api';
 // import { NavLink, useNavigate } from "react-router-dom";
 // import "./Navbar.css";
 // import {
@@ -13,7 +14,7 @@
 //   const navigate = useNavigate();
 
 //   useEffect(() => {
-//     fetch("http://localhost:8090/api/v1/categories/public/search")
+//     fetch(`${API_BASE_URL}/api/v1/categories/public/search`)
 //       .then((res) => res.json())
 //       .then((res) => {
 
@@ -112,7 +113,7 @@ function Navbar() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("http://localhost:8090/api/v1/categories/public/search")
+    fetch(`${API_BASE_URL}/api/v1/categories/public/search`)
       .then((res) => res.json())
       .then((res) => {
         const categories = res?.data?.content || [];

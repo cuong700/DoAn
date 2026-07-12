@@ -1,7 +1,8 @@
-import { EditOutlined } from "@ant-design/icons";
+﻿import { EditOutlined } from "@ant-design/icons";
 import { Button, Form, Input, Modal, notification, Spin, Switch } from "antd";
 import { useState } from "react";
 import { getCookie } from "../../../helpers/cookie";
+import API_BASE_URL from '../../../config/api';
 
 function EditCategory(props) {
   const { record, onReload } = props;
@@ -38,7 +39,7 @@ function EditCategory(props) {
         ...value,
       };
 
-      const res = await fetch(`http://localhost:8090/api/v1/categories/admin/update/${record.id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/categories/admin/update/${record.id}`, {
         method: "PATCH",
        headers: {
             "Content-Type": "application/json",

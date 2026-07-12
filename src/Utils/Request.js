@@ -1,5 +1,6 @@
 // Request.js
-const API_DOMAIN = "http://localhost:8090/";
+import API_BASE_URL from "../config/api";
+const API_DOMAIN = API_BASE_URL + "/";
 
 // GET request function
 export const get = async ( path) => {
