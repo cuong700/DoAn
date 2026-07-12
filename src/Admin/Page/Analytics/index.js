@@ -218,7 +218,6 @@ function Analytics() {
               src={`${API_BASE_URL}${record.thumbnail}`}
               alt={record.productName}
               crossOrigin="anonymous"
-              alt={record.productName}
               style={{
                 width: 50,
                 height: 50,

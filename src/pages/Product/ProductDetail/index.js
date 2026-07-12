@@ -175,9 +175,6 @@ function ProductDetail() {
             <div style={{ borderRadius: 8, overflow: "hidden", background: "#f5f5f5" }}>
               <Image
                 className="pd-main-image"
-                preview={{
-                  mask: null,
-                }}
                 src={`${API_BASE_URL}${product.thumbnail}`}
                 alt={product.name}
                 crossOrigin="anonymous"
