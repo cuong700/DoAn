@@ -1,23 +1,10 @@
-
-import { Line } from "@ant-design/plots";
-import {
-  Button,
-  Card,
-  Col,
-  DatePicker,
-  Form,
-  message,
-  Row,
-  Space,
-  Spin,
-  Statistic,
-  Table,
-} from "antd";
+﻿import { Line } from "@ant-design/plots";
+import { Card, Col, message, Row, Spin, Statistic, Table } from "antd";
 import { useEffect, useState } from "react";
 import { getCookie } from "../../../helpers/cookie";
 import "./Analytics.css";
 import ExcelAnalytics from "./ExcelAnalytics";
-import dayjs from "dayjs";
+import API_BASE_URL from '../../../config/api';
 
 function Analytics() {
   const [summary, setSummary] = useState({
@@ -71,19 +58,16 @@ function Analytics() {
 
       const [resNumber, resChart] = await Promise.all([
         fetch(
-          `http://localhost:8090/api/v1/orders/admin/revenue/products?${params.toString()}`,
+          `${API_BASE_URL}/api/v1/orders/admin/revenue/products?${params.toString()}`,
           {
             method: "GET",
             headers,
           }
         ),
-        fetch(
-          `http://localhost:8090/api/v1/orders/admin/revenue/chart?${params.toString()}`,
-          {
-            method: "GET",
-            headers,
-          }
-        ),
+        fetch(`${API_BASE_URL}/api/v1/orders/admin/revenue/chart`, {
+          method: "GET",
+          headers,
+        }),
       ]);
 
       if (!resNumber.ok || !resChart.ok) {
@@ -230,7 +214,8 @@ function Analytics() {
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           {record.thumbnail && (
             <img
-              src={`http://localhost:8090${record.thumbnail}`}
+              src={`${API_BASE_URL}${record.thumbnail}`}
+              alt={record.productName}
               crossOrigin="anonymous"
               alt={record.productName}
               style={{

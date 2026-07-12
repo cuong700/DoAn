@@ -1,4 +1,4 @@
-import { EditOutlined } from "@ant-design/icons";
+﻿import { EditOutlined } from "@ant-design/icons";
 import {
   Button,
   Form,
@@ -12,6 +12,7 @@ import {
 } from "antd";
 import { useState } from "react";
 import { getCookie } from "../../../helpers/cookie";
+import API_BASE_URL from '../../../config/api';
 
 const { Option } = Select;
 
@@ -44,7 +45,7 @@ function EditCoupon(props) {
       });
 
       const res = await fetch(
-        `http://localhost:8090/api/v1/products/public/search?${params.toString()}`,
+        `${API_BASE_URL}/api/v1/products/public/search?${params.toString()}`,
         {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
@@ -130,7 +131,7 @@ function EditCoupon(props) {
       }
 
       const res = await fetch(
-        `http://localhost:8090/api/v1/coupons/admin/update/${record.id}`,
+        `${API_BASE_URL}/api/v1/coupons/admin/update/${record.id}`,
         {
           method: "PATCH",
           headers: {

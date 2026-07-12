@@ -1,4 +1,4 @@
-
+﻿
 import { useEffect, useState } from "react";
 import "./Cart.css";
 import { Plus, Minus, Trash2, Tag, ShoppingBag } from "lucide-react";
@@ -7,6 +7,7 @@ import { getCookie } from "../../helpers/cookie";
 import axios from "axios";
 import { ShoppingCartOutlined } from "@ant-design/icons";
 import CouponModal from "./CouponModal"; 
+import API_BASE_URL from '../../config/api';
 
 function Cart() {
   const navigate = useNavigate();
@@ -81,7 +82,7 @@ function Cart() {
 
     try {
       const res = await axios.post(
-        "http://localhost:8090/api/v1/coupons/user/available",
+        `${API_BASE_URL}/api/v1/coupons/user/available`,
         { items },
         {
           headers: {
@@ -125,7 +126,7 @@ function Cart() {
       });
 
       const res = await axios.post(
-        "http://localhost:8090/api/v1/cart/public/verify",
+        `${API_BASE_URL}/api/v1/cart/public/verify`,
         { items }
       );
 
@@ -173,7 +174,7 @@ function Cart() {
       });
 
       const res = await axios.post(
-        "http://localhost:8090/api/v1/coupons/user/calculate",
+        `${API_BASE_URL}/api/v1/coupons/user/calculate`,
         {
           user_id: Number(userId),
           coupon_codes: selectedCoupons,
@@ -380,7 +381,7 @@ function Cart() {
                   </label>
 
                   <img
-                    src={`http://localhost:8090${item.product_thumbnail}`}
+                    src={`${API_BASE_URL}${item.product_thumbnail}`}
                     alt={item.name}
                     crossOrigin="anonymous"
                     className="item-image"

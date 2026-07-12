@@ -1,6 +1,7 @@
-
+﻿
 import { Image, Select, Space, Table, Tooltip, Input, Tag } from "antd";
 import { useEffect, useState } from "react";
+import dayjs from "dayjs";
 import EditProduct from "./EditProduct";
 import DeleteProduct from "./DeleteProduct";
 import CreateProduct from "./CreateProduct";
@@ -8,6 +9,7 @@ import ViewProduct from "./ViewProduct";
 import { getCookie } from "../../../helpers/cookie";
 import { API_BASE_URL } from "../../Config/constants";
 import ImportProduct from "./ImportProduct";
+import API_BASE_URL from '../../../config/api';
 
 const { Search } = Input;
 
@@ -33,7 +35,7 @@ function ProductManagement() {
     try {
       const token = getCookie("token");
       const res = await fetch(
-        `http://localhost:8090/api/v1/products/public/${id}`,
+        `${API_BASE_URL}/api/v1/products/public/${id}`,
         { method: "GET", headers: { Authorization: `Bearer ${token}` } },
       );
       if (!res.ok) throw new Error(`Lỗi ${res.status}`);
@@ -64,32 +66,24 @@ function ProductManagement() {
       else if (status === "NGUNG_HOAT_DONG") params.append("active", "false");
 
       const res = await fetch(
-        `http://localhost:8090/api/v1/products/public/search?${params.toString()}`,
+        `${API_BASE_URL}/api/v1/products/public/search?${params.toString()}`,
         { method: "GET", headers: { Authorization: `Bearer ${token}` } },
       );
       if (!res.ok) throw new Error("Không lấy được danh sách sản phẩm");
 
       const json = await res.json();
+      console.log("ProductManagement API response:", json);
       const products = (json?.data || []).sort((a, b) => b.id - a.id);
 
-      // Fetch detail song song cho tất cả sản phẩm trong trang
-      const productsWithDetail = await Promise.all(
-        products.map(async (product) => {
-          const detail = await fetchProductDetail(product.id);
-          return {
-            ...product,
-            thumbnail: buildImageUrl(product.thumbnail),
-            // Dữ liệu đầy đủ từ detail để truyền vào EditProduct
-            images: (detail?.images || []).map(buildImageUrl),
-            sizes: detail?.sizes ?? [], // [{ id, name }]
-            colors: detail?.colors ?? [], // [{ id, color_name, color_code }]
-            variants: detail?.variants ?? [], // [{ id, size_id, size_name, color_id, ... }]
-            // Ghi đè các field có thể mới hơn từ detail
-            display_price: detail?.display_price ?? product.display_price,
-            total_stock: detail?.total_stock ?? product.total_stock,
-          };
-        }),
-      );
+      // Dùng thẳng data từ search, không fetch detail song song để tránh lỗi
+      const productsWithDetail = products.map((product) => ({
+        ...product,
+        thumbnail: buildImageUrl(product.thumbnail),
+        images: [],
+        sizes: [],
+        colors: [],
+        variants: [],
+      }));
 
       setDataSource(productsWithDetail);
       setPagination((prev) => ({
@@ -248,6 +242,43 @@ function ProductManagement() {
       dataIndex: "total_stock",
       key: "total_stock",
       width: 150,
+    },
+    {
+      title: "Thời gian sale",
+      key: "sale_time",
+      width: 200,
+      render: (_, record) => {
+        const start = record.sale_start;
+        const end   = record.sale_end;
+        const dp    = record.display_price;
+        if (!dp) return <Tag color="default">Không sale</Tag>;
+        const now = dayjs();
+        const startDj = start ? dayjs(start) : null;
+        const endDj   = end   ? dayjs(end)   : null;
+        // Xác định trạng thái
+        if (endDj && now.isAfter(endDj)) {
+          return <Tag color="red">Đã kết thúc</Tag>;
+        }
+        if (startDj && now.isBefore(startDj)) {
+          return (
+            <Tooltip title={`Bắt đầu: ${startDj.format("DD/MM/YYYY HH:mm")}`}>
+              <Tag color="orange">Sắp diễn ra</Tag>
+            </Tooltip>
+          );
+        }
+        // Đang sale
+        return (
+          <Tooltip title={
+            [start && `Từ: ${dayjs(start).format("DD/MM/YYYY HH:mm")}`,
+             end   && `Đến: ${dayjs(end).format("DD/MM/YYYY HH:mm")}`]
+            .filter(Boolean).join(" | ") || "Vĩnh viễn"
+          }>
+            <Tag color="green">
+              {endDj ? `Còn ${endDj.diff(now, "hour")}h` : "Đang sale"}
+            </Tag>
+          </Tooltip>
+        );
+      },
     },
     {
       title: "Trạng thái",

@@ -1,4 +1,4 @@
-import { message, Select, Space, Table, Tag, Tooltip, Input } from "antd";
+﻿import { message, Select, Space, Table, Tag, Tooltip, Input } from "antd";
 import { useEffect, useState } from "react";
 import "./CouponManagement.css";
 import EditCoupon from "./EditCoupon";
@@ -6,6 +6,7 @@ import DeleteCoupon from "./DeleteCoupon";
 import CreateCoupon from "./CreateCoupon";
 import { getCookie } from "../../../helpers/cookie";
 import "./CouponManagement.css";
+import API_BASE_URL from '../../../config/api';
 
 const { Search } = Input;
 
@@ -44,7 +45,7 @@ function CouponManagement() {
         params.append("active", "false");
       }
       const res = await fetch(
-        `http://localhost:8090/api/v1/coupons/admin/get-all?${params.toString()}`,
+        `${API_BASE_URL}/api/v1/coupons/admin/get-all?${params.toString()}`,
         {
           method: "GET",
           headers: token ? { Authorization: `Bearer ${token}` } : {},

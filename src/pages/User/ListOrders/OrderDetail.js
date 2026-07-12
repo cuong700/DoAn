@@ -1,7 +1,8 @@
-import React from "react";
+﻿import React from "react";
 import { Modal, Button, Descriptions, Image, Divider, Tag, Space } from "antd";
 import { CloseCircleOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
+import API_BASE_URL from '../../../config/api';
 
 function OrderDetail(props) {
   const { visible, order, onClose, renderStatusTag } = props;
@@ -91,7 +92,7 @@ function OrderDetail(props) {
             }}
           >
             <Image
-              src={`http://localhost:8090${item.product_thumbnail}`}
+              src={`${API_BASE_URL}${item.product_thumbnail}`}
               crossOrigin="anonymous"
               preview={false}
               alt={item.product_name}

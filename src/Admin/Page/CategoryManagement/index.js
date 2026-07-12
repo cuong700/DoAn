@@ -1,10 +1,11 @@
-import { message, Space, Table, Input, Tag, Select } from "antd";
+﻿import { message, Space, Table, Input, Tag, Select } from "antd";
 import { useEffect, useState } from "react";
 import "./CategoryManagement.css";
 import CreateCategory from "./CreateCategory";
 import EditCategory from "./EditCategory";
 import DeleteCategory from "./DeleteCategory";
 import { getCookie } from "../../../helpers/cookie";
+import API_BASE_URL from '../../../config/api';
 
 const { Search } = Input;
 
@@ -45,7 +46,7 @@ function CategoryManagement() {
       }
 
       const res = await fetch(
-        `http://localhost:8090/api/v1/categories/public/search?${params.toString()}`,
+        `${API_BASE_URL}/api/v1/categories/public/search?${params.toString()}`,
         {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },

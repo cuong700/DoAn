@@ -1,3 +1,4 @@
+﻿import API_BASE_URL from '../../../config/api';
 
 import { EditOutlined, PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import {
@@ -18,9 +19,11 @@ import {
   Tag,
   Popconfirm,
   Tabs,
+  DatePicker,
 } from "antd";
 import { useState, useEffect } from "react";
 import { getCookie } from "../../../helpers/cookie";
+import dayjs from "dayjs";
 
 function EditProduct({ record, onReload }) {
   const [showModal, setShowModal] = useState(false);
@@ -31,10 +34,11 @@ function EditProduct({ record, onReload }) {
   const [categories, setCategories] = useState([]);
   const [catLoading, setCatLoading] = useState(false);
 
-  // Ảnh
+  // Ảnh — mỗi item: { url: string, colorId: number|null }
   const [thumbnailFile, setThumbnailFile] = useState([]);
-  const [imagesFile, setImagesFile] = useState([]);
-  const [existingImages, setExistingImages] = useState([]);
+  // Ảnh mới upload: [{ uid, file: File, previewUrl: string, colorId: null }]
+  const [imagesFile, setImagesFile]       = useState([]);
+  const [existingImages, setExistingImages] = useState([]); // { url, colorId }
 
   // Size / Color / Variant
   const [sizes, setSizes] = useState([]);
@@ -48,6 +52,8 @@ function EditProduct({ record, onReload }) {
   // Form thêm màu mới
   const [newColorName, setNewColorName] = useState("");
   const [newColorCode, setNewColorCode] = useState("#000000");
+  // Ảnh gán cho từng màu: { [colorKey]: File } — colorKey = id hoặc color_name nếu mới
+  const [colorImages, setColorImages] = useState({});
 
   // ── Fetch danh mục ──────────────────────────────────────────────────────────
   useEffect(() => {
@@ -56,7 +62,7 @@ function EditProduct({ record, onReload }) {
         setCatLoading(true);
         const token = getCookie("token");
         const res = await fetch(
-          "http://localhost:8090/api/v1/categories/public/search?active=true",
+          `${API_BASE_URL}/api/v1/categories/public/search?active=true`,
           { headers: { Authorization: `Bearer ${token}` } },
         );
         if (!res.ok) throw new Error(`${res.status}`);
@@ -78,8 +84,8 @@ function EditProduct({ record, onReload }) {
     load();
   }, []);
 
-  // ── Mở modal — lấy data trực tiếp từ record (đã được fetch đầy đủ ở ProductManagement) ──
-  const handleShowModal = () => {
+  // ── Mở modal — fetch detail để lấy sizes/colors/variants đầy đủ ──
+  const handleShowModal = async () => {
     // Reset
     setThumbnailFile([]);
     setImagesFile([]);
@@ -88,30 +94,61 @@ function EditProduct({ record, onReload }) {
     setDeletedVariantIds([]);
     setNewColorName("");
     setNewColorCode("#000000");
+    setColorImages({});
 
-    // Ảnh
-    setExistingImages(Array.isArray(record.images) ? [...record.images] : []);
+    // Fetch detail để lấy sizes/colors/variants/images đầy đủ
+    let detail = record;
+    try {
+      const token = getCookie("token");
+      const res = await fetch(
+        `http://localhost:8090/api/v1/products/public/${record.id}`,
+        { method: "GET", headers: { Authorization: `Bearer ${token}` } },
+      );
+      if (res.ok) {
+        const json = await res.json();
+        detail = json?.data ?? json;
+      }
+    } catch (e) {
+      console.error("Không thể fetch detail sản phẩm:", e);
+    }
 
-    // Sizes — record.sizes đã có { id, name } từ ProductManagement
+    const buildImageUrl = (path) => {
+      if (!path) return "";
+      if (path.startsWith("http")) return path;
+      return `http://localhost:8090${path}`;
+    };
+
+    // Ảnh — giữ cả url lẫn colorId để gán màu
+    setExistingImages(
+      Array.isArray(detail.images)
+        ? detail.images.map((img) => {
+            if (typeof img === "string") return { url: buildImageUrl(img), colorId: null };
+            const url = buildImageUrl(img?.image_url ?? img?.url ?? "");
+            return { url, colorId: img?.color_id ?? null };
+          })
+        : [],
+    );
+
+    // Sizes — detail.sizes đã có { id, name } hoặc { id, size_name }
     setSizes(
-      (record.sizes ?? []).map((s) => ({
+      (detail.sizes ?? []).map((s) => ({
         id: s.id ?? null,
-        name: s.name ?? "",
+        name: s.name ?? s.size_name ?? "",
       })),
     );
 
-    // Colors — record.colors đã có { id, color_name, color_code }
+    // Colors — detail.colors đã có { id, color_name, color_code }
     setColors(
-      (record.colors ?? []).map((c) => ({
+      (detail.colors ?? []).map((c) => ({
         id: c.id ?? null,
         color_name: c.color_name ?? "",
         color_code: c.color_code ?? "#000000",
       })),
     );
 
-    // Variants — record.variants đã có đầy đủ
+    // Variants — detail.variants đã có đầy đủ
     setVariants(
-      (record.variants ?? []).map((v) => ({
+      (detail.variants ?? []).map((v) => ({
         id: v.id ?? null,
         size_id: v.size_id ?? null,
         size_name: v.size_name ?? "",
@@ -123,15 +160,20 @@ function EditProduct({ record, onReload }) {
     );
 
     form.setFieldsValue({
-      name: record.name,
-      category_id: record.category_id,
-      description: record.description,
-      cost: typeof record.cost === "number" ? record.cost : null,
-      price: typeof record.price === "number" ? record.price : null,
-      display_price:
-        typeof record.display_price === "number" ? record.display_price : null,
-      weight: typeof record.weight === "number" ? record.weight : null,
-      active: record.active ?? true,
+      name: detail.name ?? record.name,
+      category_id: detail.category_id ?? record.category_id,
+      description: detail.description ?? record.description,
+      cost: typeof detail.cost === "number" ? detail.cost : (typeof record.cost === "number" ? record.cost : null),
+      price: typeof detail.price === "number" ? detail.price : (typeof record.price === "number" ? record.price : null),
+      display_price: typeof detail.display_price === "number" ? detail.display_price : (typeof record.display_price === "number" ? record.display_price : null),
+      weight: typeof detail.weight === "number" ? detail.weight : (typeof record.weight === "number" ? record.weight : null),
+      active: detail.active ?? record.active ?? true,
+      sale_range: (() => {
+        const start = detail.sale_start ?? record.sale_start;
+        const end   = detail.sale_end   ?? record.sale_end;
+        if (start || end) return [start ? dayjs(start) : null, end ? dayjs(end) : null];
+        return null;
+      })(),
     });
 
     setShowModal(true);
@@ -141,6 +183,7 @@ function EditProduct({ record, onReload }) {
     setShowModal(false);
     form.resetFields();
     setThumbnailFile([]);
+    imagesFile.forEach((item) => { if (item.previewUrl) URL.revokeObjectURL(item.previewUrl); });
     setImagesFile([]);
     setExistingImages([]);
     setSizes([]);
@@ -149,11 +192,17 @@ function EditProduct({ record, onReload }) {
     setDeletedSizeIds([]);
     setDeletedColorIds([]);
     setDeletedVariantIds([]);
+    setColorImages({});
   };
 
   // ── Ảnh ────────────────────────────────────────────────────────────────────
   const removeExistingImage = (url) =>
-    setExistingImages((prev) => prev.filter((u) => u !== url));
+    setExistingImages((prev) => prev.filter((img) => img.url !== url));
+
+  const setExistingImageColor = (url, colorId) =>
+    setExistingImages((prev) =>
+      prev.map((img) => img.url === url ? { ...img, colorId } : img)
+    );
 
   // ── Size ───────────────────────────────────────────────────────────────────
   const addSize = () =>
@@ -278,22 +327,36 @@ function EditProduct({ record, onReload }) {
       fd.append("active", value.active ?? true);
       fd.append("replaceAllVariants", false);
 
+      // Thời gian sale — format ISO không có Z để Spring parse được
+      if (value.sale_range?.[0])
+        fd.append("saleStart", value.sale_range[0].format("YYYY-MM-DDTHH:mm:ss"));
+      else
+        fd.append("saleStart", "");
+      if (value.sale_range?.[1])
+        fd.append("saleEnd", value.sale_range[1].format("YYYY-MM-DDTHH:mm:ss"));
+      else
+        fd.append("saleEnd", "");
+
       // Thumbnail
       if (thumbnailFile[0]?.originFileObj)
         fd.append("thumbnail", thumbnailFile[0].originFileObj);
 
       // Ảnh mới upload thêm
-      imagesFile.forEach((f) => {
-        if (f.originFileObj) fd.append("images", f.originFileObj);
+      const keptLen = existingImages.length;
+      imagesFile.forEach((item, i) => {
+        fd.append("images", item.file);
       });
 
-      // Ảnh cũ giữ lại
-      existingImages.forEach((url) => {
-        let name = url.split("/").pop().split("?")[0];
-        try {
-          name = decodeURIComponent(name);
-        } catch (_) {}
+      // Ảnh cũ giữ lại + gán color_id
+      existingImages.forEach((img, i) => {
+        let name = img.url.split("/").pop().split("?")[0];
+        try { name = decodeURIComponent(name); } catch (_) {}
         fd.append("keptImages", name);
+        fd.append(`imageColorIds[${i}]`, img.colorId ?? "");
+      });
+      // imageColorIds cho ảnh mới upload
+      imagesFile.forEach((item, i) => {
+        fd.append(`imageColorIds[${keptLen + i}]`, item.colorId ?? "");
       });
 
       // ── Sizes ──
@@ -340,7 +403,7 @@ function EditProduct({ record, onReload }) {
 
       const token = getCookie("token");
       const res = await fetch(
-        `http://localhost:8090/api/v1/products/admin/update/${record.id}`,
+        `${API_BASE_URL}/api/v1/products/admin/update/${record.id}`,
         {
           method: "PATCH",
           headers: { Authorization: `Bearer ${token}` },
@@ -513,77 +576,97 @@ function EditProduct({ record, onReload }) {
             </Form.Item>
 
             {/* ── Album ── */}
-            <Form.Item label="Ảnh mô tả (Album)">
-              {existingImages.length > 0 && (
-                <div
-                  style={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: 12,
-                    marginBottom: 12,
-                    padding: 10,
-                    border: "1px dashed #d9d9d9",
-                    borderRadius: 8,
-                    background: "#fafafa",
-                  }}
-                >
-                  {existingImages.map((url, idx) => (
-                    <div
-                      key={idx}
-                      style={{ position: "relative", width: 90, height: 90 }}
-                    >
-                      <img
-                        src={url}
-                        alt={`img-${idx}`}
-                        crossOrigin="anonymous"
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                          borderRadius: 4,
-                          border: "1px solid #eee",
-                        }}
-                        onError={(e) => {
-                          e.target.style.display = "none";
-                        }}
+            <Form.Item label="Ảnh mô tả (Album) — Gán màu cho từng ảnh">
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 12, padding: 10, border: "1px dashed #d9d9d9", borderRadius: 8, background: "#fafafa", minHeight: 60 }}>
+
+                {/* Ảnh cũ đã có */}
+                {existingImages.map((img, idx) => (
+                  <div key={`exist-${idx}`} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                    <div style={{ position: "relative", width: 90, height: 90 }}>
+                      <img src={img.url} alt={`img-${idx}`} crossOrigin="anonymous"
+                        style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 4, border: "1px solid #eee" }}
+                        onError={(e) => { e.target.style.display = "none"; }}
                       />
-                      <Button
-                        type="primary"
-                        danger
-                        size="small"
-                        icon={<DeleteOutlined />}
-                        onClick={() => removeExistingImage(url)}
-                        style={{
-                          position: "absolute",
-                          top: -8,
-                          right: -8,
-                          width: 24,
-                          height: 24,
-                          borderRadius: "50%",
-                          padding: 0,
-                          zIndex: 10,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
+                      {img.colorId && (() => {
+                        const c = colors.find((c) => c.id === img.colorId);
+                        return c ? (
+                          <span style={{ position: "absolute", bottom: 4, right: 4, width: 14, height: 14, borderRadius: "50%", background: c.color_code, border: "1.5px solid #fff", boxShadow: "0 0 0 1px #aaa" }} />
+                        ) : null;
+                      })()}
+                      <Button type="primary" danger size="small" icon={<DeleteOutlined />}
+                        onClick={() => removeExistingImage(img.url)}
+                        style={{ position: "absolute", top: -8, right: -8, width: 24, height: 24, borderRadius: "50%", padding: 0, zIndex: 10, display: "flex", alignItems: "center", justifyContent: "center" }}
                       />
                     </div>
-                  ))}
-                </div>
-              )}
-              <Upload
-                listType="picture-card"
-                multiple
-                fileList={imagesFile}
-                beforeUpload={() => false}
-                accept="image/*"
-                onChange={({ fileList }) => setImagesFile(fileList)}
-              >
-                <div>
-                  <PlusOutlined />
-                  <div style={{ marginTop: 8 }}>Thêm ảnh</div>
-                </div>
-              </Upload>
+                    <Select size="small" style={{ width: 90 }} placeholder="Màu" allowClear
+                      value={img.colorId ?? undefined}
+                      onChange={(val) => setExistingImageColor(img.url, val ?? null)}
+                      options={[
+                        ...colors.filter((c) => c.color_name?.trim()).map((c) => ({
+                          label: (
+                            <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                              <span style={{ width: 10, height: 10, borderRadius: "50%", background: c.color_code, display: "inline-block", border: "1px solid #d9d9d9", flexShrink: 0 }} />
+                              {c.color_name}
+                            </span>
+                          ),
+                          value: c.id ?? c.color_name,
+                        })),
+                      ]}
+                    />
+                  </div>
+                ))}
+
+                {/* Ảnh mới upload */}
+                {imagesFile.map((item, idx) => (
+                  <div key={`new-${idx}`} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                    <div style={{ position: "relative", width: 90, height: 90 }}>
+                      <img src={item.previewUrl} alt={`new-${idx}`}
+                        style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 4, border: "2px solid #1677ff" }}
+                      />
+                      {item.colorId && (() => {
+                        const c = colors.find((c) => (c.id ?? c.color_name) === item.colorId);
+                        return c ? (
+                          <span style={{ position: "absolute", bottom: 4, right: 4, width: 14, height: 14, borderRadius: "50%", background: c.color_code, border: "1.5px solid #fff", boxShadow: "0 0 0 1px #aaa" }} />
+                        ) : null;
+                      })()}
+                      <Button type="primary" danger size="small" icon={<DeleteOutlined />}
+                        onClick={() => {
+                          URL.revokeObjectURL(item.previewUrl);
+                          setImagesFile((prev) => prev.filter((_, i) => i !== idx));
+                        }}
+                        style={{ position: "absolute", top: -8, right: -8, width: 24, height: 24, borderRadius: "50%", padding: 0, zIndex: 10, display: "flex", alignItems: "center", justifyContent: "center" }}
+                      />
+                    </div>
+                    <Select size="small" style={{ width: 90 }} placeholder="Màu" allowClear
+                      value={item.colorId ?? undefined}
+                      onChange={(val) => setImagesFile((prev) => prev.map((f, i) => i === idx ? { ...f, colorId: val ?? null } : f))}
+                      options={colors.filter((c) => c.color_name?.trim()).map((c) => ({
+                        label: (
+                          <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                            <span style={{ width: 10, height: 10, borderRadius: "50%", background: c.color_code, display: "inline-block", border: "1px solid #d9d9d9", flexShrink: 0 }} />
+                            {c.color_name}
+                          </span>
+                        ),
+                        value: c.id ?? c.color_name,
+                      }))}
+                    />
+                  </div>
+                ))}
+
+                {/* Nút thêm ảnh */}
+                <Upload accept="image/*" showUploadList={false} multiple
+                  beforeUpload={(file) => {
+                    const previewUrl = URL.createObjectURL(file);
+                    setImagesFile((prev) => [...prev, { file, previewUrl, colorId: null }]);
+                    return false;
+                  }}
+                >
+                  <div style={{ width: 90, height: 90, border: "1px dashed #d9d9d9", borderRadius: 4, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer", background: "#fff", gap: 4 }}>
+                    <PlusOutlined style={{ fontSize: 18, color: "#999" }} />
+                    <span style={{ fontSize: 12, color: "#999" }}>Thêm ảnh</span>
+                  </div>
+                </Upload>
+              </div>
             </Form.Item>
 
             {/* ── Thông tin cơ bản ── */}
@@ -655,6 +738,20 @@ function EditProduct({ record, onReload }) {
                 </Form.Item>
               </Col>
             </Row>
+
+            <Form.Item
+              label="Thời gian sale"
+              name="sale_range"
+              help="Để trống nếu sale vĩnh viễn. Sau thời gian kết thúc, giá sẽ tự động về giá gốc."
+            >
+              <DatePicker.RangePicker
+                showTime={{ format: "HH:mm" }}
+                format="DD/MM/YYYY HH:mm"
+                style={{ width: "100%" }}
+                placeholder={["Bắt đầu sale", "Kết thúc sale"]}
+                allowEmpty={[true, true]}
+              />
+            </Form.Item>
 
             {/* ── Tabs Size / Màu / Biến thể ── */}
             {/* ── Tabs Size / Màu / Biến thể ── */}
@@ -858,48 +955,16 @@ function EditProduct({ record, onReload }) {
                                       flexShrink: 0,
                                     }}
                                   />
-                                  <span
-                                    style={{
-                                      flex: 1,
-                                      fontWeight: 500,
-                                      fontSize: 13,
-                                    }}
-                                  >
+                                  <span style={{ flex: 1, fontWeight: 500, fontSize: 13 }}>
                                     {c.color_name}
                                   </span>
-                                  <span
-                                    style={{
-                                      fontFamily: "monospace",
-                                      fontSize: 11,
-                                      color: "#888",
-                                      background: "#f0f0f0",
-                                      padding: "2px 7px",
-                                      borderRadius: 4,
-                                    }}
-                                  >
+                                  <span style={{ fontFamily: "monospace", fontSize: 11, color: "#888", background: "#f0f0f0", padding: "2px 7px", borderRadius: 4 }}>
                                     {c.color_code}
                                   </span>
-                                  {!c.id && (
-                                    <Tag
-                                      color="green"
-                                      style={{ fontSize: 10, margin: 0 }}
-                                    >
-                                      Mới
-                                    </Tag>
-                                  )}
-                                  <Popconfirm
-                                    title="Xoá màu? Biến thể liên quan cũng bị xoá."
-                                    okText="Xoá"
-                                    cancelText="Huỷ"
-                                    onConfirm={() => deleteColor(i)}
-                                  >
-                                    <Button
-                                      type="text"
-                                      danger
-                                      size="small"
-                                      icon={<DeleteOutlined />}
-                                      style={{ opacity: 0.75 }}
-                                    />
+                                  {!c.id && <Tag color="green" style={{ fontSize: 10, margin: 0 }}>Mới</Tag>}
+
+                                  <Popconfirm title="Xoá màu? Biến thể liên quan cũng bị xoá." okText="Xoá" cancelText="Huỷ" onConfirm={() => deleteColor(i)}>
+                                    <Button type="text" danger size="small" icon={<DeleteOutlined />} style={{ opacity: 0.75 }} />
                                   </Popconfirm>
                                 </div>
                               ))

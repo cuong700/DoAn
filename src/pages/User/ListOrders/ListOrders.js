@@ -1,3 +1,4 @@
+﻿import API_BASE_URL from '../../../config/api';
 import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import {
@@ -41,7 +42,7 @@ export function ListOrders() {
         const token = getCookie("token");
         const idUser = getCookie("userid");
         const response = await axios.get(
-          `http://localhost:8090/api/v1/orders/user/${idUser}`,
+          `${API_BASE_URL}/api/v1/orders/user/${idUser}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -110,7 +111,7 @@ export function ListOrders() {
     try {
       const token = getCookie("token");
       const response = await axios.get(
-        `http://localhost:8090/api/v1/orders/user/detail/${orderId}`,
+        `${API_BASE_URL}/api/v1/orders/user/detail/${orderId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -158,7 +159,7 @@ export function ListOrders() {
     try {
       const token = getCookie("token");
       await axios.put(
-        `http://localhost:8090/api/v1/orders/user/cancel/${
+        `${API_BASE_URL}/api/v1/orders/user/cancel/${
           orderToCancel.id
         }?reason=${encodeURIComponent(cancelReason.trim())}`,
         {},
@@ -202,7 +203,7 @@ export function ListOrders() {
       message.loading({ content: "Đang tạo link thanh toán...", key: "repay" });
 
       const response = await axios.post(
-        `http://localhost:8090/api/v1/payment/user/create/${orderId}?gateway=momo`,
+        `${API_BASE_URL}/api/v1/payment/user/create/${orderId}?gateway=momo`,
         {},
         {
           headers: {
@@ -338,7 +339,7 @@ export function ListOrders() {
                           <div className="anhdemo">
                             <Image
                               className="customimage"
-                              src={`http://localhost:8090${item.product_thumbnail}`}
+                              src={`${API_BASE_URL}${item.product_thumbnail}`}
                               alt="product"
                               crossOrigin="anonymous"
                               preview={false}

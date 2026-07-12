@@ -1,7 +1,8 @@
-import { Button, DatePicker, Form, Input, notification, Spin } from "antd";
+﻿import { Button, DatePicker, Form, Input, notification, Spin } from "antd";
 import { useEffect, useState } from "react";
 import { getCookie, setCookie } from "../../../helpers/cookie";
 import dayjs from "dayjs";
+import API_BASE_URL from '../../../config/api';
 
 function Profile() {
   const [form] = Form.useForm();
@@ -28,7 +29,7 @@ function Profile() {
       const token = getCookie("token");
 
       const res = await fetch(
-        "http://localhost:8090/api/v1/users/admin/get-all-user",
+        `${API_BASE_URL}/api/v1/users/admin/get-all-user`,
         {
           method: "GET",
           headers: {
@@ -75,7 +76,7 @@ function Profile() {
       };
 
       const res = await fetch(
-        `http://localhost:8090/api/v1/users/user/details/${id}`,
+        `${API_BASE_URL}/api/v1/users/user/details/${id}`,
         {
           method: "PATCH",
           headers: {

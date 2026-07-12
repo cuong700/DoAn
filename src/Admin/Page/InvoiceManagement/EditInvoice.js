@@ -1,3 +1,4 @@
+﻿import API_BASE_URL from '../../../config/api';
 import { EditOutlined } from "@ant-design/icons";
 import {
   Button,
@@ -38,7 +39,7 @@ function EditInvoice(props) {
       const token = getCookie("token");
 
       const res = await fetch(
-        `http://localhost:8090/api/v1/orders/user/detail/${record.id}`,
+        `${API_BASE_URL}/api/v1/orders/user/detail/${record.id}`,
         {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
@@ -115,7 +116,7 @@ function EditInvoice(props) {
       console.log("Payload gửi lên:", JSON.stringify(payload, null, 2));
 
       const res = await fetch(
-        `http://localhost:8090/api/v1/orders/admin/update/${record.id}`,
+        `${API_BASE_URL}/api/v1/orders/admin/update/${record.id}`,
         {
           method: "PATCH",
           headers: {

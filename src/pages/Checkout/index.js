@@ -1,10 +1,10 @@
-
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./Checkout.css";
 import { getCookie } from "../../helpers/cookie";
 import axios from "axios";
 import ShippingForm from "./ShippingForm";
+import API_BASE_URL from '../../config/api';
 
 function Checkout() {
   const navigate = useNavigate();
@@ -129,7 +129,7 @@ function Checkout() {
 
     try {
       const res = await axios.post(
-        "http://localhost:8090/api/v1/coupons/user/available",
+        `${API_BASE_URL}/api/v1/coupons/user/available`,
         { items },
         {
           headers: {
@@ -175,7 +175,7 @@ function Checkout() {
       }));
 
       const res = await axios.post(
-        "http://localhost:8090/api/v1/coupons/user/calculate",
+        `${API_BASE_URL}/api/v1/coupons/user/calculate`,
         {
           user_id: Number(userId),
           coupon_codes: selectedCoupons,
@@ -384,7 +384,7 @@ function Checkout() {
 
       // Gọi API tạo đơn hàng
       const response = await fetch(
-        "http://localhost:8090/api/v1/orders/user/create",
+        `${API_BASE_URL}/api/v1/orders/user/create`,
         {
           method: "POST",
           headers: {
@@ -423,7 +423,7 @@ function Checkout() {
           try {
             // Gọi API tạo thanh toán MoMo
             const paymentResponse = await fetch(
-              `http://localhost:8090/api/v1/payment/user/create/${orderId}?gateway=momo`,
+              `${API_BASE_URL}/api/v1/payment/user/create/${orderId}?gateway=momo`,
               {
                 method: "POST",
                 headers: {
@@ -530,7 +530,7 @@ function Checkout() {
                   }`}
                 >
                   <img
-                    src={`http://localhost:8090${product.thumbnail}`}
+                    src={`${API_BASE_URL}${product.thumbnail}`}
                     alt={product.name}
                     crossOrigin="anonymous"
                   />

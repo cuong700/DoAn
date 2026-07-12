@@ -1,23 +1,19 @@
-﻿import { DeleteOutlined } from "@ant-design/icons";
+import { DeleteOutlined } from "@ant-design/icons";
 import { Button, message, notification, Popconfirm } from "antd";
 import { useState } from "react";
 import { getCookie } from "../../../helpers/cookie";
-import API_BASE_URL from '../../../config/api';
 
-function DeleteCoupon(props) {
-  const { record, onReload, activeFilter } = props;
-
+function DeleteBanner({ record, onReload }) {
   const [loading, setLoading] = useState(false);
-
   const [notiApi, contextHolder] = notification.useNotification();
 
   const handleDelete = async () => {
     try {
       setLoading(true);
-
       const token = getCookie("token");
+
       const res = await fetch(
-        `${API_BASE_URL}/api/v1/coupons/admin/delete/${record.id}`,
+        `http://localhost:8090/api/v1/banners/admin/delete/${record.id}`,
         {
           method: "DELETE",
           headers: {
@@ -27,16 +23,14 @@ function DeleteCoupon(props) {
         }
       );
 
-      if (!res.ok) throw new Error("Delete thất bại");
+      if (!res.ok) throw new Error("Xoá thất bại");
 
       notiApi.success({
         message: "Xoá thành công",
-        description: `Đã xoá mã giảm giá: ${record.code}`,
+        description: `Đã xoá banner: ${record.title}`,
       });
 
-      setTimeout(() => {
-        onReload();
-      }, 500);
+      setTimeout(() => onReload(), 500);
     } catch (error) {
       console.error(error);
       message.error("Xoá thất bại!");
@@ -45,26 +39,14 @@ function DeleteCoupon(props) {
     }
   };
 
-  
-  const confirmTitle =
-    activeFilter === "NGUNG_HOAT_DONG"
-      ? "Mã giảm giá này đã bị xoá."
-      : "Bạn chắc chắn muốn xoá?";
-
-  const showOkButton = activeFilter !== "NGUNG_HOAT_DONG";
-
   return (
     <>
       {contextHolder}
       <Popconfirm
-       title={confirmTitle}
-        onConfirm={showOkButton ? handleDelete : undefined}
+        title="Bạn chắc chắn muốn xoá banner này?"
+        onConfirm={handleDelete}
         okText="Xoá"
-        cancelText={showOkButton ? "Huỷ" : "Đóng"}
-        showCancel={true}
-        okButtonProps={{
-          style: { display: showOkButton ? "inline-block" : "none" },
-        }}
+        cancelText="Huỷ"
       >
         <Button
           size="small"
@@ -78,4 +60,4 @@ function DeleteCoupon(props) {
   );
 }
 
-export default DeleteCoupon;
+export default DeleteBanner;

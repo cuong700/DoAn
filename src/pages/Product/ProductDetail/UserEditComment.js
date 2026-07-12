@@ -1,6 +1,7 @@
-import { Button, Input, message, Modal } from "antd";
+﻿import { Button, Input, message, Modal } from "antd";
 import { useEffect, useState } from "react";
 import { getCookie } from "../../../helpers/cookie";
+import API_BASE_URL from '../../../config/api';
 
 const { TextArea } = Input;
 
@@ -34,7 +35,7 @@ function UserEditComment(props) {
 
     try {
       const response = await fetch(
-        `http://localhost:8090/api/v1/comments/user/update/${comment.id}`,
+        `${API_BASE_URL}/api/v1/comments/user/update/${comment.id}`,
         {
           method: "PUT",
           headers: {

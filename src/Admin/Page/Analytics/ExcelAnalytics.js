@@ -1,7 +1,8 @@
-import { FileExcelOutlined } from "@ant-design/icons";
+﻿import { FileExcelOutlined } from "@ant-design/icons";
 import { Button, message } from "antd";
 import { useState } from "react";
 import { getCookie } from "../../../helpers/cookie";
+import API_BASE_URL from '../../../config/api';
 
 function ExcelAnalytics() {
   const [exporting, setExporting] = useState(false);
@@ -17,7 +18,7 @@ function ExcelAnalytics() {
       if (end) query.append("end", end);
 
       const res = await fetch(
-        `http://localhost:8090/api/v1/orders/admin/revenue/products/export?${query.toString()}`,
+        `${API_BASE_URL}/api/v1/orders/admin/revenue/products/export?${query.toString()}`,
         {
           method: "GET",
           headers: {
